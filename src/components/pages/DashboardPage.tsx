@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Youtube,
   FileText,
@@ -13,7 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-const DashboardPage = () => {
+const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
   return (
     <div className="space-y-6">
       <div>
@@ -122,6 +123,14 @@ const DashboardPage = () => {
               </span>
             </li>
           </ul>
+          <div className="mt-5 pt-4 border-t border-border flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs text-muted-foreground">
+              Add your YouTube API key and a playlist to start your first import.
+            </p>
+            <Button size="sm" onClick={() => onNavigate?.('settings')} className="gap-1.5">
+              Get started <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

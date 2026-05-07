@@ -131,6 +131,7 @@ const Index = () => {
   });
   const [shortcodeCopied, setShortcodeCopied] = useState(false);
   const [galleryNotFound, setGalleryNotFound] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
 
   useEffect(() => {
     // DEMO MODE: Always start with default gallery, skip WP/localStorage
@@ -595,7 +596,7 @@ const Index = () => {
         {/* Pro Welcome Message - shows after license activation */}
         {license.isPro && <ProWelcome className="mx-6 mb-6" />}
         
-        <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || "dashboard"} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Navigation with Underline Style */}
           <div className="px-6">
             <TabsList className="flex border-b border-slate-200 bg-transparent p-0 h-auto">
@@ -646,11 +647,11 @@ const Index = () => {
 
           <div className={`p-6 pt-8 ${isDemo ? 'min-h-[800px]' : ''}`}>
             <TabsContent value="dashboard" className="mt-0">
-              <DashboardPage />
+              <DashboardPage onNavigate={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="import" className="mt-0">
-              <ImportPage />
+              <ImportPage onNavigate={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="tasks" className="mt-0">
