@@ -287,7 +287,18 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             placeholder="AIza..."
             className="h-9 text-sm font-mono"
           />
-          <p className="text-[11px] text-muted-foreground">Get a key from Google Cloud Console → API & Services → Credentials.</p>
+          <p className="text-[11px] text-muted-foreground">
+            Get a key from{' '}
+            <a
+              href="https://console.cloud.google.com/apis/credentials"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-0.5"
+            >
+              Google Cloud Console <ExternalLink className="w-2.5 h-2.5" />
+            </a>{' '}
+            → API &amp; Services → Credentials. Make sure <strong>YouTube Data API v3</strong> is enabled.
+          </p>
         </div>
 
         <div className="space-y-1.5">
