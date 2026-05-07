@@ -1357,11 +1357,11 @@ export const SimpleInstructionsSection = ({
         )}
       </div>
 
-      {instructions.some((p) => SIMPLE_INSTRUCTION_META[p.type]?.needsValue) && (
+      {instructions.some((p) => SIMPLE_INSTRUCTION_META[p.type]?.needsValue && p.type !== "speaker_tag") && (
         <div className="space-y-2 pt-2 border-t border-border">
           {instructions.map((p, idx) => {
             const meta = SIMPLE_INSTRUCTION_META[p.type];
-            if (!meta || !meta.needsValue) return null;
+            if (!meta || !meta.needsValue || p.type === "speaker_tag") return null;
             return (
               <div key={p.id} className="space-y-1">
                 <Label className="text-[11px] text-muted-foreground">
