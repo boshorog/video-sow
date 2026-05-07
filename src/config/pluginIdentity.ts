@@ -29,26 +29,26 @@
  * WordPress plugin slug (folder name, shortcode prefix, option names)
  * Example: 'kindpixels-pdf-gallery' → [kindpdfg_gallery] shortcode
  */
-export const PLUGIN_SLUG = 'kindpixels-pdf-gallery';
+export const PLUGIN_SLUG = 'videosow';
 
 /**
  * Short prefix for PHP functions, AJAX actions, DB options, CSS classes
  * Should be 6-10 chars, lowercase, no hyphens
  * Example: 'kindpdfg' → kindpdfg_action, kindpdfg_settings
  */
-export const PLUGIN_PREFIX = 'kindpdfg';
+export const PLUGIN_PREFIX = 'videosow';
 
 /**
  * JavaScript global object name (set via wp_localize_script)
  * Example: 'kindpdfgData' → window.kindpdfgData
  */
-export const JS_GLOBAL_NAME = 'kindpdfgData';
+export const JS_GLOBAL_NAME = 'videosowData';
 
 /**
  * Legacy global name for backwards compatibility
  * Set to null if not needed
  */
-export const JS_GLOBAL_LEGACY = 'wpPDFGallery';
+export const JS_GLOBAL_LEGACY = 'kindpdfgData';
 
 // =============================================================================
 // DISPLAY NAMES
@@ -57,23 +57,22 @@ export const JS_GLOBAL_LEGACY = 'wpPDFGallery';
 /**
  * Plugin display name in WordPress admin (Free version)
  */
-export const PLUGIN_NAME = 'PDF Gallery';
+export const PLUGIN_NAME = 'Video Sow';
 
 /**
  * Plugin display name for Pro version
  */
-export const PRO_NAME = 'PDF Gallery Pro';
+export const PRO_NAME = 'Video Sow Pro';
 
 /**
  * Plugin version - update this for each release
- * Also update in: kindpixels-pdf-gallery.php, readme.txt
  */
-export const PLUGIN_VERSION = '2.6.8';
+export const PLUGIN_VERSION = '0.1.0';
 
 /**
  * Short description for meta/SEO
  */
-export const PLUGIN_DESCRIPTION = 'Beautiful document gallery with lightbox viewer for WordPress';
+export const PLUGIN_DESCRIPTION = 'Automatically convert YouTube playlist videos into WordPress articles';
 
 // =============================================================================
 // FREEMIUS LICENSING (Pro features)
