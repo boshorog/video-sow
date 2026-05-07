@@ -34,9 +34,6 @@ const ImporterSettingsPanel = () => {
       onChange={imp.setConfig}
       onSave={imp.save}
       isSaving={imp.isSaving}
-      onSync={imp.sync}
-      onCancelSync={imp.cancelSync}
-      isSyncing={imp.isSyncing}
       onRepair={imp.repair}
       isRepairing={imp.isRepairing}
       repairProgress={imp.repairProgress}
