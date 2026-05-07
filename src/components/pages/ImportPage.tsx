@@ -152,6 +152,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         onCancelSync={imp.cancelSync}
         onConfigChange={imp.setConfig}
         onSave={imp.save}
+        isPro={license.isPro}
+        onPlaylistClick={() => onNavigate?.('settings')}
       />
 
       <Card>
