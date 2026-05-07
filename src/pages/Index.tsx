@@ -578,39 +578,46 @@ const Index = () => {
         {/* Pro Welcome Message - shows after license activation */}
         {license.isPro && <ProWelcome className="mx-6 mb-6" />}
         
-        <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || "gallery"} className="w-full">
+        <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || "dashboard"} className="w-full">
           {/* Tab Navigation with Underline Style */}
           <div className="px-6">
             <TabsList className="flex border-b border-slate-200 bg-transparent p-0 h-auto">
-              <TabsTrigger 
-                value="preview"
+              <TabsTrigger
+                value="dashboard"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
               >
-                <Eye className="w-4 h-4" />
-                Preview
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
               </TabsTrigger>
-              <TabsTrigger 
-                value="gallery"
+              <TabsTrigger
+                value="import"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
               >
-                <Layers className="w-4 h-4" />
-                Galleries
+                <Youtube className="w-4 h-4" />
+                Import
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
+                value="tasks"
+                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
+              >
+                <ListTodo className="w-4 h-4" />
+                Tasks
+              </TabsTrigger>
+              <TabsTrigger
                 value="settings"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
               >
                 <Settings className="w-4 h-4" />
                 Settings
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="docs"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
               >
                 <BookOpen className="w-4 h-4" />
                 Documentation
               </TabsTrigger>
-              <TabsTrigger 
+              <TabsTrigger
                 value="pro"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
               >
@@ -619,75 +626,32 @@ const Index = () => {
               </TabsTrigger>
             </TabsList>
           </div>
-          
+
           <div className={`p-6 pt-8 ${isDemo ? 'min-h-[800px]' : ''}`}>
-            <TabsContent value="preview" className="space-y-6 mt-0">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Gallery Shortcode</h3>
-                <p className="text-muted-foreground mb-4">
-                  Copy this shortcode to display the current gallery on any page or post:
-                </p>
-                <div className="flex items-center justify-center gap-2">
-                  <code className="bg-muted px-3 py-2 rounded text-sm font-mono">
-                    {(() => {
-                      const galleryName = currentGallery?.name || 'main';
-                      return `[kindpdfg_gallery name="${galleryName.toLowerCase().replace(/[^a-z0-9-_]/g, '-')}"]`;
-                    })()}
-                  </code>
-                  <Button 
-                    onClick={copyShortcode}
-                    variant="outline" 
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    {shortcodeCopied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copy
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <PDFGallery 
-                items={currentItems} 
-                settings={settings}
-                showRatings={galleryRatingsEnabled}
-                lightboxEnabled={galleryLightboxEnabled}
-                galleryId={currentGallery?.id || 'default'}
-              />
+            <TabsContent value="dashboard" className="mt-0">
+              <DashboardPage />
             </TabsContent>
-            
-            <TabsContent value="gallery" className="mt-0">
-              <PDFAdmin 
-                galleries={galleryState.galleries}
-                currentGalleryId={galleryState.currentGalleryId}
-                onGalleriesChange={(galleries) => {
-                  setGalleryState(prev => ({ ...prev, galleries }));
-                  if (isDemo) saveDemoState(galleries);
-                }}
-                onCurrentGalleryChange={(galleryId) => setGalleryState(prev => ({ ...prev, currentGalleryId: galleryId }))}
-                isDemo={isDemo}
-              />
+
+            <TabsContent value="import" className="mt-0">
+              <ImportPage />
             </TabsContent>
-            
+
+            <TabsContent value="tasks" className="mt-0">
+              <TasksPage />
+            </TabsContent>
+
             <TabsContent value="settings" className="mt-0">
-              <SettingsProposal2 
-                settings={settings} 
-                onSettingsChange={setSettings} 
+              <SettingsProposal2
+                settings={settings}
+                onSettingsChange={setSettings}
                 currentGalleryId={galleryState.currentGalleryId}
               />
             </TabsContent>
-            
+
             <TabsContent value="docs" className="mt-0">
               <PluginDocumentation />
             </TabsContent>
-            
+
             <TabsContent value="pro" className="mt-0">
               {license.isPro && license.checked ? (
                 <PluginDocumentation showOnlyLicenseAndComparison />
