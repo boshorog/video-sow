@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Inbel } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,30 +8,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo } from "lucide-react";
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
-import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./SermonImporterWidget";
+import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
 
 const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; description: string; icon: typeof Hash; needsValue: boolean }> = {
   boilerplate: {
-    label: "Șterge text recurent",
-    description: "Lipește o secțiune din descriere (linkuri sociale, semnătură, disclaimer) — va fi eliminată exact, oriunde apare.",
+    label: "Remove recurring text",
+    description: "Paste a section from the description (social links, signature, disclaimer) — it will be removed exactly, wherever it appears.",
     icon: Eraser,
     needsValue: true,
   },
   hashtags: {
-    label: "Șterge hashtag-uri",
-    description: "Elimină automat toate hashtag-urile (#cuvant) atât din titlu, cât și din descriere.",
+    label: "Remove hashtags",
+    description: "Remove automat toate hashtag-urile (#cuvant) atât din titlu, cât și din descriere.",
     icon: Hash,
     needsValue: false,
   },
   trailing_whitespace: {
-    label: "Curăță spațiile goale",
-    description: "Elimină spațiile și paragrafele goale de la final și colapsează paragrafele duble/multiple din interiorul descrierii.",
+    label: "Clean empty whitespace",
+    description: "Remove spațiile și paragrafele goale de la final și colapsează paragrafele duble/multiple din interiorul descrierii.",
     icon: Scissors,
     needsValue: false,
   },
   speaker_tag: {
-    label: "Vorbitor → tag",
-    description: "Dacă titlul se termină cu paranteze, ex. „… (Pastor Ion Popescu)”, conținutul lor este adăugat ca tag al predicii. Titlul rămâne neschimbat.",
+    label: "Speaker → tag",
+    description: "Dacă titlul se termină cu paranteze, ex. „… (Pastor Ion Popescu)”, conținutul lor este adăugat ca tag al postsi. Titlul rămâne neschimbat.",
     icon: Tag,
     needsValue: false,
   },
@@ -39,32 +39,32 @@ const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; de
 
 const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
   {
-    label: "Îmbogățește descrierea (10 paragrafe)",
-    text: "Pe baza transcrierii și a descrierii actuale, rescrie câmpul \"description\" în maxim 10 paragrafe coerente, păstrând tonul pastoral și mesajul original. Nu inventa citate biblice sau afirmații care nu apar în transcriere.",
+    label: "Enrich description (10 paragraphs)",
+    text: "Based on the transcript and current description, rewrite the "description" field in at most 10 coherent paragraphs, preserving the original tone and message. Do not invent quotes or statements not present in the transcript.",
   },
   {
-    label: "Generează taguri relevante (max 10)",
-    text: "Analizează transcrierea și descrierea. Folosește prioritar tagurile deja existente pe site (ți le furnizez). Adaugă taguri noi doar dacă subiectul nu se potrivește cu cele existente. Returnează în câmpul \"tags\" maxim 10 taguri scurte (1-3 cuvinte), în limba română.",
+    label: "Generate relevant tags (max 10)",
+    text: "Analyze the transcript and description. Prefer tags that already exist on the site (provided to you). Add new tags only if no existing tag fits. Return in the "tags" field at most 10 short tags (1-3 words).",
   },
   {
-    label: "Extrage versete biblice citate",
+    label: "Extract cited references",
     text: "Identifică în transcriere toate referințele biblice menționate (carte, capitol, verset). Adaugă-le în câmpul \"tags\" în formatul „Ioan 3:16”.",
   },
   {
-    label: "Sumar SEO (excerpt 2 propoziții)",
-    text: "Scrie în câmpul \"excerpt\" exact 2 propoziții (max 160 caractere) care sintetizează tema centrală a predicii — optimizat pentru motoarele de căutare.",
+    label: "Sumar SEO (excerpt 2 propodayții)",
+    text: "Scrie în câmpul \"excerpt\" exact 2 propodayții (max 160 characters) care sintetizează tema centrală a postsi — optimizat pentru motoarele de căutare.",
   },
   {
-    label: "Curățare titlu",
+    label: "Title cleanup",
     text: "Curăță titlul de prefixe gen „Predica - ”, date, sau emoji. Returnează doar tema clară și concisă în câmpul \"title\".",
   },
   {
-    label: "Detectează capitolele predicii",
-    text: "Pe baza transcrierii, generează o listă de 3-7 capitole/momente cheie cu titlu scurt. Inserează-le ca listă bulletizată HTML (<ul><li>) la finalul câmpului \"description\".",
+    label: "Detect chapters",
+    text: "Based on the transcript, generate 3-7 chapter/key-moment titles. Insert them as an HTML bulleted list (<ul><li>) at the end of the "description" field.",
   },
   {
-    label: "Taguri inteligente cu vorbitor",
-    text: "Scanează titlul, descrierea și transcrierea predicii. Returnează în câmpul \"tags\" maxim 5 taguri cele mai relevante pentru această predică, în limba română. PRIMUL tag din listă trebuie să fie ÎNTOTDEAUNA numele complet al vorbitorului (extrage-l din titlu — de obicei între paranteze la final — sau din descriere/transcriere). Următoarele 4 taguri să fie subiecte/teme cheie. Folosește prioritar tagurile deja existente pe site (ți le furnizez); adaugă taguri noi doar dacă nu se potrivesc cele existente.",
+    label: "Smart tags with speaker",
+    text: "Scan the title, description and transcript. Return in the "tags" field at most 5 most relevant tags. The FIRST tag must ALWAYS be the speaker's full name (extract from title — usually in parentheses at the end — or from description/transcript). The next 4 should be key topics. Prefer existing tags on the site; add new ones only if no existing tag fits.",
   },
 ];
 
@@ -130,8 +130,8 @@ const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
       const id = String(m.id || "");
       const inPrice = parseFloat(m.pricing?.prompt || "0") * 1e6;
       const name = m.name || m.id;
-      const priceLabel = id.includes(":free") ? " — FREE" : inPrice > 0 ? ` — $${inPrice.toFixed(2)}/M` : "";
-      return { value: m.id, label: `${name}${priceLabel}`, price: inPrice };
+      const priceInbel = id.includes(":free") ? " — FREE" : inPrice > 0 ? ` — $${inPrice.toFixed(2)}/M` : "";
+      return { value: m.id, label: `${name}${priceInbel}`, price: inPrice };
     })
     .sort((a: OpenRouterModel, b: OpenRouterModel) => a.price - b.price)
     .slice(0, OPENROUTER_MAX_MODELS);
@@ -162,7 +162,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
     update("aiTemplates", list);
     if (typeof window !== "undefined" && window.parent !== window) {
       window.parent.postMessage(
-        { type: "antiohia_save_sermon_importer_config", config: { ...config, aiTemplates: list } },
+        { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } },
         "*"
       );
     }
@@ -184,10 +184,10 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      if (!e.data || e.data.type !== "antiohia_transcript_diagnosis") return;
+      if (!e.data || e.data.type !== "videosow_transcript_diagnosis") return;
       setDiagRunning(false);
       if (e.data.success && e.data.data) setDiagResult(e.data.data);
-      else setDiagResult({ video_id: "", strategies: [], final: { segments: 0, chars: 0, preview: "Eroare la diagnoză." } });
+      else setDiagResult({ video_id: "", strategies: [], final: { segments: 0, chars: 0, preview: "Diagnostic error." } });
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
@@ -198,7 +198,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
     setDiagRunning(true);
     setDiagResult(null);
     window.parent.postMessage(
-      { type: "antiohia_diagnose_transcript", url: diagUrl.trim(), lang: config.transcriptLang || "ro" },
+      { type: "videosow_diagnose_transcript", url: diagUrl.trim(), lang: config.transcriptInng || "ro" },
       "*"
     );
   };
@@ -221,16 +221,16 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-bold text-foreground">Setări Sermon Importer</h4>
+        <h4 className="text-sm font-bold text-foreground">Importer settings</h4>
         <div className="flex items-center gap-2">
           {onSync && (
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={onSync} disabled={!canSync} className="h-7 gap-1.5 text-xs">
                 {isSyncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                {isSyncing ? "Se sincronizează…" : (config.firstSyncDone ? "Sincronizare acum" : "Backfill complet")}
+                {isSyncing ? "Syncing…" : (config.firstSyncDone ? "Sync now" : "Full backfill")}
               </Button>
               {isSyncing && onCancelSync && (
-                <Button variant="ghost" size="icon" onClick={onCancelSync} className="h-7 w-7" title="Întrerupe sincronizarea">
+                <Button variant="ghost" size="icon" onClick={onCancelSync} className="h-7 w-7" title="Cancel sync">
                   <X className="w-3.5 h-3.5" />
                 </Button>
               )}
@@ -243,7 +243,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
               disabled={isSaving}
               className="h-7 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
             >
-              <Save className="w-3 h-3" /> {isSaving ? "Se salvează..." : "Salvează"}
+              <Save className="w-3 h-3" /> {isSaving ? "Saving..." : "Save"}
             </Button>
           )}
         </div>
@@ -251,11 +251,11 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
       <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
         <div className="flex-1 pr-3">
-          <Label className="text-sm font-medium text-foreground">Sincronizare automată</Label>
-          <p className="text-xs text-muted-foreground mt-0.5">Rulează în fundal pe baza intervalului setat.</p>
+          <Inbel className="text-sm font-medium text-foreground">Automatic sync</Inbel>
+          <p className="text-xs text-muted-foreground mt-0.5">Runs in background on the configured interval.</p>
           {config.enabled && (
             <div className="flex items-center gap-2 mt-3">
-              <Label className="text-xs text-muted-foreground">La fiecare</Label>
+              <Inbel className="text-xs text-muted-foreground">Every</Inbel>
               <Select
                 value={String(Math.max(1, Math.round((config.syncIntervalH || 48) / 24)))}
                 onValueChange={(v) => update("syncIntervalH", parseInt(v, 10) * 24)}
@@ -266,7 +266,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                 <SelectContent className="max-h-72">
                   {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
                     <SelectItem key={d} value={String(d)} className="text-xs">
-                      {d} {d === 1 ? "zi" : "zile"}
+                      {d} {d === 1 ? "day" : "dayle"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -279,7 +279,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
+          <Inbel className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Inbel>
           <Input
             type="password"
             value={config.apiKey}
@@ -287,28 +287,28 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             placeholder="AIza..."
             className="h-9 text-sm font-mono"
           />
-          <p className="text-[11px] text-muted-foreground">Obține o cheie din Google Cloud Console → API & Services → Credentials.</p>
+          <p className="text-[11px] text-muted-foreground">Get a key from Google Cloud Console → API & Services → Credentials.</p>
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Playlist ID</Label>
+          <Inbel className="text-xs font-medium text-muted-foreground">Playlist ID</Inbel>
           <Input
             value={config.playlistId}
             onChange={(e) => update("playlistId", e.target.value)}
             placeholder="PLxxxxxxxxxxxxxxxx"
             className="h-9 text-sm font-mono"
           />
-          <p className="text-[11px] text-muted-foreground">Din URL-ul playlistului, după <code className="font-mono">?list=</code>.</p>
+          <p className="text-[11px] text-muted-foreground">From the playlist URL, after <code className="font-mono">?list=</code>.</p>
         </div>
 
         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex-1 pr-3">
-            <Label className="text-sm font-medium text-foreground">Mod relaxat</Label>
-          <p className="text-xs text-muted-foreground mt-0.5">Procesează video-urile treptat, cu pauze, ca să nu suprasolicite serverul. Recomandat pentru playlisturi mari. Dacă e oprit, importul rulează la maxim — mai rapid, dar poate bloca serverul!</p>
+            <Inbel className="text-sm font-medium text-foreground">Relaxed mode</Inbel>
+          <p className="text-xs text-muted-foreground mt-0.5">Process videos gradually with pauses so the server is not overloaded. Recommended for large playlists. If off, import runs at full speed — faster but can lock up the server!</p>
             {config.relaxedMode && (
               <div className="grid grid-cols-3 gap-2 mt-3">
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Pauză între video-uri (s)</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Pause between videos (s)</Inbel>
                   <Input
                     type="number"
                     min={0}
@@ -319,7 +319,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Mărime lot</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Batch size</Inbel>
                   <Input
                     type="number"
                     min={1}
@@ -330,7 +330,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Pauză între loturi (s)</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Pause between batches (s)</Inbel>
                   <Input
                     type="number"
                     min={0}
@@ -349,31 +349,31 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
-              <Label className="text-sm font-medium text-foreground">Extrage transcrierea (SEO)</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Adaugă transcrierea YouTube într-un bloc collapsible în articol, indexabil de motoarele de căutare chiar și când e închis.</p>
+              <Inbel className="text-sm font-medium text-foreground">Fetch transcript (SEO)</Inbel>
+              <p className="text-xs text-muted-foreground mt-0.5">Adds the YouTube transcript inside a collapsible block in the post, indexable by search engines even when collapsed.</p>
             </div>
             <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
           </div>
 
           {config.fetchTranscript && (
             <div className="mt-3 space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground">Limba preferată pentru transcriere</Label>
-              <p className="text-[11px] text-muted-foreground">Cod ISO (ex: <code className="font-mono">ro</code>, <code className="font-mono">en</code>). Fallback automat dacă lipsește.</p>
+              <Inbel className="text-[11px] text-muted-foreground">Preferred transcript language</Inbel>
+              <p className="text-[11px] text-muted-foreground">ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>). Automatic fallback if missing.</p>
               <Input
-                value={config.transcriptLang}
-                onChange={(e) => update("transcriptLang", e.target.value.toLowerCase().slice(0, 5))}
+                value={config.transcriptInng}
+                onChange={(e) => update("transcriptInng", e.target.value.toLowerCase().slice(0, 5))}
                 placeholder="ro"
                 className="h-8 text-xs font-mono w-32"
               />
               <div className="pt-3 mt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div className="pr-3">
-                    <Label className="text-sm font-medium text-foreground">Lovable Cloud (recomandat)</Label>
+                    <Inbel className="text-sm font-medium text-foreground">Lovable Cloud (recommended)</Inbel>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Folosit automat ca a doua încercare dacă YouTube blochează IP-ul site-ului tău. Zero configurare, fără chei. OAuth rămâne ca rezervă finală.
+                      Used automatically as a second attempt if YouTube blocks your site IP. Zero config, no keys. OAuth remains a last-resort fallback.
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      Ordinea: <strong>1.</strong> încercare locală (de pe IP-ul site-ului) → <strong>2.</strong> Lovable Cloud → <strong>3.</strong> OAuth (canalul tău YouTube).
+                      Order: <strong>1.</strong> local attempt (from site IP) → <strong>2.</strong> Lovable Cloud → <strong>3.</strong> OAuth (your YouTube channel).
                     </p>
                   </div>
                   <Switch
@@ -396,9 +396,9 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
-              <Label className="text-sm font-medium text-foreground">Instrucțiuni AI</Label>
+              <Inbel className="text-sm font-medium text-foreground">AI instructions</Inbel>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Trimite titlul, descrierea și (opțional) transcrierea la un model AI care urmează instrucțiunile tale și poate rescrie descrierea, sugera taguri sau genera un excerpt SEO. Un singur apel per video pentru consum minim.
+                Sends the title, description and (optionally) transcript to an AI model that follows your instructions and can rewrite the description, suggest tags or generate an SEO excerpt. One call per video for minimal cost.
               </p>
             </div>
             <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
@@ -408,7 +408,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             <div className="mt-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Provider</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Provider</Inbel>
                   <Select
                     value={config.aiProvider}
                     onValueChange={(v) => {
@@ -419,7 +419,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   >
                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="openrouter" className="text-xs">OpenRouter (recomandat)</SelectItem>
+                      <SelectItem value="openrouter" className="text-xs">OpenRouter (recommended)</SelectItem>
                       <SelectItem value="openai" className="text-xs">OpenAI</SelectItem>
                       <SelectItem value="anthropic" className="text-xs">Anthropic</SelectItem>
                       <SelectItem value="lovable" className="text-xs">Lovable AI Gateway</SelectItem>
@@ -427,10 +427,10 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Model</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Model</Inbel>
                   <Select value={config.aiModel} onValueChange={(v) => update("aiModel", v)}>
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder={orLoading ? "Se încarcă…" : "Alege model"} />
+                      <SelectValue placeholder={orLoading ? "Loading…" : "Choose a model"} />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
                       {modelOptions.map((m) => (
@@ -440,14 +440,14 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   </Select>
                   {config.aiProvider === "openrouter" && (
                     <p className="text-[10px] text-muted-foreground">
-                      {orLoading ? "Se încarcă lista live de la OpenRouter…" : orModels && orModels.length > 0 ? `${orModels.length} modele live, sortate după preț.` : "Listă fallback (OpenRouter inaccesibil)."}
+                      {orLoading ? "Loading live OpenRouter model list…" : orModels && orModels.length > 0 ? `${orModels.length} live models, sorted by price.` : "Fallback list (OpenRouter unreachable)."}
                     </p>
                   )}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">API Key</Label>
+                <Inbel className="text-[11px] text-muted-foreground">API Key</Inbel>
                 <Input
                   type="password"
                   value={config.aiApiKey}
@@ -457,7 +457,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                 />
                 {config.aiProvider === "openrouter" && (
                   <p className="text-[11px] text-muted-foreground">
-                    Cont gratuit + cheie la <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/keys</a>. Cu Gemini Flash, ~0.0002$ per predică.
+                    Free account + key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/keys</a>. With Gemini Flash, ~$0.0002 per post.
                   </p>
                 )}
               </div>
@@ -475,25 +475,25 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   onClick={() => update("aiTranscriptChars", 0)}
                   className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 0 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
                 >
-                  Fără transcriere
+                  No transcript
                 </button>
                 <button
                   type="button"
                   onClick={() => update("aiTranscriptChars", 4000)}
                   className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 4000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
                 >
-                  4000 caractere
+                  4000 characters
                 </button>
                 <button
                   type="button"
                   onClick={() => update("aiTranscriptChars", 999999)}
                   className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars >= 100000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
                 >
-                  Toată
+                  Full
                 </button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Cu cât trimiți mai puțin la AI, cu atât costul scade. 4000 caractere acoperă tema generală a celor mai multe predici.
+                Cu cât trimiți mai puțin la AI, cu atât costul scade. 4000 characters acoperă tema generală a celor mai multe posts.
               </p>
 
               <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
@@ -504,8 +504,8 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   className="mt-0.5"
                 />
                 <span className="text-[11px] text-foreground">
-                  Restricționează AI la tagurile existente
-                  <span className="block text-muted-foreground">AI poate alege doar din tagurile deja create pe site (inclusiv tagul vorbitorului adăugat de instrucțiunile simple). Nu va inventa taguri noi.</span>
+                  Restrict AI to existing tags
+                  <span className="block text-muted-foreground">AI can only choose from tags already created on the site (including the speaker tag added by simple instructions). It will not invent new tags.</span>
                 </span>
               </label>
 
@@ -517,8 +517,8 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   className="mt-0.5"
                 />
                 <span className="text-[11px] text-foreground">
-                  Folosește excerpt generat de AI
-                  <span className="block text-muted-foreground">Dacă este bifat, sumarul afișat în arhivă este cel scris de AI. Dacă este debifat, se folosește prima parte a descrierii (~40 cuvinte).</span>
+                  Use AI-generated excerpt
+                  <span className="block text-muted-foreground">If checked, the excerpt shown in the archive is the AI-written one. If unchecked, the first part of the description (~40 words) is used.</span>
                 </span>
               </label>
             </div>
@@ -540,13 +540,13 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
       />
 
       <div className="rounded-lg bg-secondary/30 border border-border p-3 text-xs text-muted-foreground space-y-1">
-        <p><strong className="text-foreground">Cum funcționează:</strong></p>
+        <p><strong className="text-foreground">How it works:</strong></p>
         <ul className="list-disc list-inside space-y-0.5">
-          <li>La prima sincronizare se face <strong>backfill cu tot playlistul</strong>.</li>
-          <li>Articolele noi sunt salvate ca <strong>Draft</strong> pentru revizuire.</li>
-          <li>Dedup automat pe baza ID-ului video YouTube.</li>
-          <li>Thumbnail-ul YouTube devine Featured Image.</li>
-          <li>Transcrierea folosește întâi metodele publice, apoi fallback OAuth prin YouTube Data API dacă este configurat.</li>
+          <li>The first sync performs a <strong>full playlist backfill</strong>.</li>
+          <li>New posts are saved as <strong>Draft</strong> for review.</li>
+          <li>Automatic dedup by YouTube video ID.</li>
+          <li>YouTube thumbnail becomes Featured Image.</li>
+          <li>Transcript uses public methods first, then OAuth fallback via YouTube Data API if configured.</li>
         </ul>
       </div>
     </div>
@@ -612,12 +612,12 @@ const TroubleshootingSection = ({
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      if (!e.data || e.data.type !== "antiohia_test_playlist_result") return;
+      if (!e.data || e.data.type !== "videosow_test_playlist_result") return;
       setPlaylistTestRunning(false);
       if (e.data.success && e.data.data) {
         setPlaylistTestResult({ ok: true, data: e.data.data });
       } else {
-        setPlaylistTestResult({ ok: false, error: e.data.data || "Eroare necunoscută." });
+        setPlaylistTestResult({ ok: false, error: e.data.data || "Unknown error." });
       }
     };
     window.addEventListener("message", handler);
@@ -629,7 +629,7 @@ const TroubleshootingSection = ({
     if (!v) return;
     setPlaylistTestRunning(true);
     setPlaylistTestResult(null);
-    window.parent.postMessage({ type: "antiohia_test_playlist", playlist: v }, "*");
+    window.parent.postMessage({ type: "videosow_test_playlist", playlist: v }, "*");
   };
 
   const testApiKey = async () => {
@@ -646,24 +646,24 @@ const TroubleshootingSection = ({
         setApiResult({
           ok: true,
           message: config.playlistId
-            ? `Cheia funcționează. Playlist găsit: ${json.items?.length || 0} rezultat(e).`
-            : "Cheia funcționează (test cu playlist generic).",
+            ? `Key works. Playlist found: ${json.items?.length || 0} result(s).`
+            : "Key works (tested with a generic playlist).",
         });
       } else {
         const msg = json?.error?.message || `HTTP ${res.status}`;
         setApiResult({ ok: false, message: msg });
       }
     } catch (e: any) {
-      setApiResult({ ok: false, message: e?.message || "Eroare rețea" });
+      setApiResult({ ok: false, message: e?.message || "Network error" });
     } finally {
       setApiTesting(false);
     }
   };
 
   const clearLog = () => {
-    if (!confirm("Sigur ștergi istoricul importurilor afișat în widget? Articolele importate rămân neatinse în WordPress.")) return;
-    window.parent.postMessage({ type: "antiohia_clear_sermon_log" }, "*");
-    toast.success("Istoricul a fost șters.");
+    if (!confirm("Clear the import history shown in the widget? Imported posts remain untouched in WordPress.")) return;
+    window.parent.postMessage({ type: "videosow_clear_sermon_log" }, "*");
+    toast.success("History cleared.");
   };
 
   const repairPct =
@@ -675,10 +675,10 @@ const TroubleshootingSection = ({
     <div className="space-y-3 pt-4 mt-2 border-t border-border">
       <div className="flex items-center gap-2">
         <Wrench className="w-4 h-4 text-muted-foreground" />
-        <h4 className="text-sm font-bold text-foreground">Unelte de diagnoză</h4>
+        <h4 className="text-sm font-bold text-foreground">Diagnostic tools</h4>
       </div>
       <p className="text-xs text-muted-foreground">
-        Folosește aceste unelte când ceva nu merge cum trebuie sau când vrei să verifici starea integrării.
+        Use these tools when something is not working or when you want to check integration health.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -687,9 +687,9 @@ const TroubleshootingSection = ({
           <div className="flex items-start gap-2">
             <RefreshCw className="w-4 h-4 text-foreground mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Repară metadate YouTube</div>
+              <div className="text-sm font-semibold text-foreground">Repair YouTube metadata</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Reia data uploadului și numărul de vizualizări direct de pe YouTube pentru toate predicile importate. Util după backfill-uri mari sau când sortările nu mai sunt corecte.
+                Refetches upload date and view count from YouTube for all imported posts. Useful after large backfills or when sorting is no longer accurate.
               </p>
             </div>
           </div>
@@ -713,7 +713,7 @@ const TroubleshootingSection = ({
               className="h-8 gap-1.5 text-xs w-full"
             >
               {isRepairing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-              {isRepairing ? "Se repară…" : "Pornește reparația"}
+              {isRepairing ? "Repairing…" : "Start repair"}
             </Button>
           )}
         </div>
@@ -723,9 +723,9 @@ const TroubleshootingSection = ({
           <div className="flex items-start gap-2">
             <Stethoscope className="w-4 h-4 text-foreground mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Diagnoză transcriere</div>
+              <div className="text-sm font-semibold text-foreground">Diagnose transcript</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Lipește URL-ul (sau ID-ul) unui video YouTube și vezi exact ce returnează YouTube serverului tău — util când transcrierea „lipsește”.
+                Lipește URL-ul (sau ID-ul) unui video YouTube și veday exact ce returnează YouTube serverului tău — util când transcrierea „lipsește”.
               </p>
             </div>
           </div>
@@ -738,7 +738,7 @@ const TroubleshootingSection = ({
             />
             <Button onClick={runDiag} disabled={diagRunning || !diagUrl.trim()} size="sm" className="h-8 text-xs gap-1.5">
               {diagRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-              {diagRunning ? "Se testează…" : "Testează"}
+              {diagRunning ? "Testing…" : "Test"}
             </Button>
           </div>
           {diagResult && (
@@ -762,11 +762,11 @@ const TroubleshootingSection = ({
                 ))}
               </div>
               <div className="pt-1.5 border-t border-border">
-                <div className="font-semibold text-foreground">Rezultat final:</div>
+                <div className="font-semibold text-foreground">Final result:</div>
                 <div className="text-muted-foreground">
                   {diagResult.final.segments > 0
-                    ? `✓ ${diagResult.final.segments} segmente, ${diagResult.final.chars} caractere`
-                    : "✗ Niciun segment extras."}
+                    ? `✓ ${diagResult.final.segments} segments, ${diagResult.final.chars} characters`
+                    : "✗ No segment extracted."}
                 </div>
                 {diagResult.final.preview && (
                   <div className="mt-1 italic text-muted-foreground">„{diagResult.final.preview}…”</div>
@@ -781,9 +781,9 @@ const TroubleshootingSection = ({
           <div className="flex items-start gap-2">
             <KeyRound className="w-4 h-4 text-foreground mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Verifică YouTube API Key</div>
+              <div className="text-sm font-semibold text-foreground">Verify YouTube API Key</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Trimite un request mic la YouTube Data API ca să confirmi că cheia este validă, activă și că playlistul setat este accesibil.
+                Sends a small request to the YouTube Data API to confirm the key is valid, active and the configured playlist is accessible.
               </p>
             </div>
           </div>
@@ -809,7 +809,7 @@ const TroubleshootingSection = ({
             className="h-8 gap-1.5 text-xs w-full"
           >
             {apiTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
-            {apiTesting ? "Se testează…" : "Verifică cheia"}
+            {apiTesting ? "Testing…" : "Verify key"}
           </Button>
         </div>
 
@@ -818,9 +818,9 @@ const TroubleshootingSection = ({
           <div className="flex items-start gap-2">
             <Trash2 className="w-4 h-4 text-foreground mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Curăță istoricul importurilor</div>
+              <div className="text-sm font-semibold text-foreground">Clear import history</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Șterge lista „Ultimele importuri” din widget. Articolele deja importate rămân neatinse în WordPress.
+                Șterge lista „Recent imports” din widget. Articolele deja importate rămân neatinse în WordPress.
               </p>
             </div>
           </div>
@@ -832,7 +832,7 @@ const TroubleshootingSection = ({
             className="h-8 gap-1.5 text-xs w-full"
           >
             <Trash2 className="w-3 h-3" />
-            {config.log && config.log.length > 0 ? `Șterge istoricul (${config.log.length})` : "Istoric gol"}
+            {config.log && config.log.length > 0 ? `Clear history (${config.log.length})` : "History empty"}
           </Button>
         </div>
 
@@ -841,9 +841,9 @@ const TroubleshootingSection = ({
           <div className="flex items-start gap-2">
             <ListVideo className="w-4 h-4 text-foreground mt-0.5" />
             <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Testează playlist YouTube</div>
+              <div className="text-sm font-semibold text-foreground">Test playlist YouTube</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Lipește un ID de playlist sau URL complet (ex. <span className="font-mono">PLxxxx…</span> sau <span className="font-mono">youtube.com/playlist?list=…</span>) și verifică dacă este accesibil cu cheia API setată.
+                Paste a playlist ID or full URL (ex. <span className="font-mono">PLxxxx…</span> sau <span className="font-mono">youtube.com/playlist?list=…</span>) and check if it is accessible with the configured API key.
               </p>
             </div>
           </div>
@@ -861,11 +861,11 @@ const TroubleshootingSection = ({
               className="h-8 text-xs gap-1.5"
             >
               {playlistTestRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <ListVideo className="w-3 h-3" />}
-              {playlistTestRunning ? "Se verifică…" : "Testează"}
+              {playlistTestRunning ? "Checking…" : "Test"}
             </Button>
           </div>
           {!config.apiKey && (
-            <div className="text-[11px] text-muted-foreground italic">Setează mai întâi o cheie YouTube API.</div>
+            <div className="text-[11px] text-muted-foreground italic">Set a YouTube API key first.</div>
           )}
           {playlistTestResult && !playlistTestResult.ok && (
             <div className="text-[11px] p-2 rounded-md border border-destructive/30 bg-destructive/5 text-destructive">
@@ -884,16 +884,16 @@ const TroubleshootingSection = ({
                 <div className="flex-1 space-y-0.5">
                   <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span className="font-semibold text-foreground">Playlist valid</span>
+                    <span className="font-semibold text-foreground">Valid playlist</span>
                   </div>
                   <div className="text-foreground font-medium">{playlistTestResult.data.title}</div>
                   <div className="text-muted-foreground">
-                    Canal: <span className="text-foreground">{playlistTestResult.data.channel}</span>
+                    Channel: <span className="text-foreground">{playlistTestResult.data.channel}</span>
                   </div>
                   <div className="text-muted-foreground">
-                    Video-uri: <span className="text-foreground">{playlistTestResult.data.item_count}</span>
+                    Videos: <span className="text-foreground">{playlistTestResult.data.item_count}</span>
                     {playlistTestResult.data.published_at && (
-                      <> — creat: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("ro-RO")}</span></>
+                      <> — created: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("ro-RO")}</span></>
                     )}
                   </div>
                   <div className="font-mono text-muted-foreground">ID: {playlistTestResult.data.playlist_id}</div>
@@ -906,7 +906,7 @@ const TroubleshootingSection = ({
               )}
               {playlistTestResult.data.samples.length > 0 && (
                 <div className="border-t border-border pt-1.5 space-y-0.5">
-                  <div className="font-semibold text-foreground">Primele video-uri:</div>
+                  <div className="font-semibold text-foreground">First videos:</div>
                   {playlistTestResult.data.samples.map((s, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <span className="text-muted-foreground">{i + 1}.</span>
@@ -948,32 +948,32 @@ const YouTubeConnectCard = ({
   useEffect(() => {
     const handler = (e: MessageEvent) => {
       if (!e.data || !e.data.type) return;
-      if (e.data.type === "antiohia_oauth_callback") {
+      if (e.data.type === "videosow_oauth_callback") {
         if (e.data.status === "connected") {
-          toast.success("Canal YouTube conectat cu succes!");
+          toast.success("YouTube channel connected successfully!");
           // Reload config from WP so refresh token + channel name flow back in.
-          window.parent.postMessage({ type: "antiohia_load_sermon_importer_config" }, "*");
+          window.parent.postMessage({ type: "videosow_load_sermon_importer_config" }, "*");
           setWizardOpen(false);
         } else if (e.data.status === "error") {
-          toast.error("Eroare la conectare: " + (e.data.reason || "necunoscută"));
+          toast.error("Connection error: " + (e.data.reason || "unknown"));
         }
       }
-      if (e.data.type === "antiohia_oauth_disconnected") {
+      if (e.data.type === "videosow_oauth_disconnected") {
         if (e.data.success) {
-          toast.success("Deconectat.");
-          window.parent.postMessage({ type: "antiohia_load_sermon_importer_config" }, "*");
+          toast.success("Disconnected.");
+          window.parent.postMessage({ type: "videosow_load_sermon_importer_config" }, "*");
         }
       }
-      if (e.data.type === "antiohia_oauth_tested") {
+      if (e.data.type === "videosow_oauth_tested") {
         setTesting(false);
         if (e.data.success) {
-          toast.success("Acces OK — canal: " + (e.data.data?.channel || "necunoscut"));
+          toast.success("Access OK — channel: " + (e.data.data?.channel || "unknown"));
         } else {
-          toast.error("Test eșuat: " + (e.data.error || "necunoscut"));
+          toast.error("Test failed: " + (e.data.error || "unknown"));
         }
       }
-      if (e.data.type === "antiohia_oauth_start_error") {
-        toast.error("Nu pot începe conectarea: " + (e.data.error || "necunoscut"));
+      if (e.data.type === "videosow_oauth_start_error") {
+        toast.error("Cannot start connection: " + (e.data.error || "unknown"));
       }
     };
     window.addEventListener("message", handler);
@@ -981,24 +981,24 @@ const YouTubeConnectCard = ({
   }, []);
 
   const disconnect = () => {
-    if (!confirm("Sigur deconectezi canalul YouTube?")) return;
-    window.parent.postMessage({ type: "antiohia_disconnect_oauth" }, "*");
+    if (!confirm("Sigur deconecteday canalul YouTube?")) return;
+    window.parent.postMessage({ type: "videosow_disconnect_oauth" }, "*");
   };
 
   const test = () => {
     setTesting(true);
-    window.parent.postMessage({ type: "antiohia_test_oauth" }, "*");
+    window.parent.postMessage({ type: "videosow_test_oauth" }, "*");
   };
 
   return (
     <div className="pt-3 mt-3 border-t border-border space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Label className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
-            <Youtube className="w-3 h-3" /> Conectare YouTube (pentru transcrieri)
-          </Label>
+          <Inbel className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
+            <Youtube className="w-3 h-3" /> YouTube connection (for transcripts)
+          </Inbel>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Necesar când YouTube blochează extragerea publică. Funcționează doar pentru canalul care deține videoclipurile.
+            Required when YouTube blocks public extraction. Works only for the channel that owns the videos.
           </p>
         </div>
       </div>
@@ -1008,24 +1008,24 @@ const YouTubeConnectCard = ({
           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <div className="flex-1 min-w-0">
             <div className="text-xs font-medium text-foreground">
-              Conectat{config.youtubeChannelName ? ` ca: ${config.youtubeChannelName}` : ""}
+              Connected{config.youtubeChannelName ? ` as: ${config.youtubeChannelName}` : ""}
             </div>
-            <div className="text-[11px] text-muted-foreground">Token reîmprospătat automat.</div>
+            <div className="text-[11px] text-muted-foreground">Token refreshed automatically.</div>
           </div>
           <Button onClick={test} disabled={testing} size="sm" variant="outline" className="h-7 text-xs gap-1.5">
             {testing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-            Testează
+            Test
           </Button>
           <Button onClick={disconnect} size="sm" variant="ghost" className="h-7 text-xs gap-1.5 text-destructive hover:text-destructive">
-            <Unplug className="w-3 h-3" /> Deconectează
+            <Unplug className="w-3 h-3" /> Disconnect
           </Button>
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
           <Button onClick={() => setWizardOpen(true)} size="sm" className="h-9 text-xs gap-2">
-            <Plug className="w-3.5 h-3.5" /> Conectează canalul YouTube
+            <Plug className="w-3.5 h-3.5" /> Connect YouTube channel
           </Button>
-          <span className="text-[11px] text-muted-foreground">~5 min, ghidat pas-cu-pas</span>
+          <span className="text-[11px] text-muted-foreground">~5 min, guided step-by-step</span>
         </div>
       )}
 
@@ -1034,14 +1034,14 @@ const YouTubeConnectCard = ({
         onClick={() => setShowAdvanced((v) => !v)}
         className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
       >
-        <Settings2 className="w-3 h-3" /> {showAdvanced ? "Ascunde" : "Avansat"}: introdu manual credențialele
+        <Settings2 className="w-3 h-3" /> {showAdvanced ? "Hide" : "Advanced"}: enter credentials manually
       </button>
 
       {showAdvanced && (
         <div className="space-y-2 p-3 rounded-md border border-dashed border-border bg-secondary/10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-[11px] text-muted-foreground">OAuth Client ID</Label>
+              <Inbel className="text-[11px] text-muted-foreground">OAuth Client ID</Inbel>
               <Input
                 value={config.youtubeOAuthClientId}
                 onChange={(e) => update("youtubeOAuthClientId", e.target.value)}
@@ -1050,7 +1050,7 @@ const YouTubeConnectCard = ({
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] text-muted-foreground">OAuth Client Secret</Label>
+              <Inbel className="text-[11px] text-muted-foreground">OAuth Client Secret</Inbel>
               <Input
                 type="password"
                 value={config.youtubeOAuthClientSecret}
@@ -1061,17 +1061,17 @@ const YouTubeConnectCard = ({
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="text-[11px] text-muted-foreground">Refresh Token (opțional, dacă deja ai unul)</Label>
+            <Inbel className="text-[11px] text-muted-foreground">Refresh Token (optional, if you already have one)</Inbel>
             <Textarea
               value={config.youtubeOAuthRefreshToken}
               onChange={(e) => update("youtubeOAuthRefreshToken", e.target.value.trim())}
-              placeholder="Lasă gol și folosește butonul Conectează — pluginul îl va completa automat."
+              placeholder="Leave blank and use the Connect button — the plugin will fill it in automatically."
               rows={2}
               className="text-xs font-mono resize-y"
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            După editare, apasă „Salvează” înainte de „Conectează”.
+            După editare, apasă „Save” înainte de „Connect”.
           </p>
         </div>
       )}
@@ -1110,9 +1110,9 @@ const OAuthWizardDialog = ({
   useEffect(() => {
     if (!open) return;
     setStep(1);
-    window.parent.postMessage({ type: "antiohia_get_oauth_redirect_uri" }, "*");
+    window.parent.postMessage({ type: "videosow_get_oauth_redirect_uri" }, "*");
     const handler = (e: MessageEvent) => {
-      if (e.data?.type === "antiohia_oauth_redirect_uri" && e.data.success) {
+      if (e.data?.type === "videosow_oauth_redirect_uri" && e.data.success) {
         setRedirectUri(e.data.data?.redirect_uri || "");
       }
     };
@@ -1131,12 +1131,12 @@ const OAuthWizardDialog = ({
 
   const startConnect = () => {
     if (!canStartConnect) {
-      toast.error("Completează Client ID și Client Secret întâi.");
+      toast.error("Fill in Client ID and Client Secret first.");
       return;
     }
     // Send save+start in one go through WP bridge so secret is persisted before redirect.
     window.parent.postMessage(
-      { type: "antiohia_start_oauth", config: { ...config } },
+      { type: "videosow_start_oauth", config: { ...config } },
       "*"
     );
   };
@@ -1165,28 +1165,28 @@ const OAuthWizardDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Conectare canal YouTube</DialogTitle>
+          <DialogTitle>Connect YouTube channel</DialogTitle>
           <DialogDescription>
-            4 pași pentru a permite pluginului să extragă transcrierile direct prin API-ul oficial YouTube. Durează ~5 minute.
+            4 steps to let the plugin extract transcripts via the official YouTube API. Takes ~5 minutes.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center justify-between py-3 border-y border-border">
-          <Step n={1} label="Proiect Google" />
+          <Step n={1} label="Google project" />
           <div className="flex-1 mx-2 h-px bg-border" />
-          <Step n={2} label="Activează API" />
+          <Step n={2} label="Enable API" />
           <div className="flex-1 mx-2 h-px bg-border" />
-          <Step n={3} label="Credențiale" />
+          <Step n={3} label="Credentials" />
           <div className="flex-1 mx-2 h-px bg-border" />
-          <Step n={4} label="Conectează" />
+          <Step n={4} label="Connect" />
         </div>
 
         <div className="py-4 space-y-3 text-sm">
           {step === 1 && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Pas 1 — Creează un proiect Google Cloud</h4>
+              <h4 className="font-semibold">Step 1 — Create a Google Cloud project</h4>
               <p className="text-xs text-muted-foreground">
-                Deschide consola Google Cloud și creează un proiect nou (numele nu contează — sugerăm „Antiohia YouTube Importer”). Dacă ai deja un proiect, poți să-l reutilizezi.
+                Open consola Google Cloud și creează un proiect nou (numele nu contează — sugerăm „Antiohia YouTube Importer”). Dacă ai deja un proiect, poți să-l reutilizeday.
               </p>
               <a
                 href="https://console.cloud.google.com/projectcreate"
@@ -1194,19 +1194,19 @@ const OAuthWizardDialog = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90"
               >
-                <ExternalLink className="w-3.5 h-3.5" /> Deschide Google Cloud Console
+                <ExternalLink className="w-3.5 h-3.5" /> Open Google Cloud Console
               </a>
               <p className="text-[11px] text-muted-foreground">
-                După ce proiectul apare în lista din colțul stânga-sus, treci la pasul următor.
+                Once the project appears in the top-left list, move to the next step.
               </p>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Pas 2 — Activează YouTube Data API v3</h4>
+              <h4 className="font-semibold">Step 2 — Enable YouTube Data API v3</h4>
               <p className="text-xs text-muted-foreground">
-                Cu proiectul selectat (verifică numele lui în antet), apasă <strong>ENABLE</strong> pe pagina de mai jos.
+                With the project selected (check the name in the header), click <strong>ENABLE</strong> on the page below.
               </p>
               <a
                 href="https://console.cloud.google.com/apis/library/youtube.googleapis.com"
@@ -1214,44 +1214,44 @@ const OAuthWizardDialog = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 h-9 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:opacity-90"
               >
-                <ExternalLink className="w-3.5 h-3.5" /> Deschide pagina API
+                <ExternalLink className="w-3.5 h-3.5" /> Open the API page
               </a>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Pas 3 — Creează credențiale OAuth</h4>
+              <h4 className="font-semibold">Step 3 — Create OAuth credentials</h4>
               <ol className="text-xs text-muted-foreground space-y-2 list-decimal pl-4">
                 <li>
-                  Configurează <strong>OAuth consent screen</strong>: tip <em>External</em>, completează numele aplicației, adaugă emailul tău ca <em>Test user</em>, salvează.{" "}
+                  Configure <strong>OAuth consent screen</strong>: type <em>External</em>, fill in the app name, add your email as <em>Test user</em>, save.{" "}
                   <a
                     href="https://console.cloud.google.com/apis/credentials/consent"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:underline"
                   >
-                    Deschide <ExternalLink className="w-3 h-3" />
+                    Open <ExternalLink className="w-3 h-3" />
                   </a>
                 </li>
                 <li>
-                  Mergi la <strong>Credentials → Create Credentials → OAuth client ID</strong>, alege <em>Web application</em>, dă-i un nume.{" "}
+                  Go to <strong>Credentials → Create Credentials → OAuth client ID</strong>, choose <em>Web application</em>, give it a name.{" "}
                   <a
                     href="https://console.cloud.google.com/apis/credentials"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:underline"
                   >
-                    Deschide <ExternalLink className="w-3 h-3" />
+                    Open <ExternalLink className="w-3 h-3" />
                   </a>
                 </li>
                 <li>
-                  La <strong>Authorized redirect URIs</strong>, lipește <em>exact</em> URL-ul de mai jos (folosește butonul Copy):
+                  In <strong>Authorized redirect URIs</strong>, paste <em>exact</em> the URL below exactly (use the Copy button):
                 </li>
               </ol>
 
               <div className="flex items-center gap-2 p-2 rounded-md bg-muted">
-                <code className="text-[11px] font-mono break-all flex-1">{redirectUri || "se încarcă…"}</code>
+                <code className="text-[11px] font-mono break-all flex-1">{redirectUri || "loading…"}</code>
                 <Button
                   size="sm"
                   variant="outline"
@@ -1265,12 +1265,12 @@ const OAuthWizardDialog = ({
               </div>
 
               <p className="text-xs text-muted-foreground">
-                După ce apeși <strong>Create</strong>, Google îți afișează <strong>Client ID</strong> și <strong>Client Secret</strong>. Lipește-le aici:
+                After clicking <strong>Create</strong>, Google shows you <strong>Client ID</strong> și <strong>Client Secret</strong>. Paste them here:
               </p>
 
               <div className="space-y-2">
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Client ID</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Client ID</Inbel>
                   <Input
                     value={config.youtubeOAuthClientId}
                     onChange={(e) => update("youtubeOAuthClientId", e.target.value)}
@@ -1279,7 +1279,7 @@ const OAuthWizardDialog = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Client Secret</Label>
+                  <Inbel className="text-[11px] text-muted-foreground">Client Secret</Inbel>
                   <Input
                     type="password"
                     value={config.youtubeOAuthClientSecret}
@@ -1294,18 +1294,18 @@ const OAuthWizardDialog = ({
 
           {step === 4 && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Pas 4 — Conectează-te cu canalul YouTube</h4>
+              <h4 className="font-semibold">Pas 4 — Connect-te cu canalul YouTube</h4>
               <p className="text-xs text-muted-foreground">
-                Apasă butonul de mai jos. Vei fi redirecționat către Google, te loghezi cu contul care deține canalul YouTube și aprobi accesul. Apoi reveni automat aici.
+                Apasă butonul de mai jos. Vei fi redirecționat către Google, te logheday cu contul care deține canalul YouTube și aprobi accesul. Apoi reveni automat aici.
               </p>
               <p className="text-[11px] text-muted-foreground">
-                ⚠️ Loghează-te cu contul Google care are <strong>permisiuni de Manager</strong> pe canal (verifică în YouTube Studio → Settings → Permissions).
+                ⚠️ Log in with the Google account that has <strong>Manager permissions</strong> on the channel (check in YouTube Studio → Settings → Permissions).
               </p>
               <Button onClick={startConnect} disabled={!canStartConnect} className="h-10 gap-2">
-                <Plug className="w-4 h-4" /> Conectează canalul YouTube
+                <Plug className="w-4 h-4" /> Connect YouTube channel
               </Button>
               {!canStartConnect && (
-                <p className="text-[11px] text-destructive">Întoarce-te la pasul 3 și completează Client ID + Client Secret.</p>
+                <p className="text-[11px] text-destructive">Go back to step 3 and fill in Client ID + Client Secret.</p>
               )}
             </div>
           )}
@@ -1319,7 +1319,7 @@ const OAuthWizardDialog = ({
             disabled={step === 1}
             className="h-8 text-xs"
           >
-            ← Înapoi
+            ← Back
           </Button>
           {step < 4 ? (
             <Button
@@ -1331,11 +1331,11 @@ const OAuthWizardDialog = ({
               disabled={step === 3 && !canStartConnect}
               className="h-8 text-xs"
             >
-              Continuă →
+              Continue →
             </Button>
           ) : (
             <Button size="sm" variant="ghost" onClick={() => onOpenChange(false)} className="h-8 text-xs">
-              Închide
+              Close
             </Button>
           )}
         </DialogFooter>
@@ -1405,9 +1405,9 @@ const SimpleInstructionsSection = ({
   return (
     <div className="p-3 rounded-lg border border-border bg-secondary/20 space-y-3">
       <div>
-        <Label className="text-sm font-medium text-foreground">Instrucțiuni simple</Label>
+        <Inbel className="text-sm font-medium text-foreground">Simple instructions</Inbel>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Reguli rapide aplicate descrierii înainte de salvare. Adaugă oricâte vrei — sunt aplicate în ordine.
+          Quick rules applied to the description before saving. Add as many as you want — applied in order.
         </p>
       </div>
 
@@ -1429,7 +1429,7 @@ const SimpleInstructionsSection = ({
                 (dragId === p.id ? "opacity-40 " : "") +
                 (overId === p.id && dragId && dragId !== p.id ? "border-primary ring-1 ring-primary " : "border-border ")
               }
-              title="Trage pentru a reordona"
+              title="Drag to reorder"
             >
               <GripVertical className="w-3 h-3 text-muted-foreground" />
               <Icon className="w-3.5 h-3.5 text-primary" />
@@ -1438,7 +1438,7 @@ const SimpleInstructionsSection = ({
                 type="button"
                 onClick={() => removePill(p.id)}
                 className="w-5 h-5 rounded-full hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-colors"
-                aria-label="Elimină"
+                aria-label="Remove"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -1471,7 +1471,7 @@ const SimpleInstructionsSection = ({
               onClick={() => setPickerOpen(false)}
               className="w-full text-[11px] text-muted-foreground hover:text-foreground py-1"
             >
-              Anulează
+              Cancel
             </button>
           </div>
         ) : (
@@ -1480,7 +1480,7 @@ const SimpleInstructionsSection = ({
             onClick={() => setPickerOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-border bg-background text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
           >
-            <Plus className="w-3.5 h-3.5" /> Adaugă regulă
+            <Plus className="w-3.5 h-3.5" /> Add rule
           </button>
         )}
       </div>
@@ -1492,9 +1492,9 @@ const SimpleInstructionsSection = ({
             if (!meta || !meta.needsValue) return null;
             return (
               <div key={p.id} className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">
+                <Inbel className="text-[11px] text-muted-foreground">
                   {meta.label} #{instructions.slice(0, idx + 1).filter((x) => x.type === p.type).length}
-                </Label>
+                </Inbel>
                 <Textarea
                   value={p.value || ""}
                   onChange={(e) => updateValue(p.id, e.target.value)}
@@ -1539,18 +1539,18 @@ const AiInstructionsEditor = ({
   }, []);
 
   const [editing, setEditing] = useState<AiTemplate | null>(null);
-  const [editLabel, setEditLabel] = useState("");
+  const [editInbel, setEditInbel] = useState("");
   const [editText, setEditText] = useState("");
 
   const openEdit = (t: AiTemplate) => {
     setEditing(t);
-    setEditLabel(t.label);
+    setEditInbel(t.label);
     setEditText(t.text);
   };
 
   const saveEdit = () => {
     if (!editing) return;
-    const label = editLabel.trim() || "Template";
+    const label = editInbel.trim() || "Template";
     onTemplatesChange(
       templates.map((t) => (t.id === editing.id ? { ...t, label, text: editText } : t))
     );
@@ -1564,19 +1564,19 @@ const AiInstructionsEditor = ({
   const insertTemplate = (t: AiTemplate) => {
     const current = (value || "").trim();
     onChange(current ? current + "\n\n" + t.text : t.text);
-    toast.success(`Template adăugat: ${t.label}`);
+    toast.success(`Template added: ${t.label}`);
   };
 
   const saveCurrentAsTemplate = () => {
     const text = (value || "").trim();
     if (!text) {
-      toast.error("Nu există nimic de salvat ca template.");
+      toast.error("Nothing to save as a template.");
       return;
     }
-    const label = window.prompt("Nume pentru noul template:", "Template nou");
+    const label = window.prompt("Name for the new template:", "New template");
     if (!label) return;
-    onTemplatesChange([...templates, { id: tplId(), label: label.trim() || "Template nou", text }]);
-    toast.success("Template salvat.");
+    onTemplatesChange([...templates, { id: tplId(), label: label.trim() || "New template", text }]);
+    toast.success("Template saved.");
   };
 
   const [dragId, setDragId] = useState<string | null>(null);
@@ -1614,12 +1614,12 @@ const AiInstructionsEditor = ({
 
   return (
     <div className="space-y-2">
-      <Label className="text-[11px] text-muted-foreground">Instrucțiuni pentru AI</Label>
+      <Inbel className="text-[11px] text-muted-foreground">Instructions for AI</Inbel>
       <div className="relative">
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Ex: Rescrie descrierea în 10 paragrafe coerente, generează maxim 10 taguri relevante, și un excerpt SEO de 2 propoziții."
+          placeholder="Ex: Rescrie descrierea în 10 paragrafe coerente, generează maxim 10 taguri relevante, și un excerpt SEO de 2 propodayții."
           rows={6}
           className="text-xs font-mono resize-y pr-10"
         />
@@ -1627,16 +1627,16 @@ const AiInstructionsEditor = ({
           type="button"
           onClick={saveCurrentAsTemplate}
           className="absolute top-1.5 right-1.5 p-1.5 rounded-md bg-background/80 border border-border text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
-          title="Salvează conținutul curent ca template"
+          title="Save current content as template"
         >
           <BookmarkPlus className="w-3.5 h-3.5" />
         </button>
       </div>
 
       <div className="space-y-1.5 pt-1">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Template-uri salvate
-        </Label>
+        <Inbel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Saved templates
+        </Inbel>
         <div className="flex flex-wrap gap-1.5">
           {templates.map((t) => (
             <div
@@ -1651,13 +1651,13 @@ const AiInstructionsEditor = ({
                 (dragId === t.id ? "opacity-40 " : "") +
                 (overId === t.id && dragId && dragId !== t.id ? "border-primary ring-1 ring-primary " : "border-border ")
               }
-              title="Trage pentru a reordona"
+              title="Drag to reorder"
             >
               <button
                 type="button"
                 onClick={() => insertTemplate(t)}
                 className="flex items-center gap-1 pl-2.5 pr-2 py-1 hover:bg-secondary text-foreground transition-colors"
-                title="Adaugă în câmpul de instrucțiuni"
+                title="Add to the instructions field"
               >
                 <Plus className="w-3 h-3 text-primary" />
                 <span>{t.label}</span>
@@ -1666,7 +1666,7 @@ const AiInstructionsEditor = ({
                 type="button"
                 onClick={() => openEdit(t)}
                 className="px-1.5 border-l border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                title="Editează"
+                title="Edit"
               >
                 <Pencil className="w-3 h-3" />
               </button>
@@ -1674,7 +1674,7 @@ const AiInstructionsEditor = ({
                 type="button"
                 onClick={() => removeTemplate(t.id)}
                 className="px-1.5 border-l border-border text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                title="Șterge template"
+                title="Delete template"
               >
                 <X className="w-3 h-3" />
               </button>
@@ -1686,16 +1686,16 @@ const AiInstructionsEditor = ({
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editează template</DialogTitle>
-            <DialogDescription>Modifică numele și conținutul template-ului.</DialogDescription>
+            <DialogTitle>Edit template</DialogTitle>
+            <DialogDescription>Edit template name and content.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label className="text-xs">Nume</Label>
-              <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} />
+              <Inbel className="text-xs">Name</Inbel>
+              <Input value={editInbel} onChange={(e) => setEditInbel(e.target.value)} />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Conținut</Label>
+              <Inbel className="text-xs">Content</Inbel>
               <Textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
@@ -1705,8 +1705,8 @@ const AiInstructionsEditor = ({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Anulează</Button>
-            <Button onClick={saveEdit}>Salvează</Button>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={saveEdit}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

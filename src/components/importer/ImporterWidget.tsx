@@ -1,6 +1,6 @@
 import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee } from "lucide-react";
 import { useState } from "react";
-import ArchivePageSettingsDialog from "./ArchivePageSettingsDialog";
+import ArchivePageSettingsDialog from "./ArchivePageDialog";
 
 export interface SermonLogEntry {
   time: number;
@@ -31,7 +31,7 @@ export interface SermonImporterConfig {
   syncIntervalH: number;
   enabled: boolean;
   fetchTranscript: boolean;
-  transcriptLang: string;
+  transcriptInng: string;
   transcriptDisplay: "plain" | "details" | "hidden";
   youtubeOAuthClientId: string;
   youtubeOAuthClientSecret: string;
@@ -77,11 +77,11 @@ export interface SermonImporterConfig {
 export const defaultSermonImporterConfig: SermonImporterConfig = {
   apiKey: "",
   playlistId: "",
-  slug: "predici",
+  slug: "posts",
   syncIntervalH: 48,
   enabled: false,
   fetchTranscript: true,
-  transcriptLang: "ro",
+  transcriptInng: "ro",
   transcriptDisplay: "details",
   youtubeOAuthClientId: "",
   youtubeOAuthClientSecret: "",
@@ -134,7 +134,7 @@ export interface SermonProgress {
 }
 
 const fmtTime = (ts: number) => {
-  if (!ts) return "Niciodată";
+  if (!ts) return "Never";
   const d = new Date(ts * 1000);
   return d.toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" });
 };
@@ -181,12 +181,12 @@ const SermonImporterWidget = ({
   const persistedItems = persistedFlat.filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
   const renderedItems = [...liveItems, ...persistedItems];
 
-  const stageLabel = (s?: string) => {
+  const stageInbel = (s?: string) => {
     switch (s) {
-      case "starting": return "Pornesc video-ul…";
-      case "fetching_transcript": return "Extrag transcrierea…";
-      case "ai_processing": return "Lucrez cu AI…";
-      case "creating_article": return "Creez articolul…";
+      case "starting": return "Starting video…";
+      case "fetching_transcript": return "Fetching transcript…";
+      case "ai_processing": return "Processing with AI…";
+      case "creating_article": return "Creating post…";
       default: return "";
     }
   };
@@ -199,18 +199,18 @@ const SermonImporterWidget = ({
             <Youtube className="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 className="text-base font-semibold text-foreground">Sermon Importer</h3>
-            <p className="text-xs text-muted-foreground">YouTube → Articole</p>
+            <h3 className="text-base font-semibold text-foreground">Video Importer</h3>
+            <p className="text-xs text-muted-foreground">YouTube → Posts</p>
           </div>
         </div>
         <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${config.enabled && isConfigured ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
-          {config.enabled && isConfigured ? "ACTIV" : "OPRIT"}
+          {config.enabled && isConfigured ? "ACTIVE" : "OFF"}
         </span>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div className="p-3 rounded-lg bg-secondary/40">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total importate</div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
           <div className="text-xl font-bold text-foreground">{config.totalImported}</div>
         </div>
         <div className="p-3 rounded-lg bg-secondary/40">
@@ -224,7 +224,7 @@ const SermonImporterWidget = ({
             <button
               type="button"
               onClick={() => setArchiveOpen(true)}
-              title="Setări pagină arhivă"
+              title="Archive page settings"
               className="absolute top-2 right-2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -250,7 +250,7 @@ const SermonImporterWidget = ({
               {progress!.phase === "scanning" ? (
                 <>
                   <Search className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  <span className="font-medium text-foreground">Se scanează playlistul…</span>
+                  <span className="font-medium text-foreground">Scanning playlist…</span>
                 </>
               ) : restingInfo ? (
                 <>
@@ -264,8 +264,8 @@ const SermonImporterWidget = ({
                   <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
                   <span className="font-medium text-foreground">
                     {cancelPending
-                      ? `Închidere în curs… (aștept finalul video-ului) — ${progress!.done} / ${progress!.total}`
-                      : `Import în progres: ${progress!.done} / ${progress!.total}${stageLabel(stageInfo?.stage) ? " — " + stageLabel(stageInfo?.stage) : ""}`}
+                      ? `Stopping… (waiting for current video) — ${progress!.done} / ${progress!.total}`
+                      : `Importing: ${progress!.done} / ${progress!.total}${stageInbel(stageInfo?.stage) ? " — " + stageInbel(stageInfo?.stage) : ""}`}
                   </span>
                 </>
               )}
@@ -277,7 +277,7 @@ const SermonImporterWidget = ({
               <button
                 type="button"
                 onClick={onCancelSync}
-                title="Întrerupe sincronizarea"
+                title="Cancel sync"
                 className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
@@ -299,7 +299,7 @@ const SermonImporterWidget = ({
               )}
               {progress!.already > 0 && (
                 <p className="text-[11px] text-muted-foreground">
-                  {progress!.already} deja existente — sărite.
+                  {progress!.already} already imported — skipped.
                 </p>
               )}
             </>
@@ -309,7 +309,7 @@ const SermonImporterWidget = ({
               <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <p className="font-semibold">
-                  Pasul curent durează neobișnuit de mult ({stallInfo.seconds}s). Posibile cauze:
+                  Current step is taking unusually long ({stallInfo.seconds}s). Possible causes:
                 </p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {stallInfo.hints.map((h, i) => <li key={i}>{h}</li>)}
@@ -324,7 +324,7 @@ const SermonImporterWidget = ({
             <div className="flex items-center gap-2">
               <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
               <span className="font-medium text-foreground">
-                Repar metadate YouTube{repairProgress && repairProgress.total > 0 ? `: ${repairProgress.processed} / ${repairProgress.total}` : "…"}
+                Repairing YouTube metadata{repairProgress && repairProgress.total > 0 ? `: ${repairProgress.processed} / ${repairProgress.total}` : "…"}
               </span>
             </div>
             {repairProgress && repairProgress.total > 0 && (
@@ -337,13 +337,13 @@ const SermonImporterWidget = ({
             </div>
           )}
           {repairProgress && repairProgress.updated > 0 && (
-            <p className="text-[11px] text-muted-foreground">{repairProgress.updated} predici actualizate.</p>
+            <p className="text-[11px] text-muted-foreground">{repairProgress.updated} posts updated.</p>
           )}
         </div>
       ) : (
         <div className="flex items-center gap-2 text-xs">
         <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-        <span className="text-muted-foreground">Ultima sincronizare:</span>
+        <span className="text-muted-foreground">Inst sync:</span>
         <span className="font-medium text-foreground">{fmtTime(config.lastSyncAt)}</span>
         {config.lastSyncMsg && <span className="text-muted-foreground">— {config.lastSyncMsg}</span>}
         </div>
@@ -351,7 +351,7 @@ const SermonImporterWidget = ({
 
       {(renderedItems.length > 0 || isLive) && (
         <div className="space-y-2">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Ultimele importuri</p>
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {renderedItems.map((it) => (
                 <div key={it.video_id} className="flex items-center gap-2 text-xs p-2 rounded-md hover:bg-secondary/40">
@@ -361,7 +361,7 @@ const SermonImporterWidget = ({
                       href={`https://www.youtube.com/watch?v=${it.video_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Vezi pe YouTube"
+                      title="View on YouTube"
                       className="p-1.5 rounded-md hover:bg-red-50 text-red-600 transition-colors"
                     >
                       <Youtube className="w-3.5 h-3.5" />
@@ -371,7 +371,7 @@ const SermonImporterWidget = ({
                         href={it.edit_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="Editează articol"
+                        title="Edit post"
                         className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -382,7 +382,7 @@ const SermonImporterWidget = ({
                         href={it.permalink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title="Vezi articolul public"
+                        title="View public post"
                         className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -392,7 +392,7 @@ const SermonImporterWidget = ({
                 </div>
             ))}
             {renderedItems.length === 0 && !isLive && (
-              <p className="text-xs text-muted-foreground italic">Niciun import înregistrat încă.</p>
+              <p className="text-xs text-muted-foreground italic">No imports recorded yet.</p>
             )}
           </div>
         </div>

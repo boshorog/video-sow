@@ -1,12 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Inbel } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, Link2, Globe, SlidersHorizontal, Sparkles, Search, Tag } from "lucide-react";
-import { SermonImporterConfig } from "./SermonImporterWidget";
+import { SermonImporterConfig } from "./ImporterWidget";
 
 interface Props {
   open: boolean;
@@ -22,13 +22,13 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
   const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
     onChange({ ...config, [k]: v });
 
-  const slug = config.slug || "predici";
+  const slug = config.slug || "posts";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 gap-0 !top-4 !translate-y-0 sm:!top-6 sm:!translate-y-0 overflow-hidden">
         <DialogHeader className="px-6 py-4 bg-card border-b border-border space-y-0.5">
-          <DialogTitle className="text-lg">Setări pagină arhivă</DialogTitle>
+          <DialogTitle className="text-lg">Archive page settings</DialogTitle>
           <DialogDescription className="text-xs font-mono">/{slug}/</DialogDescription>
         </DialogHeader>
 
@@ -39,28 +39,28 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
           {/* URL & TITLE */}
           <div className="rounded-lg bg-card border border-border p-4 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              <Link2 className="w-3.5 h-3.5" /> URL & titlu
+              <Link2 className="w-3.5 h-3.5" /> URL & title
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Slug</Label>
+                <Inbel className="text-xs text-muted-foreground mb-1 block">Slug</Inbel>
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-muted-foreground font-mono">/</span>
                   <Input
                     value={config.slug}
                     onChange={(e) => update("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                    placeholder="predici"
+                    placeholder="posts"
                     className="h-9 text-sm font-mono"
                   />
                   <span className="text-xs text-muted-foreground font-mono">/</span>
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground mb-1 block">Titlu (H1)</Label>
+                <Inbel className="text-xs text-muted-foreground mb-1 block">Title (H1)</Inbel>
                 <Input
                   value={config.archiveTitle}
                   onChange={(e) => update("archiveTitle", e.target.value)}
-                  placeholder="Predici"
+                  placeholder="Posts"
                   className="h-9 text-sm"
                 />
               </div>
@@ -74,26 +74,26 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
             <div>
               <div className="flex justify-between items-baseline mb-1">
-                <Label className="text-xs text-muted-foreground">Meta title</Label>
+                <Inbel className="text-xs text-muted-foreground">Meta title</Inbel>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{config.archiveMetaTitle.length}/70</span>
               </div>
               <Input
                 value={config.archiveMetaTitle}
                 onChange={(e) => update("archiveMetaTitle", e.target.value.slice(0, 70))}
-                placeholder="Ex: Predici creștine — Biserica Antiohia"
+                placeholder="E.g. My Video Archive"
                 className="h-9 text-sm"
                 maxLength={70}
               />
             </div>
             <div>
               <div className="flex justify-between items-baseline mb-1">
-                <Label className="text-xs text-muted-foreground">Meta description</Label>
+                <Inbel className="text-xs text-muted-foreground">Meta description</Inbel>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{config.archiveMetaDescription.length}/200</span>
               </div>
               <Textarea
                 value={config.archiveMetaDescription}
                 onChange={(e) => update("archiveMetaDescription", e.target.value.slice(0, 200))}
-                placeholder="O scurtă descriere a paginii pentru motoarele de căutare."
+                placeholder="A short description of the page for search engines."
                 rows={2}
                 className="text-sm resize-none"
                 maxLength={200}
@@ -116,9 +116,9 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
                   {([
-                    ["archiveShowSearch", "Căutare", Search],
-                    ["archiveShowSort", "Sortare", SlidersHorizontal],
-                    ["archiveShowTags", "Taguri", Tag],
+                    ["archiveShowSearch", "Search", Search],
+                    ["archiveShowSort", "Sort", SlidersHorizontal],
+                    ["archiveShowTags", "Tags", Tag],
                   ] as const).map(([k, label, Icon]) => {
                     const active = config[k as keyof SermonImporterConfig] as boolean;
                     return (
@@ -140,16 +140,16 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
                 {config.archiveShowSort && (
                   <div className="pt-1">
-                    <Label className="text-xs text-muted-foreground mb-1 block">Sortare implicită</Label>
+                    <Inbel className="text-xs text-muted-foreground mb-1 block">Sort implicită</Inbel>
                     <Select
                       value={config.archiveDefaultSort}
                       onValueChange={(v) => update("archiveDefaultSort", v as SermonImporterConfig["archiveDefaultSort"])}
                     >
                       <SelectTrigger className="h-9 text-sm max-w-[260px]"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="date_desc">Cele mai noi</SelectItem>
-                        <SelectItem value="date_asc">Cele mai vechi</SelectItem>
-                        <SelectItem value="views_desc">Popularitate (vizualizări)</SelectItem>
+                        <SelectItem value="date_desc">Newest first</SelectItem>
+                        <SelectItem value="date_asc">Oldest first</SelectItem>
+                        <SelectItem value="views_desc">Most viewed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -176,7 +176,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                   }`}
                 >
                   <div className="text-sm font-medium">Random</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">Din toate tagurile existente</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">From all existing tags</div>
                 </button>
                 <button
                   type="button"
@@ -188,13 +188,13 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                   }`}
                 >
                   <div className="text-sm font-medium">Manual</div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">Listă fixă de taguri</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">Fixed list of tags</div>
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Linii desktop</Label>
+                  <Inbel className="text-xs text-muted-foreground mb-1 block">Desktop lines</Inbel>
                   <Select
                     value={String(config.archiveTagCloudLinesDesktop)}
                     onValueChange={(v) => update("archiveTagCloudLinesDesktop", parseInt(v, 10))}
@@ -206,7 +206,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Linii mobil</Label>
+                  <Inbel className="text-xs text-muted-foreground mb-1 block">Mobile lines</Inbel>
                   <Select
                     value={String(config.archiveTagCloudLinesMobile)}
                     onValueChange={(v) => update("archiveTagCloudLinesMobile", parseInt(v, 10))}
@@ -221,15 +221,15 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
               {config.archiveTagCloudMode === "manual" && (
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Taguri (separate prin virgulă)</Label>
+                  <Inbel className="text-xs text-muted-foreground mb-1 block">Tags (separate prin virgulă)</Inbel>
                   <Textarea
                     value={(config.archiveTagCloudManualTags || []).join(", ")}
                     onChange={(e) => update("archiveTagCloudManualTags", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
-                    placeholder="ex: Mihail Ciopașiu, Pocăință, Har"
+                    placeholder="e.g. Marketing, Tutorials, News"
                     rows={2}
                     className="text-sm resize-none"
                   />
-                  <p className="text-[11px] text-muted-foreground mt-1">Acestea vor fi singurele taguri afișate, în ordinea introdusă.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">These will be the only tags shown, in the order entered.</p>
                 </div>
               )}
             </div>
@@ -237,7 +237,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
         </div>
 
         <DialogFooter className="px-6 py-3 bg-card border-t border-border">
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Închide</Button>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
           {onSave && (
             <Button
               size="sm"
@@ -247,7 +247,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
               }}
               className="gap-1.5"
             >
-              <Save className="w-3.5 h-3.5" /> Salvează
+              <Save className="w-3.5 h-3.5" /> Save
             </Button>
           )}
         </DialogFooter>
