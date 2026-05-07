@@ -151,6 +151,9 @@ const SermonImporterWidget = ({
   onCancelSync,
   onConfigChange,
   onSave,
+  onPlaylistClick,
+  isPro,
+  playlistName,
 }: {
   config: SermonImporterConfig;
   progress?: SermonProgress;
@@ -163,6 +166,9 @@ const SermonImporterWidget = ({
   onCancelSync?: () => void;
   onConfigChange?: (c: SermonImporterConfig) => void;
   onSave?: () => void;
+  onPlaylistClick?: () => void;
+  isPro?: boolean;
+  playlistName?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const isConfigured = !!config.apiKey && !!config.playlistId;
