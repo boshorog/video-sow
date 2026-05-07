@@ -647,11 +647,11 @@ const Index = () => {
 
           <div className={`p-6 pt-8 ${isDemo ? 'min-h-[800px]' : ''}`}>
             <TabsContent value="dashboard" className="mt-0">
-              <DashboardPage />
+              <DashboardPage onNavigate={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="import" className="mt-0">
-              <ImportPage />
+              <ImportPage onNavigate={setActiveTab} />
             </TabsContent>
 
             <TabsContent value="tasks" className="mt-0">
