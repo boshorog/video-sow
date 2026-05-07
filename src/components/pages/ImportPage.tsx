@@ -56,7 +56,8 @@ const formatViews = (n: number) =>
 type SortKey = 'title' | 'date' | 'status' | 'views';
 type SortDir = 'asc' | 'desc';
 
-const ImportPage = () => {
+const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
+  const license = useLicense();
   const imp = useImporter();
   const canSync = !!imp.config.apiKey && !!imp.config.playlistId && !imp.isSyncing;
   const isFirstRun = !imp.config.firstSyncDone;
