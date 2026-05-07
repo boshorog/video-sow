@@ -31,7 +31,7 @@ const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; de
   },
   speaker_tag: {
     label: "Speaker → tag",
-    description: "If the title ends with parentheses, e.g. "… (John Doe)", the content is added as a tag. The title is unchanged.",
+    description: 'If the title ends with parentheses, e.g. "… (John Doe)", the content is added as a tag. The title is unchanged.',
     icon: Tag,
     needsValue: false,
   },
@@ -40,11 +40,11 @@ const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; de
 const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
   {
     label: "Enrich description (10 paragraphs)",
-    text: "Based on the transcript and current description, rewrite the "description" field in at most 10 coherent paragraphs, preserving the original tone and message. Do not invent quotes or statements not present in the transcript.",
+    text: 'Based on the transcript and current description, rewrite the "description" field in at most 10 coherent paragraphs, preserving the original tone and message. Do not invent quotes or statements not present in the transcript.',
   },
   {
     label: "Generate relevant tags (max 10)",
-    text: "Analyze the transcript and description. Prefer tags that already exist on the site (provided to you). Add new tags only if no existing tag fits. Return in the "tags" field at most 10 short tags (1-3 words).",
+    text: 'Analyze the transcript and description. Prefer tags that already exist on the site (provided to you). Add new tags only if no existing tag fits. Return in the "tags" field at most 10 short tags (1-3 words).',
   },
   {
     label: "Extract cited references",
@@ -60,11 +60,11 @@ const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
   },
   {
     label: "Detect chapters",
-    text: "Based on the transcript, generate 3-7 chapter/key-moment titles. Insert them as an HTML bulleted list (<ul><li>) at the end of the "description" field.",
+    text: 'Based on the transcript, generate 3-7 chapter/key-moment titles. Insert them as an HTML bulleted list (<ul><li>) at the end of the "description" field.',
   },
   {
     label: "Smart tags with speaker",
-    text: "Scan the title, description and transcript. Return in the "tags" field at most 5 most relevant tags. The FIRST tag must ALWAYS be the speaker's full name (extract from title — usually in parentheses at the end — or from description/transcript). The next 4 should be key topics. Prefer existing tags on the site; add new ones only if no existing tag fits.",
+    text: 'Scan the title, description and transcript. Return in the "tags" field at most 5 most relevant tags. The FIRST tag must ALWAYS be the speaker\'s full name (extract from title — usually in parentheses at the end — or from description/transcript). The next 4 should be key topics. Prefer existing tags on the site; add new ones only if no existing tag fits.',
   },
 ];
 
