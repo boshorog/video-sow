@@ -287,7 +287,18 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             placeholder="AIza..."
             className="h-9 text-sm font-mono"
           />
-          <p className="text-[11px] text-muted-foreground">Get a key from Google Cloud Console → API & Services → Credentials.</p>
+          <p className="text-[11px] text-muted-foreground">
+            Get a key from{' '}
+            <a
+              href="https://console.cloud.google.com/apis/credentials"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline inline-flex items-center gap-0.5"
+            >
+              Google Cloud Console <ExternalLink className="w-2.5 h-2.5" />
+            </a>{' '}
+            → API &amp; Services → Credentials. Make sure <strong>YouTube Data API v3</strong> is enabled.
+          </p>
         </div>
 
         <div className="space-y-1.5">
@@ -363,20 +374,17 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
           {config.fetchTranscript && (
             <div className="mt-3 space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground">Preferred transcript language</Label>
-              <p className="text-[11px] text-muted-foreground">ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>). Automatic fallback if missing.</p>
+              <Label className="text-[11px] text-muted-foreground">Transcript language (optional)</Label>
+              <p className="text-[11px] text-muted-foreground">
+                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>) only if you want to force a specific language.
+              </p>
               <Input
                 value={config.transcriptInng}
                 onChange={(e) => update("transcriptInng", e.target.value.toLowerCase().slice(0, 5))}
-                placeholder="ro"
+                placeholder="auto"
                 className="h-8 text-xs font-mono w-32"
               />
-              <div className="pt-3 mt-3 border-t border-border space-y-3">
-                <div className="rounded-md border border-border bg-background p-2.5 text-[11px] text-muted-foreground">
-                  <p className="text-foreground font-medium mb-1">Transcript fetch order</p>
-                  <p><strong>1. InnerTube (default)</strong> — public, keyless YouTube extraction. Used automatically.</p>
-                  <p><strong>2. OAuth backup</strong> — used only if InnerTube fails. Requires connecting your YouTube channel below.</p>
-                </div>
+              <div className="pt-3 mt-3 border-t border-border">
                 <YouTubeConnectCard config={config} update={update} onSave={onSave} />
               </div>
             </div>
@@ -870,10 +878,15 @@ const YouTubeConnectCard = ({
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => setWizardOpen(true)} size="sm" className="h-9 text-xs gap-2">
-            <Plug className="w-3.5 h-3.5" /> Connect YouTube channel
+          <Button
+            onClick={() => setWizardOpen(true)}
+            size="sm"
+            variant="ghost"
+            className="h-7 text-[11px] gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Plug className="w-3 h-3" /> Connect YouTube channel (advanced backup)
           </Button>
-          <span className="text-[11px] text-muted-foreground">~5 min, guided step-by-step</span>
+          <span className="text-[10px] text-muted-foreground/70">Optional — only needed if InnerTube fails.</span>
         </div>
       )}
 
