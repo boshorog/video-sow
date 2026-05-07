@@ -30,10 +30,10 @@ const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; de
     needsValue: false,
   },
   speaker_tag: {
-    label: "Speaker → tag",
-    description: 'If the title ends with parentheses, e.g. "… (John Doe)", the content is added as a tag. The title is unchanged.',
+    label: "Title pattern → tag",
+    description: 'Extract a piece of the title as a tag using a pattern. Examples: "(...)" for parentheses (speaker name), "[...]" for brackets, "#word" for hashtags, "@word" for mentions, or any regex with one capture group like "Live from (.+)$".',
     icon: Tag,
-    needsValue: false,
+    needsValue: true,
   },
 };
 
