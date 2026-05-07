@@ -595,7 +595,7 @@ const Index = () => {
         {/* Pro Welcome Message - shows after license activation */}
         {license.isPro && <ProWelcome className="mx-6 mb-6" />}
         
-        <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || "dashboard"} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Navigation with Underline Style */}
           <div className="px-6">
             <TabsList className="flex border-b border-slate-200 bg-transparent p-0 h-auto">
