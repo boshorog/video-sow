@@ -20,10 +20,13 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronsUpDown,
+  ListMusic,
+  AlertCircle,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
 import { useImporter } from '@/hooks/useImporter';
+import { useLicense } from '@/hooks/useLicense';
 import { cn } from '@/lib/utils';
 
 type ArchiveRow = {
