@@ -291,14 +291,20 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Playlist ID</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
           <Input
             value={config.playlistId}
-            onChange={(e) => update("playlistId", e.target.value)}
-            placeholder="PLxxxxxxxxxxxxxxxx"
+            onChange={(e) => {
+              const raw = e.target.value;
+              let parsed = raw.trim();
+              const m = parsed.match(/[?&]list=([^&\s]+)/);
+              if (m) parsed = m[1];
+              update("playlistId", parsed);
+            }}
+            placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
             className="h-9 text-sm font-mono"
           />
-          <p className="text-[11px] text-muted-foreground">From the playlist URL, after <code className="font-mono">?list=</code>.</p>
+          <p className="text-[11px] text-muted-foreground">Paste the playlist ID, or the full YouTube playlist URL — we'll extract the ID automatically.</p>
         </div>
 
         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
