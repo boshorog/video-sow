@@ -307,7 +307,7 @@ function videosow_get_sermon_importer_defaults() {
     return array(
         'apiKey'         => '',
         'playlistId'     => '',
-        'slug'           => 'videos',
+        'slug'           => 'articles',
         'syncIntervalH'  => 48,
         'enabled'        => false,
         'fetchTranscript'=> true,
@@ -425,7 +425,7 @@ function videosow_clear_stage() {
 /* Custom Post Type with configurable rewrite slug */
 function videosow_register_sermon_cpt() {
     $cfg  = videosow_get_sermon_importer_config();
-    $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'videos';
+    $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
     register_post_type( 'videosow_video', array(
         'labels' => array(
             'name'          => 'Videos',

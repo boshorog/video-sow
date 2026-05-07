@@ -77,7 +77,7 @@ export interface SermonImporterConfig {
 export const defaultSermonImporterConfig: SermonImporterConfig = {
   apiKey: "",
   playlistId: "",
-  slug: "posts",
+  slug: "articles",
   syncIntervalH: 48,
   enabled: false,
   fetchTranscript: true,
@@ -200,7 +200,7 @@ const SermonImporterWidget = ({
           </div>
           <div>
             <h3 className="text-base font-semibold text-foreground">Video Importer</h3>
-            <p className="text-xs text-muted-foreground">YouTube → Posts</p>
+            <p className="text-xs text-muted-foreground">YouTube → Articles</p>
           </div>
         </div>
         <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${config.enabled && isConfigured ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
