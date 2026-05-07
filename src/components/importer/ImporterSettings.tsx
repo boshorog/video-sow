@@ -1614,6 +1614,15 @@ export const AiTasksSection = ({
 
   const [orModels, setOrModels] = useState<OpenRouterModel[] | null>(null);
   const [orLoading, setOrLoading] = useState(false);
+  const [advancedModel, setAdvancedModel] = useState(false);
+
+  // Force openrouter as the only provider — implementation detail hidden from end users.
+  useEffect(() => {
+    if (config.aiEnabled && config.aiProvider !== "openrouter") {
+      onChange({ ...config, aiProvider: "openrouter" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.aiEnabled]);
 
   useEffect(() => {
     if (config.aiEnabled && config.aiProvider === "openrouter" && !orModels && !orLoading) {
@@ -1630,6 +1639,15 @@ export const AiTasksSection = ({
       ? orModels
       : PROVIDER_MODELS[config.aiProvider] || [];
 
+  // Beginner presets — map to a concrete OpenRouter model.
+  const PRESETS: { id: string; label: string; sub: string; model: string }[] = [
+    { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: "google/gemini-2.5-flash-lite" },
+    { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: "google/gemini-2.5-flash" },
+    { id: "fast",     label: "Fastest",   sub: "Quickest replies",       model: "openai/gpt-5-mini" },
+    { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: "google/gemini-2.5-pro" },
+  ];
+  const activePresetId = PRESETS.find((p) => p.model === config.aiModel)?.id || "balanced";
+
   return (
     <div className="p-3 rounded-lg border border-border bg-secondary/20">
       <div className="flex items-center justify-between">
@@ -1644,27 +1662,41 @@ export const AiTasksSection = ({
 
       {config.aiEnabled && (
         <div className="mt-3 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-[11px] text-muted-foreground">Provider</Label>
-              <Select
-                value={config.aiProvider}
-                onValueChange={(v) => {
-                  const provider = v as typeof config.aiProvider;
-                  const firstModel = PROVIDER_MODELS[provider]?.[0]?.value || "";
-                  onChange({ ...config, aiProvider: provider, aiModel: firstModel });
-                }}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-[11px] text-muted-foreground">AI mode</Label>
+              <button
+                type="button"
+                onClick={() => setAdvancedModel((v) => !v)}
+                className="text-[11px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
               >
-                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openrouter" className="text-xs">OpenRouter (recommended)</SelectItem>
-                  <SelectItem value="openai" className="text-xs">OpenAI</SelectItem>
-                  <SelectItem value="anthropic" className="text-xs">Anthropic</SelectItem>
-                </SelectContent>
-              </Select>
+                {advancedModel ? "Use simple modes" : "Choose model (advanced)"}
+              </button>
             </div>
-            <div className="space-y-1">
-              <Label className="text-[11px] text-muted-foreground">Model</Label>
+
+            {!advancedModel ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {PRESETS.map((p) => {
+                  const active = p.id === activePresetId;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => update("aiModel", p.model)}
+                      className={
+                        "text-left p-2 rounded-md border transition-colors " +
+                        (active
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-background text-muted-foreground hover:bg-secondary")
+                      }
+                    >
+                      <div className="text-xs font-medium text-foreground">{p.label}</div>
+                      <div className="text-[10px] text-muted-foreground">{p.sub}</div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
               <Select value={config.aiModel} onValueChange={(v) => update("aiModel", v)}>
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder={orLoading ? "Loading…" : "Choose a model"} />
@@ -1675,7 +1707,7 @@ export const AiTasksSection = ({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            )}
           </div>
 
           <div className="space-y-1">
