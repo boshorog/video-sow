@@ -19,19 +19,19 @@ const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; de
   },
   hashtags: {
     label: "Remove hashtags",
-    description: "Remove automat toate hashtag-urile (#cuvant) atât din titlu, cât și din descriere.",
+    description: "Automatically removes all hashtags (#word) from both title and description.",
     icon: Hash,
     needsValue: false,
   },
   trailing_whitespace: {
     label: "Clean empty whitespace",
-    description: "Remove spațiile și paragrafele goale de la final și colapsează paragrafele duble/multiple din interiorul descrierii.",
+    description: "Strips trailing whitespace and empty paragraphs and collapses double/multiple paragraphs inside the description.",
     icon: Scissors,
     needsValue: false,
   },
   speaker_tag: {
     label: "Speaker → tag",
-    description: "Dacă titlul se termină cu paranteze, ex. „… (Pastor Ion Popescu)”, conținutul lor este adăugat ca tag al postsi. Titlul rămâne neschimbat.",
+    description: "If the title ends with parentheses, e.g. "… (John Doe)", the content is added as a tag. The title is unchanged.",
     icon: Tag,
     needsValue: false,
   },
@@ -51,7 +51,7 @@ const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
     text: "Identifică în transcriere toate referințele biblice menționate (carte, capitol, verset). Adaugă-le în câmpul \"tags\" în formatul „Ioan 3:16”.",
   },
   {
-    label: "Sumar SEO (excerpt 2 propodayții)",
+    label: "SEO summary (2-sentence excerpt)",
     text: "Scrie în câmpul \"excerpt\" exact 2 propodayții (max 160 characters) care sintetizează tema centrală a postsi — optimizat pentru motoarele de căutare.",
   },
   {
@@ -493,7 +493,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                 </button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Cu cât trimiți mai puțin la AI, cu atât costul scade. 4000 characters acoperă tema generală a celor mai multe posts.
+                The less you send to the AI, the lower the cost. 4000 characters cover the general theme of most videos.
               </p>
 
               <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
@@ -725,7 +725,7 @@ const TroubleshootingSection = ({
             <div className="flex-1">
               <div className="text-sm font-semibold text-foreground">Diagnose transcript</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Lipește URL-ul (sau ID-ul) unui video YouTube și veday exact ce returnează YouTube serverului tău — util când transcrierea „lipsește”.
+                Paste a YouTube video URL (or ID) and see exactly what YouTube returns to your server — useful when the transcript "is missing".
               </p>
             </div>
           </div>
@@ -769,7 +769,7 @@ const TroubleshootingSection = ({
                     : "✗ No segment extracted."}
                 </div>
                 {diagResult.final.preview && (
-                  <div className="mt-1 italic text-muted-foreground">„{diagResult.final.preview}…”</div>
+                  <div className="mt-1 italic text-muted-foreground">"{diagResult.final.preview}…"</div>
                 )}
               </div>
             </div>
@@ -820,7 +820,7 @@ const TroubleshootingSection = ({
             <div className="flex-1">
               <div className="text-sm font-semibold text-foreground">Clear import history</div>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Șterge lista „Recent imports” din widget. Articolele deja importate rămân neatinse în WordPress.
+                Clears the "Recent imports" list in the widget. Already imported posts remain untouched in WordPress.
               </p>
             </div>
           </div>
@@ -901,7 +901,7 @@ const TroubleshootingSection = ({
               </div>
               {playlistTestResult.data.description && (
                 <div className="text-muted-foreground italic border-t border-border pt-1.5">
-                  „{playlistTestResult.data.description}…”
+                  "{playlistTestResult.data.description}…"
                 </div>
               )}
               {playlistTestResult.data.samples.length > 0 && (
@@ -1071,7 +1071,7 @@ const YouTubeConnectCard = ({
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            După editare, apasă „Save” înainte de „Connect”.
+            After editing, press "Save" before "Connect".
           </p>
         </div>
       )}
@@ -1186,7 +1186,7 @@ const OAuthWizardDialog = ({
             <div className="space-y-3">
               <h4 className="font-semibold">Step 1 — Create a Google Cloud project</h4>
               <p className="text-xs text-muted-foreground">
-                Open consola Google Cloud și creează un proiect nou (numele nu contează — sugerăm „Antiohia YouTube Importer”). Dacă ai deja un proiect, poți să-l reutilizeday.
+                Open the Google Cloud Console and create a new project (the name does not matter — we suggest "Video Sow YouTube Importer"). You can reuse an existing project.
               </p>
               <a
                 href="https://console.cloud.google.com/projectcreate"
@@ -1265,7 +1265,7 @@ const OAuthWizardDialog = ({
               </div>
 
               <p className="text-xs text-muted-foreground">
-                After clicking <strong>Create</strong>, Google shows you <strong>Client ID</strong> și <strong>Client Secret</strong>. Paste them here:
+                After clicking <strong>Create</strong>, Google shows you <strong>Client ID</strong> and <strong>Client Secret</strong>. Paste them here:
               </p>
 
               <div className="space-y-2">
@@ -1296,7 +1296,7 @@ const OAuthWizardDialog = ({
             <div className="space-y-3">
               <h4 className="font-semibold">Pas 4 — Connect-te cu canalul YouTube</h4>
               <p className="text-xs text-muted-foreground">
-                Apasă butonul de mai jos. Vei fi redirecționat către Google, te logheday cu contul care deține canalul YouTube și aprobi accesul. Apoi reveni automat aici.
+                Click the button below. You will be redirected to Google, log in with the account that owns the YouTube channel and approve access. You will return here automatically.
               </p>
               <p className="text-[11px] text-muted-foreground">
                 ⚠️ Log in with the Google account that has <strong>Manager permissions</strong> on the channel (check in YouTube Studio → Settings → Permissions).
@@ -1498,7 +1498,7 @@ const SimpleInstructionsSection = ({
                 <Textarea
                   value={p.value || ""}
                   onChange={(e) => updateValue(p.id, e.target.value)}
-                  placeholder={"Ex:\nUrmărește-ne pe Facebook: https://...\nInstagram: https://..."}
+                  placeholder={"E.g.\nFollow us on Facebook: https://...\nInstagram: https://..."}
                   rows={4}
                   className="text-xs font-mono resize-y"
                 />
@@ -1619,7 +1619,7 @@ const AiInstructionsEditor = ({
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Ex: Rescrie descrierea în 10 paragrafe coerente, generează maxim 10 taguri relevante, și un excerpt SEO de 2 propodayții."
+          placeholder="E.g. Rewrite the description in 10 coherent paragraphs, generate up to 10 relevant tags, and a 2-sentence SEO excerpt."
           rows={6}
           className="text-xs font-mono resize-y pr-10"
         />

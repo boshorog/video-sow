@@ -140,7 +140,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
                 {config.archiveShowSort && (
                   <div className="pt-1">
-                    <Label className="text-xs text-muted-foreground mb-1 block">Sort implicită</Label>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Default sort</Label>
                     <Select
                       value={config.archiveDefaultSort}
                       onValueChange={(v) => update("archiveDefaultSort", v as SermonImporterConfig["archiveDefaultSort"])}
@@ -221,7 +221,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
               {config.archiveTagCloudMode === "manual" && (
                 <div>
-                  <Label className="text-xs text-muted-foreground mb-1 block">Tags (separate prin virgulă)</Label>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Tags (comma-separated)</Label>
                   <Textarea
                     value={(config.archiveTagCloudManualTags || []).join(", ")}
                     onChange={(e) => update("archiveTagCloudManualTags", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
