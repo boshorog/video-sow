@@ -7,7 +7,8 @@ const TasksPage = () => {
       <div>
         <h2 className="text-2xl font-bold text-slate-800">Tasks</h2>
         <p className="text-muted-foreground mt-1">
-          Manage the cleanup rules and AI templates applied during import.
+          Cleanup rules and AI templates applied during import. (Currently configured under
+          Settings — these will move here in the next pass.)
         </p>
       </div>
 
@@ -20,8 +21,7 @@ const TasksPage = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Boilerplate cleanup, hashtag rules, and replacements applied to every imported article.
-            Coming in the next pass.
+            Boilerplate cleanup, hashtag stripping, and replacements. Configurable in Settings → Importer.
           </p>
         </CardContent>
       </Card>
@@ -35,8 +35,7 @@ const TasksPage = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Prompt templates used by the AI to summarize, structure, and tag each video.
-            Coming in the next pass.
+            Prompt templates used by the AI. Configurable in Settings → Importer.
           </p>
         </CardContent>
       </Card>
