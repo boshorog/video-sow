@@ -214,7 +214,37 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            if (!config.playlistId) onPlaylistClick?.();
+          }}
+          className={`p-3 rounded-lg text-left transition-colors ${
+            config.playlistId
+              ? 'bg-secondary/40'
+              : 'bg-amber-50 hover:bg-amber-100 border border-amber-200 cursor-pointer'
+          }`}
+        >
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+            <ListMusic className="w-3 h-3" /> Playlist
+            {isPro && config.playlistId && (
+              <span className="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
+            )}
+          </div>
+          {config.playlistId ? (
+            <>
+              <div className="text-sm font-semibold text-foreground truncate" title={playlistName || config.playlistId}>
+                {playlistName || 'Connected playlist'}
+              </div>
+              <div className="text-[10px] font-mono text-muted-foreground truncate">{config.playlistId}</div>
+            </>
+          ) : (
+            <div className="text-sm font-semibold text-amber-700 flex items-center gap-1">
+              Not connected
+            </div>
+          )}
+        </button>
         <div className="p-3 rounded-lg bg-secondary/40">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
           <div className="text-xl font-bold text-foreground">{config.totalImported}</div>
