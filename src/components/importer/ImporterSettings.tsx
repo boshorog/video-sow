@@ -878,10 +878,15 @@ const YouTubeConnectCard = ({
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2">
-          <Button onClick={() => setWizardOpen(true)} size="sm" className="h-9 text-xs gap-2">
-            <Plug className="w-3.5 h-3.5" /> Connect YouTube channel
+          <Button
+            onClick={() => setWizardOpen(true)}
+            size="sm"
+            variant="ghost"
+            className="h-7 text-[11px] gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <Plug className="w-3 h-3" /> Connect YouTube channel (advanced backup)
           </Button>
-          <span className="text-[11px] text-muted-foreground">~5 min, guided step-by-step</span>
+          <span className="text-[10px] text-muted-foreground/70">Optional — only needed if InnerTube fails.</span>
         </div>
       )}
 
