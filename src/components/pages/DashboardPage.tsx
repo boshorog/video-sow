@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Youtube,
   FileText,
@@ -13,7 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-const DashboardPage = () => {
+const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
   return (
     <div className="space-y-6">
       <div>
