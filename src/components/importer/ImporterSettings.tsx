@@ -365,25 +365,14 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                 placeholder="ro"
                 className="h-8 text-xs font-mono w-32"
               />
-              <div className="pt-3 mt-3 border-t border-border">
-                <div className="flex items-center justify-between">
-                  <div className="pr-3">
-                    <Label className="text-sm font-medium text-foreground">Lovable Cloud (recommended)</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Used automatically as a second attempt if YouTube blocks your site IP. Zero config, no keys. OAuth remains a last-resort fallback.
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Order: <strong>1.</strong> local attempt (from site IP) → <strong>2.</strong> Lovable Cloud → <strong>3.</strong> OAuth (your YouTube channel).
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.cloudTranscriptEnabled !== false}
-                    onCheckedChange={(v) => update("cloudTranscriptEnabled", v)}
-                  />
+              <div className="pt-3 mt-3 border-t border-border space-y-3">
+                <div className="rounded-md border border-border bg-background p-2.5 text-[11px] text-muted-foreground">
+                  <p className="text-foreground font-medium mb-1">Transcript fetch order</p>
+                  <p><strong>1. InnerTube (default)</strong> — public, keyless YouTube extraction. Used automatically.</p>
+                  <p><strong>2. OAuth backup</strong> — used only if InnerTube fails. Requires connecting your YouTube channel below.</p>
                 </div>
+                <YouTubeConnectCard config={config} update={update} onSave={onSave} />
               </div>
-
-              <YouTubeConnectCard config={config} update={update} onSave={onSave} />
             </div>
           )}
         </div>
