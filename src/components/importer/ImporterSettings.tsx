@@ -1192,7 +1192,7 @@ const OAuthWizardDialog = ({
 
 const genId = () => Math.random().toString(36).slice(2, 10);
 
-const SimpleInstructionsSection = ({
+export const SimpleInstructionsSection = ({
   instructions,
   onChange,
 }: {
