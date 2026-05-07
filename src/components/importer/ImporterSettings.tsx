@@ -1286,15 +1286,26 @@ export const SimpleInstructionsSection = ({
               onDrop={onDrop(p.id)}
               onDragEnd={onDragEnd}
               className={
-                "inline-flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-full bg-background border text-xs font-medium text-foreground shadow-sm cursor-grab active:cursor-grabbing transition-all " +
+                "inline-flex items-center gap-1.5 pl-1.5 pr-1.5 py-1.5 rounded-full bg-background border text-xs font-medium text-foreground shadow-sm transition-all " +
                 (dragId === p.id ? "opacity-40 " : "") +
                 (overId === p.id && dragId && dragId !== p.id ? "border-primary ring-1 ring-primary " : "border-border ")
               }
               title="Drag to reorder"
             >
-              <GripVertical className="w-3 h-3 text-muted-foreground" />
+              <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab active:cursor-grabbing" />
               <Icon className="w-3.5 h-3.5 text-primary" />
               <span>{meta.label}</span>
+              {p.type === "speaker_tag" && (
+                <input
+                  type="text"
+                  value={p.value || ""}
+                  onChange={(e) => updateValue(p.id, e.target.value)}
+                  placeholder="(...)  or  [...]  or  regex"
+                  className="ml-1 h-6 w-40 rounded-md border border-border bg-secondary/40 px-2 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+                  draggable={false}
+                  onDragStart={(e) => e.stopPropagation()}
+                />
+              )}
               <button
                 type="button"
                 onClick={() => removePill(p.id)}
