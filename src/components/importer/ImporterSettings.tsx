@@ -365,165 +365,18 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                 placeholder="ro"
                 className="h-8 text-xs font-mono w-32"
               />
-              <div className="pt-3 mt-3 border-t border-border">
-                <div className="flex items-center justify-between">
-                  <div className="pr-3">
-                    <Label className="text-sm font-medium text-foreground">Lovable Cloud (recommended)</Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Used automatically as a second attempt if YouTube blocks your site IP. Zero config, no keys. OAuth remains a last-resort fallback.
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Order: <strong>1.</strong> local attempt (from site IP) → <strong>2.</strong> Lovable Cloud → <strong>3.</strong> OAuth (your YouTube channel).
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.cloudTranscriptEnabled !== false}
-                    onCheckedChange={(v) => update("cloudTranscriptEnabled", v)}
-                  />
+              <div className="pt-3 mt-3 border-t border-border space-y-3">
+                <div className="rounded-md border border-border bg-background p-2.5 text-[11px] text-muted-foreground">
+                  <p className="text-foreground font-medium mb-1">Transcript fetch order</p>
+                  <p><strong>1. InnerTube (default)</strong> — public, keyless YouTube extraction. Used automatically.</p>
+                  <p><strong>2. OAuth backup</strong> — used only if InnerTube fails. Requires connecting your YouTube channel below.</p>
                 </div>
+                <YouTubeConnectCard config={config} update={update} onSave={onSave} />
               </div>
-
-              <YouTubeConnectCard config={config} update={update} onSave={onSave} />
             </div>
           )}
         </div>
 
-        <SimpleInstructionsSection
-          instructions={config.simpleInstructions || []}
-          onChange={(list) => update("simpleInstructions", list)}
-        />
-
-        <div className="p-3 rounded-lg border border-border bg-secondary/20">
-          <div className="flex items-center justify-between">
-            <div className="pr-3">
-              <Label className="text-sm font-medium text-foreground">AI instructions</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Sends the title, description and (optionally) transcript to an AI model that follows your instructions and can rewrite the description, suggest tags or generate an SEO excerpt. One call per video for minimal cost.
-              </p>
-            </div>
-            <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
-          </div>
-
-          {config.aiEnabled && (
-            <div className="mt-3 space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Provider</Label>
-                  <Select
-                    value={config.aiProvider}
-                    onValueChange={(v) => {
-                      const provider = v as typeof config.aiProvider;
-                      const firstModel = PROVIDER_MODELS[provider]?.[0]?.value || "";
-                      onChange({ ...config, aiProvider: provider, aiModel: firstModel });
-                    }}
-                  >
-                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="openrouter" className="text-xs">OpenRouter (recommended)</SelectItem>
-                      <SelectItem value="openai" className="text-xs">OpenAI</SelectItem>
-                      <SelectItem value="anthropic" className="text-xs">Anthropic</SelectItem>
-                      <SelectItem value="lovable" className="text-xs">Lovable AI Gateway</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[11px] text-muted-foreground">Model</Label>
-                  <Select value={config.aiModel} onValueChange={(v) => update("aiModel", v)}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder={orLoading ? "Loading…" : "Choose a model"} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {modelOptions.map((m) => (
-                        <SelectItem key={m.value} value={m.value} className="text-xs font-mono">{m.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {config.aiProvider === "openrouter" && (
-                    <p className="text-[10px] text-muted-foreground">
-                      {orLoading ? "Loading live OpenRouter model list…" : orModels && orModels.length > 0 ? `${orModels.length} live models, sorted by price.` : "Fallback list (OpenRouter unreachable)."}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-[11px] text-muted-foreground">API Key</Label>
-                <Input
-                  type="password"
-                  value={config.aiApiKey}
-                  onChange={(e) => update("aiApiKey", e.target.value)}
-                  placeholder={config.aiProvider === "openrouter" ? "sk-or-..." : config.aiProvider === "anthropic" ? "sk-ant-..." : "sk-..."}
-                  className="h-8 text-xs font-mono"
-                />
-                {config.aiProvider === "openrouter" && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Free account + key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/keys</a>. With Gemini Flash, ~$0.0002 per post.
-                  </p>
-                )}
-              </div>
-
-              <AiInstructionsEditor
-                value={config.aiInstructions}
-                onChange={(v) => update("aiInstructions", v)}
-                templates={config.aiTemplates || []}
-                onTemplatesChange={persistTemplates}
-              />
-
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => update("aiTranscriptChars", 0)}
-                  className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 0 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
-                >
-                  No transcript
-                </button>
-                <button
-                  type="button"
-                  onClick={() => update("aiTranscriptChars", 4000)}
-                  className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 4000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
-                >
-                  4000 characters
-                </button>
-                <button
-                  type="button"
-                  onClick={() => update("aiTranscriptChars", 999999)}
-                  className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars >= 100000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}
-                >
-                  Full
-                </button>
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                The less you send to the AI, the lower the cost. 4000 characters cover the general theme of most videos.
-              </p>
-
-              <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.aiRestrictTags !== false}
-                  onChange={(e) => update("aiRestrictTags", e.target.checked)}
-                  className="mt-0.5"
-                />
-                <span className="text-[11px] text-foreground">
-                  Restrict AI to existing tags
-                  <span className="block text-muted-foreground">AI can only choose from tags already created on the site (including the speaker tag added by simple instructions). It will not invent new tags.</span>
-                </span>
-              </label>
-
-              <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.aiUseAiExcerpt !== false}
-                  onChange={(e) => update("aiUseAiExcerpt", e.target.checked)}
-                  className="mt-0.5"
-                />
-                <span className="text-[11px] text-foreground">
-                  Use AI-generated excerpt
-                  <span className="block text-muted-foreground">If checked, the excerpt shown in the archive is the AI-written one. If unchecked, the first part of the description (~40 words) is used.</span>
-                </span>
-              </label>
-            </div>
-          )}
-        </div>
       </div>
 
       <TroubleshootingSection
@@ -538,17 +391,6 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         diagResult={diagResult}
         runDiag={runDiag}
       />
-
-      <div className="rounded-lg bg-secondary/30 border border-border p-3 text-xs text-muted-foreground space-y-1">
-        <p><strong className="text-foreground">How it works:</strong></p>
-        <ul className="list-disc list-inside space-y-0.5">
-          <li>The first sync performs a <strong>full playlist backfill</strong>.</li>
-          <li>New posts are saved as <strong>Draft</strong> for review.</li>
-          <li>Automatic dedup by YouTube video ID.</li>
-          <li>YouTube thumbnail becomes Featured Image.</li>
-          <li>Transcript uses public methods first, then OAuth fallback via YouTube Data API if configured.</li>
-        </ul>
-      </div>
     </div>
   );
 };
@@ -1350,7 +1192,7 @@ const OAuthWizardDialog = ({
 
 const genId = () => Math.random().toString(36).slice(2, 10);
 
-const SimpleInstructionsSection = ({
+export const SimpleInstructionsSection = ({
   instructions,
   onChange,
 }: {
@@ -1710,6 +1552,156 @@ const AiInstructionsEditor = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   AI Tasks Section: standalone export for Tasks page
+   ───────────────────────────────────────────────── */
+
+export const AiTasksSection = ({
+  config,
+  onChange,
+  onSave,
+}: {
+  config: SermonImporterConfig;
+  onChange: (c: SermonImporterConfig) => void;
+  onSave?: () => void;
+}) => {
+  const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
+    onChange({ ...config, [k]: v });
+
+  const persistTemplates = (list: AiTemplate[]) => {
+    update("aiTemplates", list);
+    if (typeof window !== "undefined" && window.parent !== window) {
+      window.parent.postMessage(
+        { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } },
+        "*"
+      );
+    }
+  };
+
+  const [orModels, setOrModels] = useState<OpenRouterModel[] | null>(null);
+  const [orLoading, setOrLoading] = useState(false);
+
+  useEffect(() => {
+    if (config.aiEnabled && config.aiProvider === "openrouter" && !orModels && !orLoading) {
+      setOrLoading(true);
+      fetchOpenRouterModels()
+        .then((list) => setOrModels(list))
+        .catch(() => setOrModels([]))
+        .finally(() => setOrLoading(false));
+    }
+  }, [config.aiEnabled, config.aiProvider, orModels, orLoading]);
+
+  const modelOptions =
+    config.aiProvider === "openrouter" && orModels && orModels.length > 0
+      ? orModels
+      : PROVIDER_MODELS[config.aiProvider] || [];
+
+  return (
+    <div className="p-3 rounded-lg border border-border bg-secondary/20">
+      <div className="flex items-center justify-between">
+        <div className="pr-3">
+          <Label className="text-sm font-medium text-foreground">AI tasks</Label>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Sends the title, description and (optionally) transcript to an AI model that follows your instructions and can rewrite the description, suggest tags or generate an SEO excerpt. One call per video for minimal cost.
+          </p>
+        </div>
+        <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
+      </div>
+
+      {config.aiEnabled && (
+        <div className="mt-3 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Provider</Label>
+              <Select
+                value={config.aiProvider}
+                onValueChange={(v) => {
+                  const provider = v as typeof config.aiProvider;
+                  const firstModel = PROVIDER_MODELS[provider]?.[0]?.value || "";
+                  onChange({ ...config, aiProvider: provider, aiModel: firstModel });
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openrouter" className="text-xs">OpenRouter (recommended)</SelectItem>
+                  <SelectItem value="openai" className="text-xs">OpenAI</SelectItem>
+                  <SelectItem value="anthropic" className="text-xs">Anthropic</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[11px] text-muted-foreground">Model</Label>
+              <Select value={config.aiModel} onValueChange={(v) => update("aiModel", v)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder={orLoading ? "Loading…" : "Choose a model"} />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {modelOptions.map((m) => (
+                    <SelectItem key={m.value} value={m.value} className="text-xs font-mono">{m.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-[11px] text-muted-foreground">API Key</Label>
+            <Input
+              type="password"
+              value={config.aiApiKey}
+              onChange={(e) => update("aiApiKey", e.target.value)}
+              placeholder={config.aiProvider === "openrouter" ? "sk-or-..." : config.aiProvider === "anthropic" ? "sk-ant-..." : "sk-..."}
+              className="h-8 text-xs font-mono"
+            />
+            {config.aiProvider === "openrouter" && (
+              <p className="text-[11px] text-muted-foreground">
+                Free account + key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/keys</a>. With Gemini Flash, ~$0.0002 per post.
+              </p>
+            )}
+          </div>
+
+          <AiInstructionsEditor
+            value={config.aiInstructions}
+            onChange={(v) => update("aiInstructions", v)}
+            templates={config.aiTemplates || []}
+            onTemplatesChange={persistTemplates}
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            <button type="button" onClick={() => update("aiTranscriptChars", 0)}
+              className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 0 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}>No transcript</button>
+            <button type="button" onClick={() => update("aiTranscriptChars", 4000)}
+              className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars === 4000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}>4000 characters</button>
+            <button type="button" onClick={() => update("aiTranscriptChars", 999999)}
+              className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars >= 100000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}>Full</button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            The less you send to the AI, the lower the cost. 4000 characters cover the general theme of most videos.
+          </p>
+
+          <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
+            <input type="checkbox" checked={config.aiRestrictTags !== false}
+              onChange={(e) => update("aiRestrictTags", e.target.checked)} className="mt-0.5" />
+            <span className="text-[11px] text-foreground">
+              Restrict AI to existing tags
+              <span className="block text-muted-foreground">AI can only choose from tags already created on the site (including the speaker tag added by simple tasks). It will not invent new tags.</span>
+            </span>
+          </label>
+
+          <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
+            <input type="checkbox" checked={config.aiUseAiExcerpt !== false}
+              onChange={(e) => update("aiUseAiExcerpt", e.target.checked)} className="mt-0.5" />
+            <span className="text-[11px] text-foreground">
+              Use AI-generated excerpt
+              <span className="block text-muted-foreground">If checked, the excerpt shown in the archive is the AI-written one. If unchecked, the first part of the description (~40 words) is used.</span>
+            </span>
+          </label>
+        </div>
+      )}
     </div>
   );
 };
