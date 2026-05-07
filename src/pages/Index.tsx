@@ -23,6 +23,26 @@ import { isDemoMode, saveDemoState } from '@/config/demoMode';
 import DashboardPage from '@/components/pages/DashboardPage';
 import ImportPage from '@/components/pages/ImportPage';
 import TasksPage from '@/components/pages/TasksPage';
+import ImporterSettings from '@/components/importer/ImporterSettings';
+import { useImporter } from '@/hooks/useImporter';
+
+const ImporterSettingsPanel = () => {
+  const imp = useImporter();
+  return (
+    <ImporterSettings
+      config={imp.config}
+      onChange={imp.setConfig}
+      onSave={imp.save}
+      isSaving={imp.isSaving}
+      onSync={imp.sync}
+      onCancelSync={imp.cancelSync}
+      isSyncing={imp.isSyncing}
+      onRepair={imp.repair}
+      isRepairing={imp.isRepairing}
+      repairProgress={imp.repairProgress}
+    />
+  );
+};
 
 import { Gallery, GalleryItem, GalleryState } from '@/types/gallery';
 import pdfGalleryLogo from '@/assets/pdf-gallery-logo.svg';
@@ -641,11 +661,7 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="settings" className="mt-0">
-              <SettingsProposal2
-                settings={settings}
-                onSettingsChange={setSettings}
-                currentGalleryId={galleryState.currentGalleryId}
-              />
+              <ImporterSettingsPanel />
             </TabsContent>
 
             <TabsContent value="docs" className="mt-0">
