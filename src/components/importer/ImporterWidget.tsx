@@ -181,7 +181,7 @@ const SermonImporterWidget = ({
   const persistedItems = persistedFlat.filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
   const renderedItems = [...liveItems, ...persistedItems];
 
-  const stageInbel = (s?: string) => {
+  const stageLabel = (s?: string) => {
     switch (s) {
       case "starting": return "Starting video…";
       case "fetching_transcript": return "Fetching transcript…";
@@ -265,7 +265,7 @@ const SermonImporterWidget = ({
                   <span className="font-medium text-foreground">
                     {cancelPending
                       ? `Stopping… (waiting for current video) — ${progress!.done} / ${progress!.total}`
-                      : `Importing: ${progress!.done} / ${progress!.total}${stageInbel(stageInfo?.stage) ? " — " + stageInbel(stageInfo?.stage) : ""}`}
+                      : `Importing: ${progress!.done} / ${progress!.total}${stageLabel(stageInfo?.stage) ? " — " + stageLabel(stageInfo?.stage) : ""}`}
                   </span>
                 </>
               )}

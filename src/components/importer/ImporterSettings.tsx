@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Inbel } from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -130,8 +130,8 @@ const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
       const id = String(m.id || "");
       const inPrice = parseFloat(m.pricing?.prompt || "0") * 1e6;
       const name = m.name || m.id;
-      const priceInbel = id.includes(":free") ? " — FREE" : inPrice > 0 ? ` — $${inPrice.toFixed(2)}/M` : "";
-      return { value: m.id, label: `${name}${priceInbel}`, price: inPrice };
+      const priceLabel = id.includes(":free") ? " — FREE" : inPrice > 0 ? ` — $${inPrice.toFixed(2)}/M` : "";
+      return { value: m.id, label: `${name}${priceLabel}`, price: inPrice };
     })
     .sort((a: OpenRouterModel, b: OpenRouterModel) => a.price - b.price)
     .slice(0, OPENROUTER_MAX_MODELS);
@@ -251,11 +251,11 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
       <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
         <div className="flex-1 pr-3">
-          <Inbel className="text-sm font-medium text-foreground">Automatic sync</Inbel>
+          <Label className="text-sm font-medium text-foreground">Automatic sync</Label>
           <p className="text-xs text-muted-foreground mt-0.5">Runs in background on the configured interval.</p>
           {config.enabled && (
             <div className="flex items-center gap-2 mt-3">
-              <Inbel className="text-xs text-muted-foreground">Every</Inbel>
+              <Label className="text-xs text-muted-foreground">Every</Label>
               <Select
                 value={String(Math.max(1, Math.round((config.syncIntervalH || 48) / 24)))}
                 onValueChange={(v) => update("syncIntervalH", parseInt(v, 10) * 24)}
@@ -279,7 +279,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Inbel className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Inbel>
+          <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
           <Input
             type="password"
             value={config.apiKey}
@@ -291,7 +291,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
 
         <div className="space-y-1.5">
-          <Inbel className="text-xs font-medium text-muted-foreground">Playlist ID</Inbel>
+          <Label className="text-xs font-medium text-muted-foreground">Playlist ID</Label>
           <Input
             value={config.playlistId}
             onChange={(e) => update("playlistId", e.target.value)}
@@ -303,12 +303,12 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex-1 pr-3">
-            <Inbel className="text-sm font-medium text-foreground">Relaxed mode</Inbel>
+            <Label className="text-sm font-medium text-foreground">Relaxed mode</Label>
           <p className="text-xs text-muted-foreground mt-0.5">Process videos gradually with pauses so the server is not overloaded. Recommended for large playlists. If off, import runs at full speed — faster but can lock up the server!</p>
             {config.relaxedMode && (
               <div className="grid grid-cols-3 gap-2 mt-3">
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Pause between videos (s)</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Pause between videos (s)</Label>
                   <Input
                     type="number"
                     min={0}
@@ -319,7 +319,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   />
                 </div>
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Batch size</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Batch size</Label>
                   <Input
                     type="number"
                     min={1}
@@ -330,7 +330,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   />
                 </div>
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Pause between batches (s)</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Pause between batches (s)</Label>
                   <Input
                     type="number"
                     min={0}
@@ -349,7 +349,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
-              <Inbel className="text-sm font-medium text-foreground">Fetch transcript (SEO)</Inbel>
+              <Label className="text-sm font-medium text-foreground">Fetch transcript (SEO)</Label>
               <p className="text-xs text-muted-foreground mt-0.5">Adds the YouTube transcript inside a collapsible block in the post, indexable by search engines even when collapsed.</p>
             </div>
             <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
@@ -357,7 +357,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
           {config.fetchTranscript && (
             <div className="mt-3 space-y-1.5">
-              <Inbel className="text-[11px] text-muted-foreground">Preferred transcript language</Inbel>
+              <Label className="text-[11px] text-muted-foreground">Preferred transcript language</Label>
               <p className="text-[11px] text-muted-foreground">ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>). Automatic fallback if missing.</p>
               <Input
                 value={config.transcriptInng}
@@ -368,7 +368,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
               <div className="pt-3 mt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div className="pr-3">
-                    <Inbel className="text-sm font-medium text-foreground">Lovable Cloud (recommended)</Inbel>
+                    <Label className="text-sm font-medium text-foreground">Lovable Cloud (recommended)</Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       Used automatically as a second attempt if YouTube blocks your site IP. Zero config, no keys. OAuth remains a last-resort fallback.
                     </p>
@@ -396,7 +396,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
-              <Inbel className="text-sm font-medium text-foreground">AI instructions</Inbel>
+              <Label className="text-sm font-medium text-foreground">AI instructions</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Sends the title, description and (optionally) transcript to an AI model that follows your instructions and can rewrite the description, suggest tags or generate an SEO excerpt. One call per video for minimal cost.
               </p>
@@ -408,7 +408,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             <div className="mt-3 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Provider</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Provider</Label>
                   <Select
                     value={config.aiProvider}
                     onValueChange={(v) => {
@@ -427,7 +427,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Model</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Model</Label>
                   <Select value={config.aiModel} onValueChange={(v) => update("aiModel", v)}>
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue placeholder={orLoading ? "Loading…" : "Choose a model"} />
@@ -447,7 +447,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
               </div>
 
               <div className="space-y-1">
-                <Inbel className="text-[11px] text-muted-foreground">API Key</Inbel>
+                <Label className="text-[11px] text-muted-foreground">API Key</Label>
                 <Input
                   type="password"
                   value={config.aiApiKey}
@@ -994,9 +994,9 @@ const YouTubeConnectCard = ({
     <div className="pt-3 mt-3 border-t border-border space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Inbel className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
+          <Label className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
             <Youtube className="w-3 h-3" /> YouTube connection (for transcripts)
-          </Inbel>
+          </Label>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             Required when YouTube blocks public extraction. Works only for the channel that owns the videos.
           </p>
@@ -1041,7 +1041,7 @@ const YouTubeConnectCard = ({
         <div className="space-y-2 p-3 rounded-md border border-dashed border-border bg-secondary/10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Inbel className="text-[11px] text-muted-foreground">OAuth Client ID</Inbel>
+              <Label className="text-[11px] text-muted-foreground">OAuth Client ID</Label>
               <Input
                 value={config.youtubeOAuthClientId}
                 onChange={(e) => update("youtubeOAuthClientId", e.target.value)}
@@ -1050,7 +1050,7 @@ const YouTubeConnectCard = ({
               />
             </div>
             <div className="space-y-1">
-              <Inbel className="text-[11px] text-muted-foreground">OAuth Client Secret</Inbel>
+              <Label className="text-[11px] text-muted-foreground">OAuth Client Secret</Label>
               <Input
                 type="password"
                 value={config.youtubeOAuthClientSecret}
@@ -1061,7 +1061,7 @@ const YouTubeConnectCard = ({
             </div>
           </div>
           <div className="space-y-1">
-            <Inbel className="text-[11px] text-muted-foreground">Refresh Token (optional, if you already have one)</Inbel>
+            <Label className="text-[11px] text-muted-foreground">Refresh Token (optional, if you already have one)</Label>
             <Textarea
               value={config.youtubeOAuthRefreshToken}
               onChange={(e) => update("youtubeOAuthRefreshToken", e.target.value.trim())}
@@ -1270,7 +1270,7 @@ const OAuthWizardDialog = ({
 
               <div className="space-y-2">
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Client ID</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Client ID</Label>
                   <Input
                     value={config.youtubeOAuthClientId}
                     onChange={(e) => update("youtubeOAuthClientId", e.target.value)}
@@ -1279,7 +1279,7 @@ const OAuthWizardDialog = ({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Inbel className="text-[11px] text-muted-foreground">Client Secret</Inbel>
+                  <Label className="text-[11px] text-muted-foreground">Client Secret</Label>
                   <Input
                     type="password"
                     value={config.youtubeOAuthClientSecret}
@@ -1405,7 +1405,7 @@ const SimpleInstructionsSection = ({
   return (
     <div className="p-3 rounded-lg border border-border bg-secondary/20 space-y-3">
       <div>
-        <Inbel className="text-sm font-medium text-foreground">Simple instructions</Inbel>
+        <Label className="text-sm font-medium text-foreground">Simple instructions</Label>
         <p className="text-xs text-muted-foreground mt-0.5">
           Quick rules applied to the description before saving. Add as many as you want — applied in order.
         </p>
@@ -1492,9 +1492,9 @@ const SimpleInstructionsSection = ({
             if (!meta || !meta.needsValue) return null;
             return (
               <div key={p.id} className="space-y-1">
-                <Inbel className="text-[11px] text-muted-foreground">
+                <Label className="text-[11px] text-muted-foreground">
                   {meta.label} #{instructions.slice(0, idx + 1).filter((x) => x.type === p.type).length}
-                </Inbel>
+                </Label>
                 <Textarea
                   value={p.value || ""}
                   onChange={(e) => updateValue(p.id, e.target.value)}
@@ -1539,18 +1539,18 @@ const AiInstructionsEditor = ({
   }, []);
 
   const [editing, setEditing] = useState<AiTemplate | null>(null);
-  const [editInbel, setEditInbel] = useState("");
+  const [editLabel, setEditLabel] = useState("");
   const [editText, setEditText] = useState("");
 
   const openEdit = (t: AiTemplate) => {
     setEditing(t);
-    setEditInbel(t.label);
+    setEditLabel(t.label);
     setEditText(t.text);
   };
 
   const saveEdit = () => {
     if (!editing) return;
-    const label = editInbel.trim() || "Template";
+    const label = editLabel.trim() || "Template";
     onTemplatesChange(
       templates.map((t) => (t.id === editing.id ? { ...t, label, text: editText } : t))
     );
@@ -1614,7 +1614,7 @@ const AiInstructionsEditor = ({
 
   return (
     <div className="space-y-2">
-      <Inbel className="text-[11px] text-muted-foreground">Instructions for AI</Inbel>
+      <Label className="text-[11px] text-muted-foreground">Instructions for AI</Label>
       <div className="relative">
         <Textarea
           value={value}
@@ -1634,9 +1634,9 @@ const AiInstructionsEditor = ({
       </div>
 
       <div className="space-y-1.5 pt-1">
-        <Inbel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
           Saved templates
-        </Inbel>
+        </Label>
         <div className="flex flex-wrap gap-1.5">
           {templates.map((t) => (
             <div
@@ -1691,11 +1691,11 @@ const AiInstructionsEditor = ({
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Inbel className="text-xs">Name</Inbel>
-              <Input value={editInbel} onChange={(e) => setEditInbel(e.target.value)} />
+              <Label className="text-xs">Name</Label>
+              <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} />
             </div>
             <div className="space-y-1">
-              <Inbel className="text-xs">Content</Inbel>
+              <Label className="text-xs">Content</Label>
               <Textarea
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}

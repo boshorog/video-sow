@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Inbel } from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Inbel className="text-xs text-muted-foreground mb-1 block">Slug</Inbel>
+                <Label className="text-xs text-muted-foreground mb-1 block">Slug</Label>
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-muted-foreground font-mono">/</span>
                   <Input
@@ -56,7 +56,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                 </div>
               </div>
               <div>
-                <Inbel className="text-xs text-muted-foreground mb-1 block">Title (H1)</Inbel>
+                <Label className="text-xs text-muted-foreground mb-1 block">Title (H1)</Label>
                 <Input
                   value={config.archiveTitle}
                   onChange={(e) => update("archiveTitle", e.target.value)}
@@ -74,7 +74,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
             <div>
               <div className="flex justify-between items-baseline mb-1">
-                <Inbel className="text-xs text-muted-foreground">Meta title</Inbel>
+                <Label className="text-xs text-muted-foreground">Meta title</Label>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{config.archiveMetaTitle.length}/70</span>
               </div>
               <Input
@@ -87,7 +87,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
             <div>
               <div className="flex justify-between items-baseline mb-1">
-                <Inbel className="text-xs text-muted-foreground">Meta description</Inbel>
+                <Label className="text-xs text-muted-foreground">Meta description</Label>
                 <span className="text-[10px] text-muted-foreground tabular-nums">{config.archiveMetaDescription.length}/200</span>
               </div>
               <Textarea
@@ -140,7 +140,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
                 {config.archiveShowSort && (
                   <div className="pt-1">
-                    <Inbel className="text-xs text-muted-foreground mb-1 block">Sort implicită</Inbel>
+                    <Label className="text-xs text-muted-foreground mb-1 block">Sort implicită</Label>
                     <Select
                       value={config.archiveDefaultSort}
                       onValueChange={(v) => update("archiveDefaultSort", v as SermonImporterConfig["archiveDefaultSort"])}
@@ -194,7 +194,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Inbel className="text-xs text-muted-foreground mb-1 block">Desktop lines</Inbel>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Desktop lines</Label>
                   <Select
                     value={String(config.archiveTagCloudLinesDesktop)}
                     onValueChange={(v) => update("archiveTagCloudLinesDesktop", parseInt(v, 10))}
@@ -206,7 +206,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                   </Select>
                 </div>
                 <div>
-                  <Inbel className="text-xs text-muted-foreground mb-1 block">Mobile lines</Inbel>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Mobile lines</Label>
                   <Select
                     value={String(config.archiveTagCloudLinesMobile)}
                     onValueChange={(v) => update("archiveTagCloudLinesMobile", parseInt(v, 10))}
@@ -221,7 +221,7 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
 
               {config.archiveTagCloudMode === "manual" && (
                 <div>
-                  <Inbel className="text-xs text-muted-foreground mb-1 block">Tags (separate prin virgulă)</Inbel>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Tags (separate prin virgulă)</Label>
                   <Textarea
                     value={(config.archiveTagCloudManualTags || []).join(", ")}
                     onChange={(e) => update("archiveTagCloudManualTags", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
