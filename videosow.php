@@ -191,6 +191,97 @@ class VideoSow_Plugin {
         echo '<div class="wrap videosow-admin-page">';
         echo '<div id="videosow-root" style="margin-top:0;"></div>';
         echo '</div>';
+        $this->print_postmessage_bridge();
+    }
+
+    /**
+     * Same-window postMessage → admin-ajax bridge.
+     * The React useImporter hook posts videosow_* events; we forward each one
+     * to its matching wp_ajax_videosow_* action and post the result back.
+     */
+    private function print_postmessage_bridge() {
+        $nonce    = wp_create_nonce( 'videosow_nonce' );
+        $ajax_url = admin_url( 'admin-ajax.php' );
+        ?>
+        <script>
+        (function(){
+            var ajaxUrl = <?php echo wp_json_encode( $ajax_url ); ?>;
+            var nonce   = <?php echo wp_json_encode( $nonce ); ?>;
+            // Map: incoming postMessage type -> [ajax action, response type, extra fields...]
+            var routes = {
+                videosow_load_sermon_importer_config:  ['videosow_load_sermon_importer_config',  'videosow_sermon_importer_config_loaded',  'config'],
+                videosow_save_sermon_importer_config:  ['videosow_save_sermon_importer_config',  'videosow_sermon_importer_config_saved'],
+                videosow_run_sermon_sync:              ['videosow_run_sermon_sync',              'videosow_sermon_sync_result'],
+                videosow_scan_sermon_playlist:         ['videosow_scan_sermon_playlist',         'videosow_sermon_scan_result'],
+                videosow_step_sermon_sync:             ['videosow_step_sermon_sync',             'videosow_sermon_step_result'],
+                videosow_cancel_sermon_sync:           ['videosow_cancel_sermon_sync',           'videosow_sermon_sync_cancelled'],
+                videosow_get_sermon_stage:             ['videosow_get_sermon_stage',             'videosow_sermon_stage'],
+                videosow_clear_sermon_log:             ['videosow_clear_sermon_log',             'videosow_sermon_log_cleared'],
+                videosow_repair_sermon_metadata:       ['videosow_repair_sermon_metadata',       'videosow_sermon_repair_result'],
+                videosow_diagnose_transcript:          ['videosow_diagnose_transcript',          'videosow_transcript_diagnosis'],
+                videosow_test_playlist:                ['videosow_test_playlist',                'videosow_test_playlist_result'],
+                videosow_get_oauth_redirect_uri:       ['videosow_get_oauth_redirect_uri',       'videosow_oauth_redirect_uri'],
+                videosow_disconnect_oauth:             ['videosow_disconnect_oauth',             'videosow_oauth_disconnected'],
+                videosow_test_oauth:                   ['videosow_test_oauth',                   'videosow_oauth_tested']
+            };
+            window.addEventListener('message', function(e){
+                var d = e.data || {}; if (!d || !d.type) return;
+                var route = routes[d.type];
+                if (!route) {
+                    // Special: start_oauth saves config first, then redirects parent.
+                    if (d.type === 'videosow_start_oauth') {
+                        var fdSave = new FormData();
+                        fdSave.append('action', 'videosow_save_sermon_importer_config');
+                        fdSave.append('nonce', nonce);
+                        fdSave.append('config', JSON.stringify(d.config || {}));
+                        fetch(ajaxUrl, {method:'POST', credentials:'same-origin', body:fdSave})
+                            .then(function(){
+                                var fdSt = new FormData();
+                                fdSt.append('action', 'videosow_start_oauth');
+                                fdSt.append('nonce', nonce);
+                                return fetch(ajaxUrl, {method:'POST', credentials:'same-origin', body:fdSt});
+                            })
+                            .then(function(r){return r.json();})
+                            .then(function(resp){
+                                if (resp && resp.success && resp.data && resp.data.auth_url) {
+                                    window.location.href = resp.data.auth_url;
+                                } else {
+                                    window.postMessage({type:'videosow_oauth_start_error', error:(resp && resp.data) || 'unknown'}, '*');
+                                }
+                            });
+                    }
+                    return;
+                }
+                var fd = new FormData();
+                fd.append('action', route[0]);
+                fd.append('nonce', nonce);
+                // Forward known optional fields
+                ['config','offset','url','lang','playlist'].forEach(function(k){
+                    if (d[k] !== undefined && d[k] !== null) {
+                        fd.append(k, typeof d[k] === 'object' ? JSON.stringify(d[k]) : String(d[k]));
+                    }
+                });
+                fetch(ajaxUrl, {method:'POST', credentials:'same-origin', body:fd})
+                    .then(function(r){return r.json();})
+                    .then(function(resp){
+                        var msg = {type: route[1], success: !!resp.success, data: resp.data || null};
+                        if (route[2]) msg[route[2]] = resp.success ? resp.data : {};
+                        window.postMessage(msg, '*');
+                    });
+            });
+            // Detect OAuth callback redirect
+            try {
+                var sp = new URLSearchParams(window.location.search);
+                var s  = sp.get('videosow_oauth');
+                if (s) {
+                    setTimeout(function(){
+                        window.postMessage({type:'videosow_oauth_callback', status:s, reason:sp.get('reason')||''}, '*');
+                    }, 800);
+                }
+            } catch(e){}
+        })();
+        </script>
+        <?php
     }
 
     public function plugin_action_links( $links ) {
