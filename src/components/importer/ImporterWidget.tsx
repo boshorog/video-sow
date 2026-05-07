@@ -198,7 +198,7 @@ const SermonImporterWidget = ({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+    <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card p-6 space-y-4 shadow-lg ring-1 ring-primary/10">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
