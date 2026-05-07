@@ -131,6 +131,7 @@ const Index = () => {
   });
   const [shortcodeCopied, setShortcodeCopied] = useState(false);
   const [galleryNotFound, setGalleryNotFound] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
 
   useEffect(() => {
     // DEMO MODE: Always start with default gallery, skip WP/localStorage
