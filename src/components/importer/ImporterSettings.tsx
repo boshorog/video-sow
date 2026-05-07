@@ -48,15 +48,15 @@ const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
   },
   {
     label: "Extract cited references",
-    text: "Identifică în transcriere toate referințele biblice menționate (carte, capitol, verset). Adaugă-le în câmpul \"tags\" în formatul „Ioan 3:16”.",
+    text: "Identify all citations mentioned in the transcript. Add them to the \"tags\" field.",
   },
   {
     label: "SEO summary (2-sentence excerpt)",
-    text: "Scrie în câmpul \"excerpt\" exact 2 propodayții (max 160 characters) care sintetizează tema centrală a postsi — optimizat pentru motoarele de căutare.",
+    text: "Write in the \"excerpt\" field exactly 2 sentences (max 160 characters) that summarize the central theme — optimized for search engines.",
   },
   {
     label: "Title cleanup",
-    text: "Curăță titlul de prefixe gen „Predica - ”, date, sau emoji. Returnează doar tema clară și concisă în câmpul \"title\".",
+    text: "Clean the title of generic prefixes, dates, or emoji. Return a clear, concise topic in the \"title\" field.",
   },
   {
     label: "Detect chapters",
