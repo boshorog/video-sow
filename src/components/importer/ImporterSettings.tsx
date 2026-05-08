@@ -470,10 +470,14 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           <Switch checked={config.relaxedMode} onCheckedChange={(v) => update("relaxedMode", v)} />
         </div>
 
+        {isPro && (
         <div className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
-              <Label className="text-sm font-medium text-foreground">Fetch transcript (SEO)</Label>
+              <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+                Fetch transcript (SEO)
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
+              </Label>
               <p className="text-xs text-muted-foreground mt-0.5">Adds the YouTube transcript inside a collapsible block in the post, indexable by search engines even when collapsed.</p>
             </div>
             <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
@@ -497,6 +501,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             </div>
           )}
         </div>
+        )}
 
       </div>
 
