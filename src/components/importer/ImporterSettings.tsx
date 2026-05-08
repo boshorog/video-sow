@@ -9,6 +9,7 @@ import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCirc
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
+import { useLicense } from "@/hooks/useLicense";
 
 const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; description: string; icon: typeof Hash; needsValue: boolean }> = {
   boilerplate: {
@@ -152,6 +153,7 @@ interface Props {
 }
 
 const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, onCancelSync, isSyncing, onRepair, isRepairing, repairProgress }: Props) => {
+  const { isPro } = useLicense();
   const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
     onChange({ ...config, [k]: v });
 
