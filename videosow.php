@@ -1078,6 +1078,9 @@ function videosow_sermon_archive_toolbar_js() {
   var byId = {};
   DATA.forEach(function(d){ byId[d.id] = d; });
   var BATCH = 20;
+  var TOOLBAR_ENABLED = <?php echo $toolbar_enabled ? 'true' : 'false'; ?>;
+  var CONFIG_EXCERPT_WORDS = <?php echo (int) $js_excerpt_words; ?>;
+  var CONFIG_LAYOUT = <?php echo wp_json_encode( $js_layout ); ?>;
   var EXCERPT_WORDS = (function(){
     var tb = document.getElementById('videosow-toolbar');
     var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || String(CONFIG_EXCERPT_WORDS), 10) : CONFIG_EXCERPT_WORDS;
@@ -1169,9 +1172,6 @@ function videosow_sermon_archive_toolbar_js() {
     });
   }
 
-  var TOOLBAR_ENABLED = <?php echo $toolbar_enabled ? 'true' : 'false'; ?>;
-  var CONFIG_EXCERPT_WORDS = <?php echo (int) $js_excerpt_words; ?>;
-  var CONFIG_LAYOUT = <?php echo wp_json_encode( $js_layout ); ?>;
   var defaultSort = (document.getElementById('videosow-toolbar') && document.getElementById('videosow-toolbar').getAttribute('data-default-sort')) || 'date_desc';
   var state = { q: '', sort: defaultSort, tags: [] };
 
