@@ -1689,8 +1689,16 @@ function videosow_ajax_save_sermon_importer_config() {
         'aiUseAiExcerpt'     => isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
     ) );
     update_option( 'videosow_importer_config', $merged );
-    // Refresh CPT slug + cron
-    flush_rewrite_rules( false );
+    // Refresh CPT slug + cron — re-register CPT so the NEW slug is used by flush_rewrite_rules.
+    if ( post_type_exists( 'videosow_video' ) ) {
+        unregister_post_type( 'videosow_video' );
+    }
+    if ( function_exists( 'videosow_register_sermon_cpt' ) ) {
+        videosow_register_sermon_cpt();
+    }
+    flush_rewrite_rules( true );
+    // Belt-and-suspenders: drop cached rules so they rebuild on the next request too.
+    delete_option( 'rewrite_rules' );
     $next = wp_next_scheduled( 'videosow_sync_event' );
     if ( $next ) wp_unschedule_event( $next, 'videosow_sync_event' );
     if ( $merged['enabled'] && ! empty( $merged['apiKey'] ) && ! empty( $merged['playlistId'] ) ) {
