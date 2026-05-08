@@ -1101,6 +1101,7 @@ function videosow_sermon_archive_toolbar_js() {
   var TOOLBAR_ENABLED = <?php echo $toolbar_enabled ? 'true' : 'false'; ?>;
   var CONFIG_EXCERPT_WORDS = <?php echo (int) $js_excerpt_words; ?>;
   var CONFIG_LAYOUT = <?php echo wp_json_encode( $js_layout ); ?>;
+  var THEME_MAP = <?php echo wp_json_encode( $theme_map ); ?>;
   var EXCERPT_WORDS = (function(){
     var tb = document.getElementById('videosow-toolbar');
     var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || String(CONFIG_EXCERPT_WORDS), 10) : CONFIG_EXCERPT_WORDS;
