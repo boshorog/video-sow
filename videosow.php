@@ -411,7 +411,7 @@ function videosow_get_sermon_importer_defaults() {
         'archiveSidebarEnabled'    => false,
         'singleSidebarEnabled'     => false,
         'archiveColumns'           => 2,
-        'archiveLayout'            => 'theme',
+        'archiveLayout'            => 'magazine-2',
         'archiveExcerptWords'      => 40,
         'archiveShowSort'          => true,
         'archiveShowTags'          => true,
