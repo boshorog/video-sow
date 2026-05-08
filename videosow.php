@@ -3933,7 +3933,7 @@ function videosow_ajax_dashboard_stats() {
 
     $cfg = videosow_get_sermon_importer_config();
     $last_sync_at  = isset( $cfg['lastSyncAt'] ) ? (int) $cfg['lastSyncAt'] : 0;
-    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? (string) $cfg['lastSyncMsg'] : '';
+    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? videosow_english_status_message( (string) $cfg['lastSyncMsg'] ) : '';
     $last_sync_human = $last_sync_at ? human_time_diff( $last_sync_at, current_time( 'timestamp' ) ) . ' ago' : '';
 
     $q = new WP_Query( array(
