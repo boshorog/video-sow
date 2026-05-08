@@ -4037,3 +4037,254 @@ function videosow_ajax_dashboard_stats() {
     ) );
 }
 add_action( 'wp_ajax_videosow_dashboard_stats', 'videosow_ajax_dashboard_stats' );
+
+/* ============================================================================
+ * THEME STRUCTURE SCANNER
+ *
+ * Detects where the active theme renders its post loop on the sermon archive,
+ * so that the archive toolbar/grid can be inserted safely on every theme
+ * without wiping out site header / menu / footer / sidebar.
+ *
+ * Result is stored per active theme stylesheet under the option
+ * `videosow_theme_map_<stylesheet_slug>` and consumed by the public archive JS
+ * via the THEME_MAP global.
+ * ============================================================================ */
+
+function videosow_theme_map_option_key( $stylesheet = '' ) {
+    if ( ! $stylesheet ) $stylesheet = get_stylesheet();
+    $stylesheet = preg_replace( '/[^a-z0-9_\-]/i', '_', (string) $stylesheet );
+    return 'videosow_theme_map_' . strtolower( $stylesheet );
+}
+
+function videosow_get_theme_map( $stylesheet = '' ) {
+    $opt = get_option( videosow_theme_map_option_key( $stylesheet ), array() );
+    if ( ! is_array( $opt ) ) $opt = array();
+    $defaults = array(
+        'theme_slug'        => $stylesheet ?: get_stylesheet(),
+        'theme_name'        => '',
+        'loop_container'    => '',
+        'article_selector'  => '',
+        'article_wrapper'   => '',
+        'pagination_selector' => '',
+        'sidebar_selector'  => '',
+        'confidence'        => 'low',
+        'scanned_at'        => 0,
+        'scan_url'          => '',
+        'note'              => '',
+    );
+    return array_merge( $defaults, $opt );
+}
+
+function videosow_save_theme_map( array $map, $stylesheet = '' ) {
+    update_option( videosow_theme_map_option_key( $stylesheet ), $map, false );
+}
+
+/* Build a unique-ish CSS selector for a DOMElement, preferring id, then a
+ * compact class chain. Returns '' for nodes we cannot describe. */
+function videosow_dom_selector_for( $node ) {
+    if ( ! ( $node instanceof DOMElement ) ) return '';
+    $id = $node->getAttribute( 'id' );
+    if ( $id && preg_match( '/^[a-zA-Z][\w\-]*$/', $id ) ) return '#' . $id;
+    $tag = strtolower( $node->tagName );
+    $cls = trim( (string) $node->getAttribute( 'class' ) );
+    if ( $cls === '' ) return $tag;
+    $parts = preg_split( '/\s+/', $cls );
+    // Strip noisy/dynamic class names.
+    $blacklist = array( 'hentry', 'has-post-thumbnail', 'logged-in', 'admin-bar', 'wp-embed-responsive', 'no-sidebar', 'has-sidebar', 'is-loading', 'loaded', 'singular', 'archive', 'kp-vis-1' );
+    $useful = array();
+    foreach ( $parts as $p ) {
+        if ( $p === '' ) continue;
+        if ( preg_match( '/^post-\d+$/', $p ) ) continue;
+        if ( in_array( $p, $blacklist, true ) ) continue;
+        if ( preg_match( '/^[a-zA-Z][\w\-]*$/', $p ) ) $useful[] = $p;
+        if ( count( $useful ) >= 2 ) break;
+    }
+    if ( empty( $useful ) ) return $tag;
+    return $tag . '.' . implode( '.', $useful );
+}
+
+/* Try a list of CSS-ish queries via XPath; return the first matching element. */
+function videosow_dom_first_match( DOMXPath $xp, array $queries, DOMNode $context = null ) {
+    foreach ( $queries as $q ) {
+        $list = $xp->query( $q, $context );
+        if ( $list && $list->length > 0 ) return $list->item( 0 );
+    }
+    return null;
+}
+
+/**
+ * Scan the live sermon archive HTML and learn the theme's layout map.
+ * Returns the saved map (also persisted to DB).
+ */
+function videosow_scan_active_theme() {
+    if ( ! function_exists( 'get_post_type_archive_link' ) ) return false;
+    $url = get_post_type_archive_link( 'videosow_video' );
+    if ( ! $url ) return false;
+
+    // Sign the request so private/admin-only theme markup still renders the
+    // same way regular visitors see it (via auth cookies of current admin).
+    $cookies = array();
+    if ( is_user_logged_in() ) {
+        foreach ( $_COOKIE as $k => $v ) {
+            if ( strpos( $k, 'wordpress_' ) === 0 || strpos( $k, 'wp-' ) === 0 ) {
+                $cookies[] = new WP_Http_Cookie( array( 'name' => $k, 'value' => $v ) );
+            }
+        }
+    }
+    $resp = wp_remote_get( add_query_arg( 'videosow_scan', '1', $url ), array(
+        'timeout'   => 15,
+        'sslverify' => false,
+        'cookies'   => $cookies,
+        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.0' ),
+    ) );
+    if ( is_wp_error( $resp ) ) return false;
+    $code = wp_remote_retrieve_response_code( $resp );
+    $html = wp_remote_retrieve_body( $resp );
+    if ( $code >= 400 || ! $html ) return false;
+
+    $dom = new DOMDocument();
+    libxml_use_internal_errors( true );
+    $loaded = $dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+    libxml_clear_errors();
+    if ( ! $loaded ) return false;
+    $xp = new DOMXPath( $dom );
+
+    // 1) Locate the post articles. Prefer the canonical pattern used by core/themes.
+    $articles = $xp->query( '//article[contains(@id,"post-")]' );
+    if ( ! $articles || $articles->length === 0 ) {
+        $articles = $xp->query( '//article[contains(@class,"post")]' );
+    }
+
+    $theme = wp_get_theme();
+    $map = array(
+        'theme_slug'        => get_stylesheet(),
+        'theme_name'        => $theme ? (string) $theme->get( 'Name' ) : '',
+        'loop_container'    => '',
+        'article_selector'  => '',
+        'article_wrapper'   => '',
+        'pagination_selector' => '',
+        'sidebar_selector'  => '',
+        'confidence'        => 'low',
+        'scanned_at'        => time(),
+        'scan_url'          => $url,
+        'note'              => '',
+    );
+
+    if ( ! $articles || $articles->length === 0 ) {
+        $map['note'] = 'No <article> elements found in the archive HTML — falling back to theme default.';
+        videosow_save_theme_map( $map );
+        return $map;
+    }
+
+    // 2) Article selector — class-derived from the first article.
+    $first_article = $articles->item( 0 );
+    $map['article_selector'] = videosow_dom_selector_for( $first_article );
+    if ( ! $map['article_selector'] ) $map['article_selector'] = 'article[id^="post-"]';
+
+    // 3) Wrapper detection — walk up while parent has multiple sibling
+    // children that each contain an article (Bootstrap/Foundation/Elementor
+    // grids, .wp-block-column, etc.).
+    $wrapper = $first_article;
+    $hops = 0;
+    while ( $wrapper && $wrapper->parentNode && $wrapper->parentNode instanceof DOMElement && $hops++ < 4 ) {
+        $parent = $wrapper->parentNode;
+        $tag = strtolower( $parent->tagName );
+        if ( $tag === 'main' || $tag === 'body' || $tag === 'html' ) break;
+        $sibling_with_articles = 0;
+        foreach ( $parent->childNodes as $sib ) {
+            if ( ! ( $sib instanceof DOMElement ) ) continue;
+            if ( $sib === $wrapper ) { $sibling_with_articles++; continue; }
+            $inner = $xp->query( './/article[contains(@id,"post-")]', $sib );
+            if ( $inner && $inner->length > 0 ) $sibling_with_articles++;
+        }
+        if ( $sibling_with_articles >= 2 ) break;
+        $wrapper = $parent;
+    }
+    $wrapper_sel = videosow_dom_selector_for( $wrapper );
+    if ( $wrapper && $wrapper !== $first_article && $wrapper_sel && $wrapper_sel !== $map['article_selector'] ) {
+        $map['article_wrapper'] = $wrapper_sel;
+    }
+
+    // 4) Loop container — closest stable ancestor of the article (or wrapper).
+    // Try common WP/theme primitives first.
+    $loop_candidates = array(
+        '//main[@id="main"]',
+        '//main',
+        '//div[@id="primary"]',
+        '//div[@id="content"]',
+        '//div[contains(concat(" ",normalize-space(@class)," ")," site-main ")]',
+        '//div[contains(concat(" ",normalize-space(@class)," ")," content-area ")]',
+        '//div[contains(concat(" ",normalize-space(@class)," ")," entry-content-wrap ")]',
+        '//div[contains(concat(" ",normalize-space(@class)," ")," posts-wrapper ")]',
+        '//div[contains(concat(" ",normalize-space(@class)," ")," elementor-posts-container ")]',
+    );
+    $loop_node = null;
+    foreach ( $loop_candidates as $q ) {
+        $list = $xp->query( $q );
+        if ( ! $list ) continue;
+        for ( $i = 0; $i < $list->length; $i++ ) {
+            $cand = $list->item( $i );
+            $inner = $xp->query( './/article[contains(@id,"post-")]', $cand );
+            if ( $inner && $inner->length > 0 ) { $loop_node = $cand; break 2; }
+        }
+    }
+    // Fallback: closest ancestor of the wrapper that ALSO contains the article
+    // (so we have something stable to insert into).
+    if ( ! $loop_node ) {
+        $cur = $wrapper ? $wrapper->parentNode : $first_article->parentNode;
+        $hops = 0;
+        while ( $cur && $cur instanceof DOMElement && $hops++ < 6 ) {
+            $tag = strtolower( $cur->tagName );
+            if ( $tag === 'body' || $tag === 'html' ) break;
+            $loop_node = $cur;
+            // Stop at the first ancestor that has a stable id/class.
+            if ( $cur->getAttribute( 'id' ) || $cur->getAttribute( 'class' ) ) break;
+            $cur = $cur->parentNode;
+        }
+    }
+    if ( $loop_node instanceof DOMElement ) {
+        $map['loop_container'] = videosow_dom_selector_for( $loop_node );
+    }
+
+    // 5) Pagination + sidebar (best-effort, optional).
+    $pag = videosow_dom_first_match( $xp, array(
+        '//nav[contains(@class,"pagination")]',
+        '//nav[contains(@class,"navigation")]//*[contains(@class,"nav-links")]',
+        '//*[contains(@class,"page-navigation")]',
+        '//*[@class="nav-links"]',
+    ) );
+    if ( $pag ) $map['pagination_selector'] = videosow_dom_selector_for( $pag );
+
+    $side = videosow_dom_first_match( $xp, array(
+        '//aside[@id="secondary"]',
+        '//aside[contains(@class,"widget-area")]',
+        '//div[contains(@class,"sidebar")]',
+    ) );
+    if ( $side ) $map['sidebar_selector'] = videosow_dom_selector_for( $side );
+
+    // 6) Confidence scoring.
+    if ( $map['loop_container'] && $map['article_selector'] ) {
+        $map['confidence'] = ( $articles->length >= 2 ) ? 'high' : 'medium';
+    } else {
+        $map['confidence'] = 'low';
+    }
+
+    videosow_save_theme_map( $map );
+    return $map;
+}
+
+function videosow_ajax_scan_theme() {
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'forbidden' );
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    $map = videosow_scan_active_theme();
+    if ( ! $map ) wp_send_json_error( 'scan_failed' );
+    wp_send_json_success( $map );
+}
+add_action( 'wp_ajax_videosow_scan_theme', 'videosow_ajax_scan_theme' );
+
+function videosow_ajax_get_theme_map() {
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'forbidden' );
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    wp_send_json_success( videosow_get_theme_map() );
+}
+add_action( 'wp_ajax_videosow_get_theme_map', 'videosow_ajax_get_theme_map' );
