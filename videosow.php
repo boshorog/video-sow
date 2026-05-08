@@ -960,7 +960,8 @@ function videosow_sermon_archive_toolbar() {
     $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search videos..." autocomplete="off" /></div>' : '';
     $tags_html   = $show_tags ? '<div class="kp-tags" id="videosow-tags"></div>' : '';
     $bar_html    = ( $search_html || $sort_html ) ? '<div class="kp-bar">' . $search_html . $sort_html . '</div>' : '';
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" style="display:none">'
+    $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
+    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" style="display:none">'
         . $bar_html
         . $tags_html
         . '</div>';
