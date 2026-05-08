@@ -23,7 +23,7 @@ import {
   ListMusic,
   AlertCircle,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
@@ -64,6 +64,34 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number }>({});
+
+  useEffect(() => {
+    const { apiKey, playlistId } = imp.config;
+    if (!apiKey || !playlistId) {
+      setPlaylistInfo({});
+      return;
+    }
+    let cancelled = false;
+    fetch(
+      `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&id=${encodeURIComponent(playlistId)}&key=${encodeURIComponent(apiKey)}`
+    )
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelled) return;
+        const item = j?.items?.[0];
+        if (item) {
+          setPlaylistInfo({
+            name: item.snippet?.title,
+            count: item.contentDetails?.itemCount,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [imp.config.apiKey, imp.config.playlistId]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -153,6 +181,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         onConfigChange={imp.setConfig}
         onSave={imp.save}
         isPro={license.isPro}
+        playlistName={playlistInfo.name}
+        playlistCount={playlistInfo.count}
         onPlaylistClick={() => onNavigate?.('settings')}
       />
 
