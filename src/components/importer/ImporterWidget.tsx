@@ -27,6 +27,7 @@ export interface AiTemplate {
 export interface SermonImporterConfig {
   apiKey: string;
   playlistId: string;
+  playlistIds?: string[];
   slug: string;
   syncIntervalH: number;
   enabled: boolean;
@@ -77,6 +78,7 @@ export interface SermonImporterConfig {
 export const defaultSermonImporterConfig: SermonImporterConfig = {
   apiKey: "",
   playlistId: "",
+  playlistIds: [],
   slug: "articles",
   syncIntervalH: 48,
   enabled: false,
