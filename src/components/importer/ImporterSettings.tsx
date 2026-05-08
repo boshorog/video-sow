@@ -405,7 +405,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             <div className="mt-3 space-y-1.5">
               <Label className="text-[11px] text-muted-foreground">Transcript language (optional)</Label>
               <p className="text-[11px] text-muted-foreground">
-                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>) only if you want to force a specific language.
+                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">en</code>, <code className="font-mono">es</code>, <code className="font-mono">fr</code>, <code className="font-mono">de</code>) only if you want to force a specific language.
               </p>
               <Input
                 value={config.transcriptInng}
