@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.0' );
+define( 'VIDEOSOW_VERSION', '1.2.1' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -410,6 +410,8 @@ function videosow_get_sermon_importer_defaults() {
         'archiveShowSearch'        => true,
         'archiveSidebarEnabled'    => false,
         'singleSidebarEnabled'     => false,
+        'archiveColumns'           => 2,
+        'archiveExcerptWords'      => 40,
         'archiveShowSort'          => true,
         'archiveShowTags'          => true,
         'archiveDefaultSort'       => 'date_desc',
@@ -720,6 +722,21 @@ function videosow_single_video_aspect_css() {
         // here, but aspect-ratio is supported in all modern browsers (95%+).
         . '.single-videosow_video .entry-content .wp-block-embed__wrapper{position:relative;}'
         . '.single-videosow_video .entry-content figure.wp-block-embed{margin-left:0 !important;margin-right:0 !important;}'
+        // Hide the theme-rendered featured image at the top of the article (the
+        // YouTube thumbnail is redundant — the video embed sits right below).
+        . '.single-videosow_video .post-thumbnail,'
+        . '.single-videosow_video .entry-thumbnail,'
+        . '.single-videosow_video .featured-image,'
+        . '.single-videosow_video .single-featured-image,'
+        . '.single-videosow_video .wp-post-image,'
+        . '.single-videosow_video .entry-header .post-thumbnail,'
+        . '.single-videosow_video figure.post-thumbnail,'
+        . '.single-videosow_video .entry-header img.wp-post-image{display:none !important;}'
+        // Make sure the article title can wrap fully and is never truncated by
+        // theme line-clamps or fixed heights.
+        . '.single-videosow_video .entry-title,'
+        . '.single-videosow_video h1.entry-title,'
+        . '.single-videosow_video .entry-header h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;word-break:break-word !important;}'
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
@@ -943,7 +960,8 @@ function videosow_sermon_archive_toolbar() {
     $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search videos..." autocomplete="off" /></div>' : '';
     $tags_html   = $show_tags ? '<div class="kp-tags" id="videosow-tags"></div>' : '';
     $bar_html    = ( $search_html || $sort_html ) ? '<div class="kp-bar">' . $search_html . $sort_html . '</div>' : '';
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" style="display:none">'
+    $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
+    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" style="display:none">'
         . $bar_html
         . $tags_html
         . '</div>';
@@ -992,6 +1010,18 @@ function videosow_sermon_archive_toolbar_js() {
   var byId = {};
   DATA.forEach(function(d){ byId[d.id] = d; });
   var BATCH = 20;
+  var EXCERPT_WORDS = (function(){
+    var tb = document.getElementById('videosow-toolbar');
+    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || '40', 10) : 40;
+    if (!n || isNaN(n) || n < 5) n = 40;
+    return n;
+  })();
+  function trimExcerpt(text, words){
+    if (!text) return '';
+    var parts = String(text).trim().split(/\s+/);
+    if (parts.length <= words) return parts.join(' ');
+    return parts.slice(0, words).join(' ') + '…';
+  }
   var allLoaded = false; // true when all synthetic cards are in the DOM
   var loadingMore = false;
 
@@ -1187,24 +1217,35 @@ function videosow_sermon_archive_toolbar_js() {
     var summary = article.querySelector('.kp-slot-excerpt') || article.querySelector('.entry-summary');
     if (summary){
       var p = summary.querySelector('p') || summary;
-      if (d.excerpt){ p.textContent = d.excerpt; summary.style.display = ''; }
+      var text = d.excerpt ? trimExcerpt(d.excerpt, EXCERPT_WORDS) : '';
+      if (text){ p.textContent = text; summary.style.display = ''; }
       else { p.textContent = ''; summary.style.display = 'none'; }
     }
-    // Thumbnail
+    // Thumbnail — make sure the cover image links to the article.
     var thumbA = article.querySelector('.post-thumbnail, a:has(img), figure');
-    if (thumbA){
-      var link = thumbA.tagName === 'A' ? thumbA : (thumbA.querySelector('a') || thumbA.closest('a'));
-      if (link && link.tagName === 'A') link.setAttribute('href', d.url || '#');
-      var img = thumbA.querySelector('img') || article.querySelector('img');
-      if (img){
-        if (d.thumb){
-          img.setAttribute('src', d.thumb);
-          if (d.srcset) img.setAttribute('srcset', d.srcset); else img.removeAttribute('srcset');
-          img.setAttribute('alt', d.alt || '');
-          img.removeAttribute('data-src'); img.removeAttribute('data-lazy-src'); img.removeAttribute('data-srcset');
-          img.classList.remove('lazyload','lazy');
-          img.style.opacity = '1'; img.style.visibility = 'visible';
-        }
+    var img = (thumbA ? thumbA.querySelector('img') : null) || article.querySelector('img');
+    if (img){
+      if (d.thumb){
+        img.setAttribute('src', d.thumb);
+        if (d.srcset) img.setAttribute('srcset', d.srcset); else img.removeAttribute('srcset');
+        img.setAttribute('alt', d.alt || '');
+        img.removeAttribute('data-src'); img.removeAttribute('data-lazy-src'); img.removeAttribute('data-srcset');
+        img.classList.remove('lazyload','lazy');
+        img.style.opacity = '1'; img.style.visibility = 'visible';
+      }
+      // Ensure the image (and its figure wrapper) is wrapped in an <a> pointing
+      // to the article. Cloned theme markup may have <figure><img></figure>
+      // without a link.
+      var existingLink = img.closest && img.closest('a');
+      if (!existingLink){
+        var wrapTarget = (img.parentNode && img.parentNode.tagName === 'FIGURE') ? img.parentNode : img;
+        var newLink = document.createElement('a');
+        newLink.className = 'post-thumbnail';
+        newLink.setAttribute('href', d.url || '#');
+        wrapTarget.parentNode.insertBefore(newLink, wrapTarget);
+        newLink.appendChild(wrapTarget);
+      } else {
+        existingLink.setAttribute('href', d.url || '#');
       }
     }
     // Strip any leftover duplicates that might have come from template
@@ -2784,7 +2825,12 @@ function videosow_import_one_video( $cfg, $video_id ) {
     // Collapse ALL whitespace runs (including newlines from emoji-line-breaks) into a single space.
     $excerpt_source = preg_replace( '/\s+/u', ' ', $excerpt_source );
     $excerpt_source = trim( $excerpt_source );
-    $final_excerpt  = $use_ai_excerpt ? $excerpt_source : wp_trim_words( $excerpt_source, 40, '…' );
+    // Store a generously long excerpt at import time (max 200 words). The
+    // archive page trims it down further client-side based on the configured
+    // archiveExcerptWords setting, so changes apply live to existing posts too.
+    $cfg_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
+    $store_words = max( 200, $cfg_words );
+    $final_excerpt  = $use_ai_excerpt ? $excerpt_source : wp_trim_words( $excerpt_source, $store_words, '…' );
 
     // CRITICAL: install a temporary filter that forces post_date/post_date_gmt for our
     // wp_insert_post call below. Other plugins (SEO, theme save_post hooks) sometimes

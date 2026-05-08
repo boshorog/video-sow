@@ -140,6 +140,25 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                 On mobile, cards always stack to a single column.
               </p>
             </div>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-1 block">
+                Excerpt length (words)
+              </Label>
+              <Input
+                type="number"
+                min={5}
+                max={200}
+                value={config.archiveExcerptWords ?? 40}
+                onChange={(e) => {
+                  const n = Math.max(5, Math.min(200, parseInt(e.target.value, 10) || 40));
+                  update("archiveExcerptWords", n);
+                }}
+                className="h-9 text-sm max-w-[140px]"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Trims the article summary on the archive page. Applies live to existing posts.
+              </p>
+            </div>
           </div>
 
           {/* LAYOUT / SIDEBAR */}
