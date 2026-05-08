@@ -2892,6 +2892,31 @@ function videosow_log_sync( $cfg, $status, $msg, $imported ) {
     if ( ! empty( $imported ) ) {
         $cfg['totalImported'] = intval( $cfg['totalImported'] ) + count( $imported );
     }
+
+    // Per-playlist stats: mirror lastSync* + totalImported + firstSyncDone keyed
+    // by the active playlist ID, so the UI can show stats relevant to whatever
+    // playlist the user is currently viewing.
+    $pid = isset( $cfg['playlistId'] ) ? (string) $cfg['playlistId'] : '';
+    if ( $pid !== '' ) {
+        $stats = isset( $cfg['playlistStats'] ) && is_array( $cfg['playlistStats'] ) ? $cfg['playlistStats'] : array();
+        $cur = isset( $stats[ $pid ] ) && is_array( $stats[ $pid ] ) ? $stats[ $pid ] : array();
+        $cur['lastSyncAt']     = $entry['time'];
+        $cur['lastSyncStatus'] = $status;
+        $cur['lastSyncMsg']    = $msg;
+        if ( ! empty( $imported ) ) {
+            $cur['totalImported'] = intval( isset( $cur['totalImported'] ) ? $cur['totalImported'] : 0 ) + count( $imported );
+        } elseif ( ! isset( $cur['totalImported'] ) ) {
+            $cur['totalImported'] = 0;
+        }
+        if ( $status === 'success' ) {
+            $cur['firstSyncDone'] = true;
+        } elseif ( ! isset( $cur['firstSyncDone'] ) ) {
+            $cur['firstSyncDone'] = false;
+        }
+        $stats[ $pid ] = $cur;
+        $cfg['playlistStats'] = $stats;
+    }
+
     update_option( 'videosow_importer_config', $cfg );
     return $entry;
 }
