@@ -108,7 +108,7 @@ export const BRANDING = {
   /**
    * Primary accent color (HSL values for Tailwind)
    */
-  accentColor: '207 59% 68%', // #7FB3DC - soft blue
+  accentColor: '1 56% 58%', // #CF5957 - logo red
   
   /**
    * Pro/premium accent color (HSL values)

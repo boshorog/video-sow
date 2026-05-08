@@ -35,11 +35,11 @@ const TasksPage = () => {
       </div>
 
       {/* Simple tasks */}
-      <Card className="border-2 border-primary/30 shadow-md bg-gradient-to-br from-primary/5 to-transparent">
-        <CardHeader className="border-b border-primary/20 bg-primary/5">
+      <Card className="border-2 border-amber-300/60 shadow-md bg-gradient-to-br from-amber-50 to-transparent dark:from-amber-950/20">
+        <CardHeader className="border-b border-amber-200/60 bg-amber-100/40 dark:bg-amber-950/30 dark:border-amber-900/40">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <span className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-              <Wand2 className="w-4 h-4 text-primary" />
+            <span className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+              <Wand2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </span>
             Simple tasks
           </CardTitle>
