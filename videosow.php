@@ -307,6 +307,8 @@ function videosow_get_sermon_importer_defaults() {
     return array(
         'apiKey'         => '',
         'playlistId'     => '',
+        'playlistIds'    => array(),
+        'playlistStats'  => array(), // map: playlist_id => { totalImported, lastSyncAt, lastSyncStatus, lastSyncMsg, firstSyncDone }
         'slug'           => 'articles',
         'syncIntervalH'  => 48,
         'enabled'        => false,
@@ -1624,6 +1626,8 @@ function videosow_ajax_save_sermon_importer_config() {
     $merged  = array_merge( $current, array(
         'apiKey'        => isset( $incoming['apiKey'] ) ? sanitize_text_field( $incoming['apiKey'] ) : $current['apiKey'],
         'playlistId'    => isset( $incoming['playlistId'] ) ? sanitize_text_field( $incoming['playlistId'] ) : $current['playlistId'],
+        'playlistIds'   => isset( $incoming['playlistIds'] ) && is_array( $incoming['playlistIds'] ) ? array_values( array_filter( array_map( 'sanitize_text_field', $incoming['playlistIds'] ) ) ) : ( isset( $current['playlistIds'] ) ? $current['playlistIds'] : array() ),
+        'playlistStats' => isset( $current['playlistStats'] ) && is_array( $current['playlistStats'] ) ? $current['playlistStats'] : array(),
         'slug'          => isset( $incoming['slug'] ) ? sanitize_title( $incoming['slug'] ) : $current['slug'],
         'syncIntervalH' => isset( $incoming['syncIntervalH'] ) ? max( 1, intval( $incoming['syncIntervalH'] ) ) : $current['syncIntervalH'],
         'enabled'       => isset( $incoming['enabled'] ) ? (bool) $incoming['enabled'] : $current['enabled'],
