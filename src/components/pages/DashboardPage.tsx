@@ -81,8 +81,16 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">{lastSyncHuman}</p>
-            <p className="text-xs text-muted-foreground mt-1 truncate">{lastSyncMsg || '—'}</p>
+            {loaded && !stats?.lastSyncAt ? (
+              <p className="text-3xl font-semibold text-slate-800">Never</p>
+            ) : (
+              <>
+                <p className="text-3xl font-semibold text-slate-800">{lastSyncHuman}</p>
+                {lastSyncMsg && (
+                  <p className="text-xs text-muted-foreground mt-1 truncate">{lastSyncMsg}</p>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

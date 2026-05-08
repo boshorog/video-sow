@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.9
+Stable tag: 1.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.1.9 =
+= 1.2.0 =
 * Import → Archive card now shows real imported articles (no longer falls back to sample data once imports exist)
 * Deleting an imported article also removes its featured image attachment from the Media Library
 * New: choose 1, 2, or 3 columns for the article cards layout on the archive page
