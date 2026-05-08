@@ -54,7 +54,15 @@ export const useImporter = () => {
 
   // Stall watchdog
   useEffect(() => {
-    if (!isSyncing) { setStallInfo(null); setRestingInfo(null); return; }
+    if (!isSyncing) {
+      setStallInfo(null);
+      setRestingInfo(null);
+      if (restTimerRef.current) {
+        window.clearInterval(restTimerRef.current);
+        restTimerRef.current = null;
+      }
+      return;
+    }
     const t = window.setInterval(() => {
       if (!stepStartRef.current) return;
       const elapsed = Math.round((Date.now() - stepStartRef.current) / 1000);
@@ -203,7 +211,10 @@ export const useImporter = () => {
     window.addEventListener('message', handler);
     wpPost({ type: 'videosow_load_sermon_importer_config' });
     wpPost({ type: 'videosow_list_archive' });
-    return () => window.removeEventListener('message', handler);
+    return () => {
+      window.removeEventListener('message', handler);
+      if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+    };
   }, []);
 
   const refreshArchive = useCallback((playlistId?: string) => {
