@@ -146,24 +146,39 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           <CardDescription>The last few videos picked up by Video Sow.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="divide-y divide-border">
-            {[
-              { title: 'How to plant tomatoes the right way', when: '2 hours ago', status: 'Drafted' },
-              { title: 'Pruning citrus in mid-season — full guide', when: '5 hours ago', status: 'Drafted' },
-              { title: 'Composting in apartments without smell', when: 'Yesterday', status: 'Published' },
-              { title: 'Soil testing for beginners (live Q&A)', when: '2 days ago', status: 'Published' },
-              { title: 'Greenhouse setup on a budget', when: '3 days ago', status: 'Published' },
-            ].map((row, i) => (
-              <li key={i} className="flex items-center gap-3 py-2.5 text-sm">
-                <PlayCircle className="w-4 h-4 text-primary shrink-0" />
-                <span className="flex-1 truncate text-slate-700">{row.title}</span>
-                <span className="text-xs text-muted-foreground shrink-0">{row.when}</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-secondary text-foreground shrink-0">
-                  {row.status}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {recent.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">
+              {loaded ? 'No imports yet — run your first sync from the Import tab.' : 'Loading…'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {recent.map((row) => {
+                const link = row.editLink || row.permalink;
+                const Tag: any = link ? 'a' : 'div';
+                return (
+                  <li key={row.id} className="flex items-center gap-3 py-2.5 text-sm">
+                    <PlayCircle className="w-4 h-4 text-primary shrink-0" />
+                    <Tag
+                      {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
+                    >
+                      {row.title}
+                    </Tag>
+                    <span className="text-xs text-muted-foreground shrink-0">{row.when}</span>
+                    <span
+                      className={`text-[11px] px-2 py-0.5 rounded-full shrink-0 ${
+                        row.status === 'Published'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {row.status}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </CardContent>
       </Card>
 
