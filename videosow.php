@@ -2825,7 +2825,12 @@ function videosow_import_one_video( $cfg, $video_id ) {
     // Collapse ALL whitespace runs (including newlines from emoji-line-breaks) into a single space.
     $excerpt_source = preg_replace( '/\s+/u', ' ', $excerpt_source );
     $excerpt_source = trim( $excerpt_source );
-    $final_excerpt  = $use_ai_excerpt ? $excerpt_source : wp_trim_words( $excerpt_source, 40, '…' );
+    // Store a generously long excerpt at import time (max 200 words). The
+    // archive page trims it down further client-side based on the configured
+    // archiveExcerptWords setting, so changes apply live to existing posts too.
+    $cfg_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
+    $store_words = max( 200, $cfg_words );
+    $final_excerpt  = $use_ai_excerpt ? $excerpt_source : wp_trim_words( $excerpt_source, $store_words, '…' );
 
     // CRITICAL: install a temporary filter that forces post_date/post_date_gmt for our
     // wp_insert_post call below. Other plugins (SEO, theme save_post hooks) sometimes
