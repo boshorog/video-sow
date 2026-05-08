@@ -105,7 +105,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
     }
   };
 
-  const useSample = isFirstRun || imp.archive.length === 0;
+  const useSample = imp.archive.length === 0;
+  const showEmptyOverlay = imp.archive.length === 0;
   const sourceRows: ArchiveRow[] = useSample
     ? SAMPLE_ARCHIVE
     : imp.archive.map((r) => ({
