@@ -1072,12 +1072,30 @@ const ThemeScanTile = () => {
           </button>
           {showDetails && (
             <div className="font-mono text-[10px] space-y-0.5 pt-1 border-t border-border">
+              <div><span className="text-muted-foreground">cards found:</span> {map.cards_found ?? 0}</div>
               <div><span className="text-muted-foreground">loop:</span> {map.loop_container || <em className="not-italic text-destructive">none</em>}</div>
               <div><span className="text-muted-foreground">article:</span> {map.article_selector || '—'}</div>
               <div><span className="text-muted-foreground">wrapper:</span> {map.article_wrapper || '—'}</div>
               <div><span className="text-muted-foreground">pagination:</span> {map.pagination_selector || '—'}</div>
               <div><span className="text-muted-foreground">sidebar:</span> {map.sidebar_selector || '—'}</div>
-              {map.note && <div className="text-amber-700 not-italic">note: {map.note}</div>}
+              <div className="pt-1 border-t border-border/50">
+                <div className="text-muted-foreground mb-0.5">theme styling registered:</div>
+                <div>· card: {map.card_classes || '—'}</div>
+                <div>· title: {map.title_classes || '—'}</div>
+                <div>· thumb: {map.thumb_classes || '—'}</div>
+                <div>· excerpt: {map.excerpt_classes || '—'}</div>
+                <div>· meta: {map.meta_classes || '—'}</div>
+                <div>· css vars: {map.theme_css_vars ? Object.keys(map.theme_css_vars).length : 0}</div>
+              </div>
+              {map.scan_attempts && map.scan_attempts.length > 0 && (
+                <div className="pt-1 border-t border-border/50">
+                  <div className="text-muted-foreground mb-0.5">scan attempts:</div>
+                  {map.scan_attempts.map((a, i) => (
+                    <div key={i} className="truncate">· {a.found} card(s) — {a.url}{a.error ? ` (${a.error})` : ''}</div>
+                  ))}
+                </div>
+              )}
+              {map.note && <div className="text-amber-700 not-italic pt-1 border-t border-border/50">note: {map.note}</div>}
             </div>
           )}
         </div>
