@@ -75,7 +75,7 @@ export const useImporter = () => {
         setIsSaving(false);
         if (d.success) {
           toast.success('Importer settings saved!');
-          wpPost({ type: 'videosow_load_sermon_importer_config' }, '*');
+          wpPost({ type: 'videosow_load_sermon_importer_config' });
         } else toast.error('Error saving.');
       }
       if (d.type === 'videosow_sermon_log_cleared' && d.success) {
@@ -94,12 +94,12 @@ export const useImporter = () => {
         if (total === 0) {
           setIsSyncing(false);
           toast.info(`Nothing to import (${already} already imported).`);
-          wpPost({ type: 'videosow_load_sermon_importer_config' }, '*');
+          wpPost({ type: 'videosow_load_sermon_importer_config' });
         } else {
           toast.info(`Starting import: ${total} videos (${already} already imported).`);
           if (!stopRef.current) {
             stepStartRef.current = Date.now();
-            wpPost({ type: 'videosow_step_sermon_sync' }, '*');
+            wpPost({ type: 'videosow_step_sermon_sync' });
           }
         }
       }
@@ -130,10 +130,10 @@ export const useImporter = () => {
           setCancelPending(false);
           if (data.cancelled) toast.info('Sync was cancelled.');
           else toast.success('Sync complete.');
-          wpPost({ type: 'videosow_load_sermon_importer_config' }, '*');
+          wpPost({ type: 'videosow_load_sermon_importer_config' });
         } else if (!stopRef.current) {
           stepStartRef.current = Date.now();
-          wpPost({ type: 'videosow_step_sermon_sync' }, '*');
+          wpPost({ type: 'videosow_step_sermon_sync' });
         }
       }
       if (d.type === 'videosow_sermon_repair_result') {
@@ -154,12 +154,12 @@ export const useImporter = () => {
           toast.success(`Metadata repaired: ${dd.processed}/${dd.total} posts processed.`);
           window.setTimeout(() => setRepairProgress(null), 3000);
         } else {
-          wpPost({ type: 'videosow_repair_sermon_metadata', offset: dd.next_offset || dd.processed || 0 }, '*');
+          wpPost({ type: 'videosow_repair_sermon_metadata', offset: dd.next_offset || dd.processed || 0 });
         }
       }
     };
     window.addEventListener('message', handler);
-    wpPost({ type: 'videosow_load_sermon_importer_config' }, '*');
+    wpPost({ type: 'videosow_load_sermon_importer_config' });
     return () => window.removeEventListener('message', handler);
   }, []);
 
@@ -167,7 +167,7 @@ export const useImporter = () => {
     if (!loaded) { toast.error('Settings have not loaded yet.'); return; }
     if (isInWordPress()) {
       setIsSaving(true);
-      wpPost({ type: 'videosow_save_sermon_importer_config', config }, '*');
+      wpPost({ type: 'videosow_save_sermon_importer_config', config });
     } else {
       toast.info('Saving only works inside WordPress.');
     }
@@ -178,7 +178,7 @@ export const useImporter = () => {
       stopRef.current = false;
       setIsSyncing(true);
       setProgress({ phase: 'scanning', total: 0, done: 0, already: 0, currentTitle: '', liveImported: [] });
-      wpPost({ type: 'videosow_scan_sermon_playlist' }, '*');
+      wpPost({ type: 'videosow_scan_sermon_playlist' });
     } else {
       toast.info('Sync only works inside WordPress.');
     }
@@ -188,7 +188,7 @@ export const useImporter = () => {
     if (!isInWordPress()) return;
     stopRef.current = true;
     setCancelPending(true);
-    wpPost({ type: 'videosow_cancel_sermon_sync' }, '*');
+    wpPost({ type: 'videosow_cancel_sermon_sync' });
   }, []);
 
   const repair = useCallback(() => {
@@ -196,7 +196,7 @@ export const useImporter = () => {
     if (!confirm('Refetch upload date and view count for all imported posts? This calls YouTube directly and can take a few seconds.')) return;
     setIsRepairing(true);
     setRepairProgress({ processed: 0, total: 0, updated: 0 });
-    wpPost({ type: 'videosow_repair_sermon_metadata', offset: 0 }, '*');
+    wpPost({ type: 'videosow_repair_sermon_metadata', offset: 0 });
   }, []);
 
   return {
