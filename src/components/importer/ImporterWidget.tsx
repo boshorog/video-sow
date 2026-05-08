@@ -154,6 +154,7 @@ const SermonImporterWidget = ({
   onPlaylistClick,
   isPro,
   playlistName,
+  playlistCount,
 }: {
   config: SermonImporterConfig;
   progress?: SermonProgress;
@@ -169,6 +170,7 @@ const SermonImporterWidget = ({
   onPlaylistClick?: () => void;
   isPro?: boolean;
   playlistName?: string;
+  playlistCount?: number;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const isConfigured = !!config.apiKey && !!config.playlistId;
@@ -222,7 +224,7 @@ const SermonImporterWidget = ({
           }}
           className={`p-3 rounded-lg text-left transition-colors ${
             config.playlistId
-              ? 'bg-secondary/40'
+              ? 'bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 cursor-pointer'
               : 'bg-amber-50 hover:bg-amber-100 border border-amber-200 cursor-pointer'
           }`}
         >
@@ -234,10 +236,12 @@ const SermonImporterWidget = ({
           </div>
           {config.playlistId ? (
             <>
-              <div className="text-sm font-semibold text-foreground truncate" title={playlistName || config.playlistId}>
+              <div className="text-sm font-semibold text-emerald-900 truncate" title={playlistName || config.playlistId}>
                 {playlistName || 'Connected playlist'}
               </div>
-              <div className="text-[10px] font-mono text-muted-foreground truncate">{config.playlistId}</div>
+              <div className="text-[10px] text-emerald-700 truncate">
+                {typeof playlistCount === 'number' ? `${playlistCount} videos` : config.playlistId}
+              </div>
             </>
           ) : (
             <div className="text-sm font-semibold text-amber-700 flex items-center gap-1">
@@ -245,15 +249,15 @@ const SermonImporterWidget = ({
             </div>
           )}
         </button>
-        <div className="p-3 rounded-lg bg-secondary/40">
+        <div className="p-3 rounded-lg bg-white border border-border">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
           <div className="text-xl font-bold text-foreground">{config.totalImported}</div>
         </div>
-        <div className="p-3 rounded-lg bg-secondary/40">
+        <div className="p-3 rounded-lg bg-white border border-border">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Interval</div>
           <div className="text-xl font-bold text-foreground">{config.syncIntervalH}h</div>
         </div>
-        <div className="p-3 rounded-lg bg-secondary/40 relative group">
+        <div className="p-3 rounded-lg bg-white border border-border relative group">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Slug</div>
           <div className="text-sm font-mono font-semibold text-foreground truncate pr-6">/{config.slug}/</div>
           {onConfigChange && (

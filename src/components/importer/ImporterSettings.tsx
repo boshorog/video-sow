@@ -241,9 +241,9 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
               size="sm"
               onClick={onSave}
               disabled={isSaving}
-              className="h-7 gap-1.5 text-xs bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+              className="gap-2"
             >
-              <Save className="w-3 h-3" /> {isSaving ? "Saving..." : "Save"}
+              <Save className="w-4 h-4" /> {isSaving ? "Saving..." : "Save"}
             </Button>
           )}
         </div>
@@ -290,7 +290,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           <p className="text-[11px] text-muted-foreground">
             Get a key from{' '}
             <a
-              href="https://console.cloud.google.com/apis/credentials"
+              href="https://console.cloud.google.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline inline-flex items-center gap-0.5"
