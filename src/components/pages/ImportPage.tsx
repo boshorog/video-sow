@@ -55,7 +55,9 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const license = useLicense();
   const imp = useImporter();
   const canSync = !!imp.config.apiKey && !!imp.config.playlistId && !imp.isSyncing;
-  const isFirstRun = !imp.config.firstSyncDone;
+  const activeStats = (imp.config.playlistId && imp.config.playlistStats?.[imp.config.playlistId]) || undefined;
+  const activeFirstSyncDone = activeStats?.firstSyncDone ?? imp.config.firstSyncDone;
+  const isFirstRun = !activeFirstSyncDone;
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -200,7 +202,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           </div>
         </CardHeader>
         <CardContent className="relative">
-          {!imp.config.firstSyncDone && (
+          {isFirstRun && (
             <div className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-card/60 backdrop-blur-[1px] rounded-b-lg">
               <div className="max-w-md text-center rounded-lg border border-primary/30 bg-card shadow-md px-5 py-4">
                 <div className="flex items-center justify-center gap-2 mb-1.5">
@@ -213,7 +215,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               </div>
             </div>
           )}
-          <div className={cn(!imp.config.firstSyncDone && 'opacity-30 pointer-events-none select-none')}>
+          <div className={cn(isFirstRun && 'opacity-30 pointer-events-none select-none')}>
 
           <Table>
             <TableHeader>

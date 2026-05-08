@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.1' );
+define( 'VIDEOSOW_VERSION', '1.1.2' );
 
 // Freemius SDK Initialization
 if ( ! function_exists( 'videosow_fs' ) ) {
@@ -307,6 +307,8 @@ function videosow_get_sermon_importer_defaults() {
     return array(
         'apiKey'         => '',
         'playlistId'     => '',
+        'playlistIds'    => array(),
+        'playlistStats'  => array(), // map: playlist_id => { totalImported, lastSyncAt, lastSyncStatus, lastSyncMsg, firstSyncDone }
         'slug'           => 'articles',
         'syncIntervalH'  => 48,
         'enabled'        => false,
@@ -1624,6 +1626,8 @@ function videosow_ajax_save_sermon_importer_config() {
     $merged  = array_merge( $current, array(
         'apiKey'        => isset( $incoming['apiKey'] ) ? sanitize_text_field( $incoming['apiKey'] ) : $current['apiKey'],
         'playlistId'    => isset( $incoming['playlistId'] ) ? sanitize_text_field( $incoming['playlistId'] ) : $current['playlistId'],
+        'playlistIds'   => isset( $incoming['playlistIds'] ) && is_array( $incoming['playlistIds'] ) ? array_values( array_filter( array_map( 'sanitize_text_field', $incoming['playlistIds'] ) ) ) : ( isset( $current['playlistIds'] ) ? $current['playlistIds'] : array() ),
+        'playlistStats' => isset( $current['playlistStats'] ) && is_array( $current['playlistStats'] ) ? $current['playlistStats'] : array(),
         'slug'          => isset( $incoming['slug'] ) ? sanitize_title( $incoming['slug'] ) : $current['slug'],
         'syncIntervalH' => isset( $incoming['syncIntervalH'] ) ? max( 1, intval( $incoming['syncIntervalH'] ) ) : $current['syncIntervalH'],
         'enabled'       => isset( $incoming['enabled'] ) ? (bool) $incoming['enabled'] : $current['enabled'],
@@ -2888,6 +2892,31 @@ function videosow_log_sync( $cfg, $status, $msg, $imported ) {
     if ( ! empty( $imported ) ) {
         $cfg['totalImported'] = intval( $cfg['totalImported'] ) + count( $imported );
     }
+
+    // Per-playlist stats: mirror lastSync* + totalImported + firstSyncDone keyed
+    // by the active playlist ID, so the UI can show stats relevant to whatever
+    // playlist the user is currently viewing.
+    $pid = isset( $cfg['playlistId'] ) ? (string) $cfg['playlistId'] : '';
+    if ( $pid !== '' ) {
+        $stats = isset( $cfg['playlistStats'] ) && is_array( $cfg['playlistStats'] ) ? $cfg['playlistStats'] : array();
+        $cur = isset( $stats[ $pid ] ) && is_array( $stats[ $pid ] ) ? $stats[ $pid ] : array();
+        $cur['lastSyncAt']     = $entry['time'];
+        $cur['lastSyncStatus'] = $status;
+        $cur['lastSyncMsg']    = $msg;
+        if ( ! empty( $imported ) ) {
+            $cur['totalImported'] = intval( isset( $cur['totalImported'] ) ? $cur['totalImported'] : 0 ) + count( $imported );
+        } elseif ( ! isset( $cur['totalImported'] ) ) {
+            $cur['totalImported'] = 0;
+        }
+        if ( $status === 'success' ) {
+            $cur['firstSyncDone'] = true;
+        } elseif ( ! isset( $cur['firstSyncDone'] ) ) {
+            $cur['firstSyncDone'] = false;
+        }
+        $stats[ $pid ] = $cur;
+        $cfg['playlistStats'] = $stats;
+    }
+
     update_option( 'videosow_importer_config', $cfg );
     return $entry;
 }
