@@ -880,7 +880,7 @@ const YouTubeConnectCard = ({
       <div className="flex items-center justify-between gap-3">
         <div>
           <Label className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
-            <Youtube className="w-3 h-3" /> YouTube connection (for transcripts)
+            <Youtube className="w-3 h-3" /> YouTube OAuth connection (for transcripts)
           </Label>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             Required when YouTube blocks public extraction. Works only for the channel that owns the videos.
@@ -906,26 +906,24 @@ const YouTubeConnectCard = ({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={() => setWizardOpen(true)}
             size="sm"
-            variant="ghost"
-            className="h-7 text-[11px] gap-1.5 text-muted-foreground hover:text-foreground"
+            variant="secondary"
+            className="h-8 text-xs gap-1.5"
           >
-            <Plug className="w-3 h-3" /> Connect YouTube channel (advanced backup)
+            <Plug className="w-3.5 h-3.5" /> Setup YouTube OAuth
           </Button>
-          <span className="text-[10px] text-muted-foreground/70">Optional — only needed if InnerTube fails.</span>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+          >
+            <Settings2 className="w-3 h-3" /> {showAdvanced ? "Hide" : "Advanced"}: enter credentials manually
+          </button>
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={() => setShowAdvanced((v) => !v)}
-        className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-      >
-        <Settings2 className="w-3 h-3" /> {showAdvanced ? "Hide" : "Advanced"}: enter credentials manually
-      </button>
 
       {showAdvanced && (
         <div className="space-y-2 p-3 rounded-md border border-dashed border-border bg-secondary/10">
