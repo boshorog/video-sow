@@ -526,6 +526,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
        </aside>
       </div>
 
+      <TroubleshootingSection
         config={config}
         onRepair={onRepair}
         isRepairing={isRepairing}
