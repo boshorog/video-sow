@@ -17,7 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.5' );
+define( 'VIDEOSOW_VERSION', '1.1.6' );
+
+/**
+ * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
+ * (not the WP plugin list) right after activating the plugin.
+ */
+register_activation_hook( __FILE__, 'videosow_on_activate' );
+function videosow_on_activate() {
+    set_transient( 'videosow_activation_redirect', 1, 60 );
+}
+add_action( 'admin_init', 'videosow_maybe_redirect_after_activation' );
+function videosow_maybe_redirect_after_activation() {
+    if ( ! get_transient( 'videosow_activation_redirect' ) ) return;
+    delete_transient( 'videosow_activation_redirect' );
+    if ( wp_doing_ajax() || wp_doing_cron() ) return;
+    // Don't hijack bulk activations.
+    if ( isset( $_GET['activate-multi'] ) ) return;
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    wp_safe_redirect( admin_url( 'admin.php?page=video-sow' ) );
+    exit;
+}
 
 // Freemius SDK Initialization
 if ( ! function_exists( 'videosow_fs' ) ) {
