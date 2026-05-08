@@ -868,6 +868,10 @@ const TroubleshootingSection = ({
           </Button>
         </div>
 
+        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+          <ThemeScanTile />
+        </div>
+
         {/* Test playlist */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5 md:col-span-2">
           <div className="flex items-start gap-2">
