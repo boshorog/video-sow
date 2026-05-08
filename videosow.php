@@ -1637,10 +1637,24 @@ function videosow_sermon_archive_toolbar_js() {
     return getSlot(article);
   }
 
+  function injectThemeCssVars(){
+    if (!THEME_MAP || !THEME_MAP.theme_css_vars) return;
+    var vars = THEME_MAP.theme_css_vars;
+    var picks = ['--primary','--primary-color','--accent','--accent-color','--theme-primary','--brand-color','--link-color','--font-body','--font-heading','--body-font','--heading-font'];
+    var css = '';
+    picks.forEach(function(k){ if (vars[k]) css += k + ':' + vars[k] + ';'; });
+    if (!css) return;
+    var s = document.createElement('style');
+    s.id = 'videosow-theme-vars';
+    s.textContent = '#videosow-grid, .videosow-grid{' + css + '}';
+    document.head.appendChild(s);
+  }
+
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
     var requestedLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
 
+    injectThemeCssVars();
     var loopContainer = resolveLoopContainer();
     var mapConfidence = THEME_MAP && THEME_MAP.confidence ? String(THEME_MAP.confidence) : 'low';
 
