@@ -813,7 +813,7 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video #videosow-grid ~ .entries-divider,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .post-separator,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .wp-block-separator{display:none !important;margin:0 !important;padding:0 !important;border:0 !important;height:0 !important;}'
-        . '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(' . max( 1, min( 3, intval( isset( $cfg['archiveColumns'] ) ? $cfg['archiveColumns'] : 2 ) ) ) . ',minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
         . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid{grid-template-columns:1fr !important;gap:1.5rem !important;}}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{display:block !important;width:auto !important;max-width:none !important;min-width:0 !important;float:none !important;clear:none !important;margin:0 !important;padding:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;max-width:none !important;float:none !important;clear:none !important;}'
