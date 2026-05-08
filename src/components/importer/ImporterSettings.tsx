@@ -253,26 +253,55 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="flex-1 pr-3">
           <Label className="text-sm font-medium text-foreground">Automatic sync</Label>
           <p className="text-xs text-muted-foreground mt-0.5">Runs in background on the configured interval.</p>
-          {config.enabled && (
-            <div className="flex items-center gap-2 mt-3">
-              <Label className="text-xs text-muted-foreground">Every</Label>
-              <Select
-                value={String(Math.max(1, Math.round((config.syncIntervalH || 48) / 24)))}
-                onValueChange={(v) => update("syncIntervalH", parseInt(v, 10) * 24)}
-              >
-                <SelectTrigger className="h-8 w-24 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
-                    <SelectItem key={d} value={String(d)} className="text-xs">
-                      {d} {d === 1 ? "day" : "dayle"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {config.enabled && (() => {
+            const hours = config.syncIntervalH || 48;
+            const isDays = hours % 24 === 0;
+            const unit: "days" | "hours" = isDays ? "days" : "hours";
+            const value = isDays ? hours / 24 : hours;
+            const setUnit = (u: "days" | "hours") => {
+              if (u === unit) return;
+              update("syncIntervalH", u === "days" ? Math.max(1, value) * 24 : Math.max(1, value));
+            };
+            const setValue = (v: number) => {
+              const safe = Math.max(1, v || 1);
+              update("syncIntervalH", unit === "days" ? safe * 24 : safe);
+            };
+            return (
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                <Label className="text-xs text-muted-foreground">Every</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={unit === "days" ? 365 : 720}
+                  value={value}
+                  onChange={(e) => setValue(parseInt(e.target.value || "1", 10))}
+                  className="h-8 w-20 text-xs"
+                />
+                <div className="flex items-center gap-3 text-xs">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sync-unit"
+                      checked={unit === "days"}
+                      onChange={() => setUnit("days")}
+                      className="accent-primary"
+                    />
+                    Days
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sync-unit"
+                      checked={unit === "hours"}
+                      onChange={() => setUnit("hours")}
+                      className="accent-primary"
+                    />
+                    Hours
+                  </label>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <Switch checked={config.enabled} onCheckedChange={(v) => update("enabled", v)} />
       </div>
@@ -376,7 +405,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             <div className="mt-3 space-y-1.5">
               <Label className="text-[11px] text-muted-foreground">Transcript language (optional)</Label>
               <p className="text-[11px] text-muted-foreground">
-                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">ro</code>, <code className="font-mono">en</code>) only if you want to force a specific language.
+                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">en</code>, <code className="font-mono">es</code>, <code className="font-mono">fr</code>, <code className="font-mono">de</code>) only if you want to force a specific language.
               </p>
               <Input
                 value={config.transcriptInng}
@@ -851,7 +880,7 @@ const YouTubeConnectCard = ({
       <div className="flex items-center justify-between gap-3">
         <div>
           <Label className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1.5">
-            <Youtube className="w-3 h-3" /> YouTube connection (for transcripts)
+            <Youtube className="w-3 h-3" /> YouTube OAuth connection (for transcripts)
           </Label>
           <p className="text-[11px] text-muted-foreground mt-0.5">
             Required when YouTube blocks public extraction. Works only for the channel that owns the videos.
@@ -877,26 +906,24 @@ const YouTubeConnectCard = ({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={() => setWizardOpen(true)}
             size="sm"
-            variant="ghost"
-            className="h-7 text-[11px] gap-1.5 text-muted-foreground hover:text-foreground"
+            variant="secondary"
+            className="h-8 text-xs gap-1.5"
           >
-            <Plug className="w-3 h-3" /> Connect YouTube channel (advanced backup)
+            <Plug className="w-3.5 h-3.5" /> Setup YouTube OAuth
           </Button>
-          <span className="text-[10px] text-muted-foreground/70">Optional — only needed if InnerTube fails.</span>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+          >
+            <Settings2 className="w-3 h-3" /> {showAdvanced ? "Hide" : "Advanced"}: enter credentials manually
+          </button>
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={() => setShowAdvanced((v) => !v)}
-        className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-      >
-        <Settings2 className="w-3 h-3" /> {showAdvanced ? "Hide" : "Advanced"}: enter credentials manually
-      </button>
 
       {showAdvanced && (
         <div className="space-y-2 p-3 rounded-md border border-dashed border-border bg-secondary/10">
