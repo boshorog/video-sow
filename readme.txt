@@ -74,6 +74,12 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.4 =
+* Default archive layout is now Magazine · 2 cols.
+* Theme default layout keeps the theme's article rendering and shows the toolbar above it (no duplication).
+* Custom layouts now physically remove the original theme article wrappers to prevent duplicates appearing under the footer.
+* Slightly larger plugin logo in the admin header.
+
 = 1.2.3 =
 * Fixed archive toolbar rendering and live excerpt-length settings.
 * Relaxed imports now show and honor Coffee break pauses between steps.
