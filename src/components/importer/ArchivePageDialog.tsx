@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Link2, Globe, SlidersHorizontal, Sparkles, Search, Tag, PanelRight } from "lucide-react";
+import { Save, Link2, Globe, SlidersHorizontal, Sparkles, Search, Tag, PanelRight, LayoutGrid } from "lucide-react";
 import { SermonImporterConfig } from "./ImporterWidget";
 
 interface Props {
@@ -98,6 +98,47 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
                 className="text-sm resize-none"
                 maxLength={200}
               />
+            </div>
+          </div>
+
+          {/* LAYOUT — columns */}
+          <div className="rounded-lg bg-card border border-border p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <LayoutGrid className="w-3.5 h-3.5" /> Layout
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground mb-2 block">
+                Article cards per row
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {([1, 2, 3] as const).map((n) => {
+                  const active = (config.archiveColumns || 2) === n;
+                  return (
+                    <button
+                      type="button"
+                      key={n}
+                      onClick={() => update("archiveColumns", n)}
+                      className={`p-3 rounded-lg border text-left transition-colors ${
+                        active
+                          ? "border-primary bg-primary/5"
+                          : "border-border bg-muted/30 hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        {Array.from({ length: n }).map((_, i) => (
+                          <div key={i} className={`h-4 flex-1 rounded-sm ${active ? "bg-primary/60" : "bg-muted-foreground/30"}`} />
+                        ))}
+                      </div>
+                      <div className="text-xs font-medium">
+                        {n === 1 ? "1 column (full width)" : `${n} columns`}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-2">
+                On mobile, cards always stack to a single column.
+              </p>
             </div>
           </div>
 

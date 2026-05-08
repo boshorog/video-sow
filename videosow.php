@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.1.8
+ * Version: 1.1.9
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.8' );
+define( 'VIDEOSOW_VERSION', '1.1.9' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -671,6 +671,37 @@ function videosow_sermon_disable_sidebars( $is_active_sidebar, $index ) {
 }
 add_filter( 'is_active_sidebar', 'videosow_sermon_disable_sidebars', 10, 2 );
 
+/* Force 16:9 aspect ratio on YouTube embeds inside single article pages. */
+function videosow_single_video_aspect_css() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    echo '<style id="videosow-single-aspect-css">'
+        . '.single-videosow_video .entry-content iframe[src*="youtube"],'
+        . '.single-videosow_video .entry-content iframe[src*="youtu.be"],'
+        . '.single-videosow_video .entry-content .wp-block-embed-youtube iframe,'
+        . '.single-videosow_video .entry-content .wp-block-embed iframe,'
+        . '.single-videosow_video .entry-content .wp-embedded-content,'
+        . '.single-videosow_video .entry-content .videosow-yt-embed iframe,'
+        . '.single-videosow_video .entry-content embed,'
+        . '.single-videosow_video .entry-content object{display:block;width:100% !important;max-width:100% !important;height:auto !important;aspect-ratio:16/9 !important;}'
+        // Fallback for browsers without aspect-ratio: wrap with padding-bottom trick is not possible
+        // here, but aspect-ratio is supported in all modern browsers (95%+).
+        . '.single-videosow_video .entry-content .wp-block-embed__wrapper{position:relative;}'
+        . '.single-videosow_video .entry-content figure.wp-block-embed{margin-left:0 !important;margin-right:0 !important;}'
+        . '</style>';
+}
+add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
+
+/* Delete attached featured image (and the YouTube thumbnail attachment) when an
+ * imported article is permanently deleted. Keeps wp-content/uploads tidy. */
+function videosow_delete_thumbnail_with_post( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'videosow_video' ) return;
+    $thumb_id = (int) get_post_thumbnail_id( $post_id );
+    if ( $thumb_id > 0 ) {
+        wp_delete_attachment( $thumb_id, true );
+    }
+}
+add_action( 'before_delete_post', 'videosow_delete_thumbnail_with_post', 10, 1 );
+
 /* Inject the archive page title into the theme's empty <h2 class="archive-heading"> */
 function videosow_sermon_archive_title_js() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
@@ -813,7 +844,7 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video #videosow-grid ~ .entries-divider,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .post-separator,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .wp-block-separator{display:none !important;margin:0 !important;padding:0 !important;border:0 !important;height:0 !important;}'
-        . '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(' . max( 1, min( 3, intval( isset( $cfg['archiveColumns'] ) ? $cfg['archiveColumns'] : 2 ) ) ) . ',minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
         . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid{grid-template-columns:1fr !important;gap:1.5rem !important;}}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{display:block !important;width:auto !important;max-width:none !important;min-width:0 !important;float:none !important;clear:none !important;margin:0 !important;padding:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;max-width:none !important;float:none !important;clear:none !important;}'
