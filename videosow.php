@@ -1474,37 +1474,22 @@ function videosow_sermon_archive_toolbar_js() {
     var seen = {};
     var seenPid = {};
     rawArticles = rawArticles.filter(function(a){
-      // Skip articles nested inside another article (theme decoration)
       if (a.parentNode && a.parentNode.closest && a.parentNode.closest('article[id^="post-"]')) return false;
       if (a.closest && a.closest('#videosow-grid')) return false;
       var id = a.id || '';
-      if (id) {
-        if (seen[id]) return false;
-        seen[id] = 1;
-      }
+      if (id) { if (seen[id]) return false; seen[id] = 1; }
       var pid = getPostId(a);
-      if (pid) {
-        if (seenPid[pid]) return false;
-        seenPid[pid] = 1;
-      } else {
-        // No resolvable post id → likely a theme placeholder, drop it
-        return false;
-      }
+      if (pid) { if (seenPid[pid]) return false; seenPid[pid] = 1; }
+      else { return false; }
       return true;
     });
-    // Build a normalized grid from cloned article cards. This avoids theme
-    // masonry/column placeholders that create random empty slots after filters.
-    var grid = null;
+
+    var grid = document.createElement('div');
+    grid.id = 'videosow-grid';
+    grid.className = 'videosow-grid';
+
     if (rawArticles.length){
-      grid = document.createElement('div');
-      grid.id = 'videosow-grid';
-      grid.className = 'videosow-grid';
-      // Capture the first theme-rendered article as a template so synthetic
-      // cards inherit the theme's CSS classes/styling for date/excerpt/title.
       captureTemplate(rawArticles[0], byId[getPostId(rawArticles[0])]);
-      // Build synthetic cards from DATA for the posts the theme rendered on this page.
-      // Using one consistent DOM structure (instead of cloning theme markup) avoids
-      // duplicate date/summary blocks with mismatched styling.
       rawArticles.forEach(function(a){
         var pid = getPostId(a);
         var d = byId[pid];
@@ -1514,39 +1499,36 @@ function videosow_sermon_archive_toolbar_js() {
         grid.appendChild(card);
         getSlot(a).classList.add('kp-source-hidden');
       });
-      var firstSlot = getSlot(rawArticles[0]);
-      if (firstSlot && firstSlot.parentNode) firstSlot.parentNode.insertBefore(grid, firstSlot);
+    } else {
+      // Fallback: theme didn't render recognizable <article> cards on this page.
+      // Build the grid from DATA directly so toolbar + columns still work.
+      DATA.slice(0, BATCH).forEach(function(d){
+        grid.appendChild(buildSyntheticCard(d));
+      });
     }
-    var placed = false;
+
     var anchor = findArchiveAnchor();
-    if (anchor && anchor.parentNode && anchor.tagName && anchor.tagName.toLowerCase() !== 'main'){
-      anchor.parentNode.insertBefore(toolbar, anchor.nextSibling);
-      placed = true;
+    var firstSlot = rawArticles.length ? getSlot(rawArticles[0]) : null;
+    var insertHost = null, insertBefore = null;
+    if (firstSlot && firstSlot.parentNode){
+      insertHost = firstSlot.parentNode; insertBefore = firstSlot;
+    } else if (anchor && anchor.parentNode){
+      insertHost = anchor.parentNode; insertBefore = anchor.nextSibling;
+    } else {
+      var mainEl = document.querySelector('main') || document.body;
+      insertHost = mainEl; insertBefore = null;
     }
-    if (grid){
-      if (!placed && grid.parentNode){
-        grid.parentNode.insertBefore(toolbar, grid);
-        placed = true;
-      }
-    }
-    if (!placed){
-      if (anchor && anchor.parentNode){
-        // Insert AFTER the heading's parent block to stay outside the grid.
-        var host = anchor.parentNode;
-        host.parentNode ? host.parentNode.insertBefore(toolbar, host.nextSibling)
-                        : host.appendChild(toolbar);
-      }
-    }
-    if (grid && toolbar.parentNode) {
-      toolbar.parentNode.insertBefore(grid, toolbar.nextSibling);
-    }
+    insertHost.insertBefore(grid, insertBefore);
+    grid.parentNode.insertBefore(toolbar, grid);
     toolbar.style.display = '';
+
     buildTags(toolbar);
     var s = toolbar.querySelector('#videosow-search');
     var so = toolbar.querySelector('#videosow-sort');
     if (s) s.addEventListener('input', function(){ state.q = s.value; if (s.value) ensureAllLoaded(); apply(); });
     if (so) so.addEventListener('change', function(){ state.sort = so.value; apply(); updateLoadMoreUI(); });
-    if (grid) { setupLoadMore(grid); hideArchiveTail(grid); }
+    setupLoadMore(grid);
+    hideArchiveTail(grid);
     hideNativePagination();
     apply();
   }
