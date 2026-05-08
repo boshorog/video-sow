@@ -61,7 +61,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number }>({});
+  const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
 
   useEffect(() => {
     const { apiKey, playlistId } = imp.config;
@@ -81,6 +81,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           setPlaylistInfo({
             name: item.snippet?.title,
             count: item.contentDetails?.itemCount,
+            channel: item.snippet?.channelTitle,
           });
         }
       })
@@ -89,6 +90,11 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       cancelled = true;
     };
   }, [imp.config.apiKey, imp.config.playlistId]);
+
+  // Refresh real archive when active playlist changes.
+  useEffect(() => {
+    imp.refreshArchive(imp.config.playlistId);
+  }, [imp.config.playlistId]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
