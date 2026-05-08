@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Link2, Globe, SlidersHorizontal, Sparkles, Search, Tag } from "lucide-react";
+import { Save, Link2, Globe, SlidersHorizontal, Sparkles, Search, Tag, PanelRight } from "lucide-react";
 import { SermonImporterConfig } from "./ImporterWidget";
 
 interface Props {
