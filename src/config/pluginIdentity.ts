@@ -29,7 +29,7 @@
  * WordPress plugin slug (folder name, shortcode prefix, option names)
  * Example: 'kindpixels-pdf-gallery' → [kindpdfg_gallery] shortcode
  */
-export const PLUGIN_SLUG = 'videosow';
+export const PLUGIN_SLUG = 'video-sow';
 
 /**
  * Short prefix for PHP functions, AJAX actions, DB options, CSS classes
@@ -67,7 +67,7 @@ export const PRO_NAME = 'Video Sow Pro';
 /**
  * Plugin version - update this for each release
  */
-export const PLUGIN_VERSION = '1.1.2';
+export const PLUGIN_VERSION = '1.1.3';
 
 /**
  * Short description for meta/SEO
@@ -120,11 +120,11 @@ export const BRANDING = {
    */
   links: {
     website: 'https://kindpixels.dev',
-    support: 'https://kindpixels.dev/support',
-    pricing: 'https://kindpixels.dev/plugins/pdf-gallery-pro',
-    documentation: 'https://kindpixels.dev/docs/pdf-gallery',
-    github: 'https://github.com/boshorog/pdf-gallery',
-    wordpressOrg: 'https://wordpress.org/plugins/kindpixels-pdf-gallery',
+    support: 'https://wordpress.org/support/plugin/video-sow/',
+    pricing: 'https://kindpixels.dev/plugins/video-sow-pro',
+    documentation: 'https://kindpixels.dev/docs/video-sow',
+    github: 'https://github.com/boshorog/video-sow',
+    wordpressOrg: 'https://wordpress.org/plugins/video-sow',
   },
 } as const;
 
