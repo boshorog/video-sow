@@ -722,6 +722,21 @@ function videosow_single_video_aspect_css() {
         // here, but aspect-ratio is supported in all modern browsers (95%+).
         . '.single-videosow_video .entry-content .wp-block-embed__wrapper{position:relative;}'
         . '.single-videosow_video .entry-content figure.wp-block-embed{margin-left:0 !important;margin-right:0 !important;}'
+        // Hide the theme-rendered featured image at the top of the article (the
+        // YouTube thumbnail is redundant — the video embed sits right below).
+        . '.single-videosow_video .post-thumbnail,'
+        . '.single-videosow_video .entry-thumbnail,'
+        . '.single-videosow_video .featured-image,'
+        . '.single-videosow_video .single-featured-image,'
+        . '.single-videosow_video .wp-post-image,'
+        . '.single-videosow_video .entry-header .post-thumbnail,'
+        . '.single-videosow_video figure.post-thumbnail,'
+        . '.single-videosow_video .entry-header img.wp-post-image{display:none !important;}'
+        // Make sure the article title can wrap fully and is never truncated by
+        // theme line-clamps or fixed heights.
+        . '.single-videosow_video .entry-title,'
+        . '.single-videosow_video h1.entry-title,'
+        . '.single-videosow_video .entry-header h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;word-break:break-word !important;}'
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
