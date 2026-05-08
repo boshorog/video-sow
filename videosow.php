@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.2' );
+define( 'VIDEOSOW_VERSION', '1.2.3' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -446,9 +446,39 @@ function videosow_get_sermon_importer_defaults() {
     );
 }
 
+function videosow_english_status_message( $msg ) {
+    $msg = is_string( $msg ) ? $msg : '';
+    if ( $msg === '' ) return '';
+    $msg = str_replace( array( 'Popularitate' ), array( 'Most viewed' ), $msg );
+    if ( preg_match( '/Întrerupt\s+manual\s+după\s+(\d+)\s+importate/ui', $msg, $m ) ) {
+        return sprintf( 'Cancelled manually after %d imported', intval( $m[1] ) );
+    }
+    if ( preg_match( '/^(\d+)\s+importate$/ui', $msg, $m ) ) {
+        return sprintf( '%d imported', intval( $m[1] ) );
+    }
+    return $msg;
+}
+
+function videosow_normalize_config_messages( $cfg ) {
+    if ( isset( $cfg['lastSyncMsg'] ) ) $cfg['lastSyncMsg'] = videosow_english_status_message( $cfg['lastSyncMsg'] );
+    if ( isset( $cfg['log'] ) && is_array( $cfg['log'] ) ) {
+        foreach ( $cfg['log'] as $i => $entry ) {
+            if ( isset( $entry['message'] ) ) $cfg['log'][ $i ]['message'] = videosow_english_status_message( $entry['message'] );
+        }
+    }
+    if ( isset( $cfg['playlistStats'] ) && is_array( $cfg['playlistStats'] ) ) {
+        foreach ( $cfg['playlistStats'] as $pid => $stats ) {
+            if ( is_array( $stats ) && isset( $stats['lastSyncMsg'] ) ) {
+                $cfg['playlistStats'][ $pid ]['lastSyncMsg'] = videosow_english_status_message( $stats['lastSyncMsg'] );
+            }
+        }
+    }
+    return $cfg;
+}
+
 function videosow_get_sermon_importer_config() {
     $saved = get_option( 'videosow_importer_config', array() );
-    return array_merge( videosow_get_sermon_importer_defaults(), is_array( $saved ) ? $saved : array() );
+    return videosow_normalize_config_messages( array_merge( videosow_get_sermon_importer_defaults(), is_array( $saved ) ? $saved : array() ) );
 }
 
 /**
