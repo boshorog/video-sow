@@ -1576,7 +1576,6 @@ function videosow_sermon_archive_toolbar_js() {
 
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
-    if (!toolbar) return;
     // Collect articles BEFORE moving anything around.
     var rawArticles = Array.prototype.slice.call(document.querySelectorAll('article[id^="post-"], .post-type-archive-videosow_video article'));
     var seen = {};
@@ -1595,7 +1594,7 @@ function videosow_sermon_archive_toolbar_js() {
     var grid = document.createElement('div');
     grid.id = 'videosow-grid';
     grid.className = 'videosow-grid';
-    var __vsLayout = (toolbar.getAttribute('data-vs-layout') || 'theme');
+    var __vsLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || 'theme';
     grid.setAttribute('data-vs-layout', __vsLayout);
 
     if (rawArticles.length){
@@ -1629,14 +1628,15 @@ function videosow_sermon_archive_toolbar_js() {
       insertHost = mainEl; insertBefore = null;
     }
     insertHost.insertBefore(grid, insertBefore);
-    grid.parentNode.insertBefore(toolbar, grid);
-    toolbar.style.display = '';
-
-    buildTags(toolbar);
-    var s = toolbar.querySelector('#videosow-search');
-    var so = toolbar.querySelector('#videosow-sort');
-    if (s) s.addEventListener('input', function(){ state.q = s.value; if (s.value) ensureAllLoaded(); apply(); });
-    if (so) so.addEventListener('change', function(){ state.sort = so.value; apply(); updateLoadMoreUI(); });
+    if (toolbar) {
+      grid.parentNode.insertBefore(toolbar, grid);
+      toolbar.style.display = '';
+      buildTags(toolbar);
+      var s = toolbar.querySelector('#videosow-search');
+      var so = toolbar.querySelector('#videosow-sort');
+      if (s) s.addEventListener('input', function(){ state.q = s.value; if (s.value) ensureAllLoaded(); apply(); });
+      if (so) so.addEventListener('change', function(){ state.sort = so.value; apply(); updateLoadMoreUI(); });
+    }
     setupLoadMore(grid);
     hideArchiveTail(grid);
     hideNativePagination();
