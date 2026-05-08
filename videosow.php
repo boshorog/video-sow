@@ -3608,3 +3608,43 @@ function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
     $html .= '</div></details>';
     return $html;
 }
+
+/**
+ * AJAX: list videos imported by this plugin (videosow_video CPT) for the Import → Archive table.
+ */
+function videosow_ajax_list_archive() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+
+    $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+    $args = array(
+        'post_type'      => 'videosow_video',
+        'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+        'posts_per_page' => 100,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+    if ( $playlist ) {
+        $args['meta_query'] = array(
+            array( 'key' => '_videosow_playlist_id', 'value' => $playlist ),
+        );
+    }
+    $q = new WP_Query( $args );
+    $rows = array();
+    foreach ( $q->posts as $p ) {
+        $vid = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
+        $views = (int) get_post_meta( $p->ID, '_videosow_yt_view_count', true );
+        $rows[] = array(
+            'id'        => $p->ID,
+            'title'     => get_the_title( $p ),
+            'videoId'   => $vid,
+            'date'      => get_the_date( 'Y-m-d', $p ),
+            'status'    => $p->post_status === 'publish' ? 'Published' : 'Draft',
+            'views'     => $views,
+            'editLink'  => get_edit_post_link( $p->ID, '' ),
+            'permalink' => get_permalink( $p ),
+        );
+    }
+    wp_send_json_success( array( 'rows' => $rows ) );
+}
+add_action( 'wp_ajax_videosow_list_archive', 'videosow_ajax_list_archive' );
