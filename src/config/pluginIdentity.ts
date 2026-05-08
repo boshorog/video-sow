@@ -26,15 +26,20 @@
 // =============================================================================
 
 /**
- * WordPress plugin slug (folder name, shortcode prefix, option names)
- * Example: 'kindpixels-pdf-gallery' → [kindpdfg_gallery] shortcode
+ * WordPress plugin slug (folder name on wp.org, used for asset paths)
+ * Hyphenated form per WordPress.org conventions.
+ * Example: 'video-sow' → installed at /wp-content/plugins/video-sow/
  */
 export const PLUGIN_SLUG = 'video-sow';
 
 /**
- * Short prefix for PHP functions, AJAX actions, DB options, CSS classes
- * Should be 6-10 chars, lowercase, no hyphens
- * Example: 'kindpdfg' → kindpdfg_action, kindpdfg_settings
+ * Unique prefix for PHP functions, AJAX actions, DB options, CSS classes,
+ * and JS globals. Must be a single token (no hyphens), lowercase, 4+ chars,
+ * and unique to this plugin per WordPress.org plugin review guidelines.
+ *
+ * Chosen value: `videosow` — derived directly from the plugin name,
+ * 8 characters long, not a generic word, and not used by any other plugin
+ * in the WordPress.org directory.
  */
 export const PLUGIN_PREFIX = 'videosow';
 
