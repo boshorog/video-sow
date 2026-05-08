@@ -1008,7 +1008,7 @@ function videosow_sermon_archive_toolbar() {
     $opts = array(
         'date_desc'  => 'Newest first',
         'date_asc'   => 'Oldest first',
-        'views_desc' => 'Popularitate',
+        'views_desc' => 'Most viewed',
     );
     $sort_html = '';
     if ( $show_sort ) {
@@ -1025,7 +1025,7 @@ function videosow_sermon_archive_toolbar() {
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
     $layout_attr = isset( $cfg['archiveLayout'] ) ? $cfg['archiveLayout'] : 'theme';
     if ( ! in_array( $layout_attr, array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ) $layout_attr = 'theme';
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:none">'
+    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:block">'
         . $bar_html
         . $tags_html
         . '</div>';
@@ -1034,6 +1034,8 @@ add_action( 'wp_footer', 'videosow_sermon_archive_toolbar', 100 );
 
 function videosow_sermon_archive_toolbar_js() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
+    $cfg = videosow_get_sermon_importer_config();
+    $toolbar_enabled = ! empty( $cfg['archiveToolbarEnabled'] );
     // Build a JS map of post-id => { date, views, tags[] } for client-side sort/filter
     $q = new WP_Query( array(
         'post_type'      => 'videosow_video',
@@ -1060,7 +1062,7 @@ function videosow_sermon_archive_toolbar_js() {
             'url'   => get_permalink( $pid ),
             'date_str' => get_the_date( '', $pid ),
             'date_attr' => get_post_time( 'c', true, $pid ),
-            'excerpt' => wp_strip_all_tags( get_the_excerpt( $pid ) ),
+            'excerpt' => wp_strip_all_tags( get_post_field( 'post_excerpt', $pid ) ),
             'thumb' => $thumb_url ? $thumb_url : '',
             'srcset' => $thumb_srcset ? $thumb_srcset : '',
             'alt'   => $thumb_alt ? $thumb_alt : '',
@@ -1165,6 +1167,7 @@ function videosow_sermon_archive_toolbar_js() {
     });
   }
 
+  var TOOLBAR_ENABLED = <?php echo $toolbar_enabled ? 'true' : 'false'; ?>;
   var defaultSort = (document.getElementById('videosow-toolbar') && document.getElementById('videosow-toolbar').getAttribute('data-default-sort')) || 'date_desc';
   var state = { q: '', sort: defaultSort, tags: [] };
 
