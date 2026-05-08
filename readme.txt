@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,12 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.4 =
+* Default archive layout is now Magazine · 2 cols.
+* Theme default layout keeps the theme's article rendering and shows the toolbar above it (no duplication).
+* Custom layouts now physically remove the original theme article wrappers to prevent duplicates appearing under the footer.
+* Slightly larger plugin logo in the admin header.
 
 = 1.2.3 =
 * Fixed archive toolbar rendering and live excerpt-length settings.

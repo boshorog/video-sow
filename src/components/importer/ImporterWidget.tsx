@@ -113,7 +113,7 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   archiveSidebarEnabled: false,
   singleSidebarEnabled: false,
   archiveColumns: 2,
-  archiveLayout: "theme",
+  archiveLayout: "magazine-2",
   archiveExcerptWords: 40,
   archiveDefaultSort: "date_desc",
   archiveTagCloudMode: "random",
