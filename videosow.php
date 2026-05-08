@@ -1057,6 +1057,7 @@ function videosow_sermon_archive_toolbar_js() {
     $toolbar_enabled = ! empty( $cfg['archiveToolbarEnabled'] );
     $js_excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
     $js_layout = isset( $cfg['archiveLayout'] ) && in_array( $cfg['archiveLayout'], array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ? $cfg['archiveLayout'] : 'theme';
+    $theme_map = function_exists( 'videosow_get_theme_map' ) ? videosow_get_theme_map() : array();
     // Build a JS map of post-id => { date, views, tags[] } for client-side sort/filter
     $q = new WP_Query( array(
         'post_type'      => 'videosow_video',
