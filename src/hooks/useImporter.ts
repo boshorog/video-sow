@@ -109,6 +109,7 @@ export const useImporter = () => {
         setStageInfo(null);
         if (!d.success) {
           setIsSyncing(false);
+          setCancelPending(false);
           setProgress((p) => ({ ...p, phase: 'idle' }));
           toast.error('Error during import step.');
           return;
@@ -122,19 +123,34 @@ export const useImporter = () => {
           }
           if (typeof data.progress === 'number') next.done = data.progress;
           if (typeof data.total === 'number') next.total = data.total;
-          if (data.done) next.phase = 'done';
+          if (data.done || data.cancelled || stopRef.current) next.phase = 'done';
           return next;
         });
-        if (data.cancelled || data.done) {
+        const stopped = stopRef.current;
+        if (data.cancelled || data.done || stopped) {
           setIsSyncing(false);
           setCancelPending(false);
-          if (data.cancelled) toast.info('Sync was cancelled.');
+          if (data.cancelled || stopped) toast.info('Sync was cancelled.');
           else toast.success('Sync complete.');
           wpPost({ type: 'videosow_load_sermon_importer_config' });
-        } else if (!stopRef.current) {
+          wpPost({ type: 'videosow_list_archive' });
+        } else {
           stepStartRef.current = Date.now();
           wpPost({ type: 'videosow_step_sermon_sync' });
         }
+      }
+      if (d.type === 'videosow_sermon_sync_cancelled') {
+        // PHP confirmed cancel — reset UI even if no in-flight step result is coming.
+        stopRef.current = true;
+        setIsSyncing(false);
+        setCancelPending(false);
+        setProgress((p) => ({ ...p, phase: 'done' }));
+        wpPost({ type: 'videosow_load_sermon_importer_config' });
+        wpPost({ type: 'videosow_list_archive' });
+      }
+      if (d.type === 'videosow_archive_list' && d.success) {
+        const rows = d.data?.rows || [];
+        setArchive(rows);
       }
       if (d.type === 'videosow_sermon_repair_result') {
         if (!d.success) {
