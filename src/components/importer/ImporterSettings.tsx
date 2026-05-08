@@ -253,26 +253,55 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         <div className="flex-1 pr-3">
           <Label className="text-sm font-medium text-foreground">Automatic sync</Label>
           <p className="text-xs text-muted-foreground mt-0.5">Runs in background on the configured interval.</p>
-          {config.enabled && (
-            <div className="flex items-center gap-2 mt-3">
-              <Label className="text-xs text-muted-foreground">Every</Label>
-              <Select
-                value={String(Math.max(1, Math.round((config.syncIntervalH || 48) / 24)))}
-                onValueChange={(v) => update("syncIntervalH", parseInt(v, 10) * 24)}
-              >
-                <SelectTrigger className="h-8 w-24 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => (
-                    <SelectItem key={d} value={String(d)} className="text-xs">
-                      {d} {d === 1 ? "day" : "dayle"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {config.enabled && (() => {
+            const hours = config.syncIntervalH || 48;
+            const isDays = hours % 24 === 0;
+            const unit: "days" | "hours" = isDays ? "days" : "hours";
+            const value = isDays ? hours / 24 : hours;
+            const setUnit = (u: "days" | "hours") => {
+              if (u === unit) return;
+              update("syncIntervalH", u === "days" ? Math.max(1, value) * 24 : Math.max(1, value));
+            };
+            const setValue = (v: number) => {
+              const safe = Math.max(1, v || 1);
+              update("syncIntervalH", unit === "days" ? safe * 24 : safe);
+            };
+            return (
+              <div className="flex items-center gap-3 mt-3 flex-wrap">
+                <Label className="text-xs text-muted-foreground">Every</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={unit === "days" ? 365 : 720}
+                  value={value}
+                  onChange={(e) => setValue(parseInt(e.target.value || "1", 10))}
+                  className="h-8 w-20 text-xs"
+                />
+                <div className="flex items-center gap-3 text-xs">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sync-unit"
+                      checked={unit === "days"}
+                      onChange={() => setUnit("days")}
+                      className="accent-primary"
+                    />
+                    Days
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sync-unit"
+                      checked={unit === "hours"}
+                      onChange={() => setUnit("hours")}
+                      className="accent-primary"
+                    />
+                    Hours
+                  </label>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <Switch checked={config.enabled} onCheckedChange={(v) => update("enabled", v)} />
       </div>
