@@ -101,43 +101,57 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
           </div>
 
-          {/* LAYOUT — columns */}
+          {/* LAYOUT — preset designs */}
           <div className="rounded-lg bg-card border border-border p-4 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <LayoutGrid className="w-3.5 h-3.5" /> Layout
             </div>
             <div>
               <Label className="text-xs text-muted-foreground mb-2 block">
-                Article cards per row
+                Card design
               </Label>
-              <div className="grid grid-cols-3 gap-2">
-                {([1, 2, 3] as const).map((n) => {
-                  const active = (config.archiveColumns || 2) === n;
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { v: "theme",      title: "Theme default",  desc: "Inherits your theme styles", cols: 1, custom: false },
+                  { v: "magazine-2", title: "Magazine · 2 cols", desc: "Custom card design",       cols: 2, custom: true  },
+                  { v: "magazine-3", title: "Magazine · 3 cols", desc: "Compact custom cards",     cols: 3, custom: true  },
+                  { v: "list",       title: "Wide list",      desc: "Image left, content right",   cols: 1, custom: "list" as const },
+                ] as const).map((opt) => {
+                  const active = (config.archiveLayout || "theme") === opt.v;
                   return (
                     <button
                       type="button"
-                      key={n}
-                      onClick={() => update("archiveColumns", n)}
+                      key={opt.v}
+                      onClick={() => update("archiveLayout", opt.v)}
                       className={`p-3 rounded-lg border text-left transition-colors ${
                         active
                           ? "border-primary bg-primary/5"
                           : "border-border bg-muted/30 hover:bg-muted/50"
                       }`}
                     >
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        {Array.from({ length: n }).map((_, i) => (
-                          <div key={i} className={`h-4 flex-1 rounded-sm ${active ? "bg-primary/60" : "bg-muted-foreground/30"}`} />
-                        ))}
+                      <div className="flex items-center gap-1.5 mb-2 h-5">
+                        {opt.custom === "list" ? (
+                          <div className={`flex w-full gap-1.5 h-full`}>
+                            <div className={`w-1/3 rounded-sm ${active ? "bg-primary/60" : "bg-muted-foreground/30"}`} />
+                            <div className="flex-1 flex flex-col gap-1 justify-center">
+                              <div className={`h-1 rounded-sm ${active ? "bg-primary/60" : "bg-muted-foreground/30"}`} />
+                              <div className={`h-1 w-3/4 rounded-sm ${active ? "bg-primary/40" : "bg-muted-foreground/20"}`} />
+                            </div>
+                          </div>
+                        ) : (
+                          Array.from({ length: opt.cols }).map((_, i) => (
+                            <div key={i} className={`h-full flex-1 rounded-sm ${active ? "bg-primary/60" : "bg-muted-foreground/30"} ${opt.custom ? "ring-1 ring-inset ring-primary/30" : ""}`} />
+                          ))
+                        )}
                       </div>
-                      <div className="text-xs font-medium">
-                        {n === 1 ? "1 column (full width)" : `${n} columns`}
-                      </div>
+                      <div className="text-xs font-medium leading-tight">{opt.title}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{opt.desc}</div>
                     </button>
                   );
                 })}
               </div>
               <p className="text-[11px] text-muted-foreground mt-2">
-                On mobile, cards always stack to a single column.
+                Custom layouts override your theme's article styling on the archive page so the design is consistent everywhere. On mobile, cards always stack to a single column.
               </p>
             </div>
             <div>
