@@ -215,7 +215,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               </div>
             </div>
           )}
-          <div className={cn(!imp.config.firstSyncDone && 'opacity-30 pointer-events-none select-none')}>
+          <div className={cn(isFirstRun && 'opacity-30 pointer-events-none select-none')}>
 
           <Table>
             <TableHeader>
