@@ -144,7 +144,7 @@ export const UpdateNotice = ({ currentVersion }: UpdateNoticeProps) => {
       }, 12000);
       
       wpUpdates.updatePlugin({
-        plugin: wpGlobal?.pluginBasename || 'kindpixels-pdf-gallery/kindpixels-pdf-gallery.php',
+        plugin: wpGlobal?.pluginBasename || 'video-sow/videosow.php',
         slug: PLUGIN_SLUG,
         success: () => {
           clearTimeout(fallbackTimeout);

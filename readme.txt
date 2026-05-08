@@ -1,230 +1,128 @@
-=== KindPixels PDF Gallery – Turn Files into Clean Galleries ===
+=== Video Sow – Turn YouTube Playlists into WordPress Articles ===
 Contributors: kindpixels
-Plugin URI: https://kindpixels.com/plugins/pdf-gallery/
-Tags: pdf, gallery, showcase, viewer, lightbox
+Plugin URI: https://kindpixels.dev/plugins/video-sow/
+Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 2.6.8
+Stable tag: 1.1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Create beautiful galleries from PDFs (and other files), with customizable layouts, lightbox viewer, and drag-and-drop management.
+Automatically convert YouTube playlist videos into WordPress articles, with optional transcript extraction and per-video draft generation.
 
 == Description ==
 
-Display PDF files, Office documents, images, videos, audio files (and even YouTube videos!) in beautiful grid or masonry layouts, with a built-in lightbox viewer. Give PDF Gallery a try!
+Video Sow watches one or more YouTube playlists and turns every video into a WordPress article: title, description, embedded player, and (in Pro) the full transcript for SEO. Set an interval, paste a YouTube Data API v3 key, and Video Sow handles the rest in the background.
 
 = Key Features =
 
-* **Create File Galleries** – Turn your files into clean, visual galleries.
-* **Built-in Lightbox** – Full-screen document viewer with zoom and navigation.
-* **Responsive Design** – Galleries look great on all devices.
-* **Thumbnail Styles** – Choose from multiple thumbnail layouts.
-* **Advanced Customization** – Fine-tune gallery design and behavior.
-* **Section Dividers** – Organize documents into logical sections using dividers and labels.
-* **Drag & Drop Ordering** – Reorder documents with simple drag and drop.
-* **Shortcode Support** – Embed galleries anywhere on your website using a shortcode.
-
-= Supported File Types =
-
-* PDF documents
-* Images (JPG, PNG, GIF, WebP)
-* Videos (MP4, YouTube links)
-* Audio files (MP3, WAV, OGG)
-* Microsoft Office (Word, Excel, PowerPoint)
-* Archives (ZIP, RAR, 7Z)
-* eBooks (EPUB, MOBI)
+* **Playlist Import** – Paste any YouTube playlist URL or ID and import each video as a WordPress post.
+* **Automatic Sync** – Schedule fetches by minutes, hours, or days; relaxed-mode pauses keep you within the YouTube quota.
+* **Per-Video Article** – Title, description, thumbnail, and embedded YouTube player are generated automatically.
+* **Archive View** – See every imported article with its source video, status, and last sync time.
+* **Diagnostic Tools** – Test API keys, scan playlists, and inspect transcript availability without leaving the admin.
+* **YouTube Data API v3** – Uses the official Google API for reliable, quota-aware fetching.
 
 = Free vs Pro =
 
 **Free version includes:**
-* One gallery with unlimited files
-* All display settings and styling options
-* Files uploaded one by one
+* One YouTube playlist
+* Automatic sync with custom interval, batch size, and relaxed pauses
+* Per-video WordPress article generation
+* Archive of imported articles
+* Diagnostic tools
 
 **Pro version adds:**
-* Unlimited galleries
-* Batch upload for multiple files at once
-* File analytics
+* Unlimited playlists with drag-to-reorder priority
+* Per-playlist statistics and switcher on the Import page
+* Transcript extraction (multi-language) for SEO-rich article bodies
+* YouTube OAuth as a transcript backup source
+* Tasks workflow for content automation
 * Priority support
 
-For a complete comparison, see [the full feature table](https://kindpixels.com/plugins/pdf-gallery#comparison).
+For a complete comparison, see [the full feature table](https://kindpixels.dev/plugins/video-sow#comparison).
 
 == Installation ==
 
-1. In your WordPress dashboard, go to "Plugins → Add New" and search for "KindPixels PDF Gallery" then click "Install Now" and "Activate".
-2. Alternatively, upload the `kindpixels-pdf-gallery` folder to the `/wp-content/plugins/` directory via FTP, then activate it from the "Plugins" menu.
-3. Go to "PDF Gallery" in your admin menu to create your first gallery.
-4. Each gallery has a unique shortcode starting with `[kindpdfg_gallery]` – copy and paste it into any page or post.
+1. In your WordPress dashboard, go to "Plugins → Add New" and search for "Video Sow", then click "Install Now" and "Activate".
+2. Alternatively, upload the `video-sow` folder to `/wp-content/plugins/` via FTP, then activate it from the "Plugins" menu.
+3. Open the new "Video Sow" admin menu and paste a YouTube Data API v3 key in Settings.
+4. Add a playlist in Settings, configure the sync interval, then run your first import from the Import page.
 
 == Frequently Asked Questions ==
 
-= How do I display a gallery on my page? =
+= Where do I get a YouTube Data API v3 key? =
 
-Each gallery has a unique shortcode that starts with `[kindpdfg_gallery]`. Simply copy the shortcode from the Galleries tab and paste it on any page or post on your website.
+Generate one in Google Cloud Console → APIs & Services → Credentials, after enabling the YouTube Data API v3 for your project.
+
+= Does Video Sow change my existing posts? =
+
+No. Each imported video becomes a new WordPress post. Re-running the sync skips videos that have already been imported.
+
+= Can I import multiple playlists? =
+
+The Free version supports one playlist. Video Sow Pro supports unlimited playlists with drag-to-reorder priority and a per-playlist switcher on the Import page.
+
+= How do transcripts work? =
+
+In Pro, Video Sow fetches the transcript for each video (when available on YouTube) and embeds it in the post body to boost SEO. An optional YouTube OAuth connection can act as a backup source for transcripts that require authentication.
 
 = What if I have more questions? =
 
-Once you install the plugin, head over to the Documentation tab where we have an extensive guide covering all features, settings, and customization options.
+Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
 
-= 2.6.8 =
-* Fix: Lightbox thumbnails no longer overlap with the document content
-* Improvements for the update UX
-* Other bug fixes
-
-= 2.6.6 =
-* Improved: Zoom controls now always visible in lightbox top bar
-* Improved: Click-to-zoom now doubles current zoom level instead of fixed 200%
+= 1.1.3 =
+* Plugin slug standardized to `video-sow` for WordPress.org compliance
+* Documentation and readme rewritten for the Video Sow workflow
 * Minor stability improvements
 
-= 2.6.5 =
-* Fix: Keyboard navigation (arrow keys, Page Up/Down) now works immediately in fullscreen mode
-* Fix: Analytics summary cards now display correct totals from backend data
-* Minor stability improvements
+= 1.1.2 =
+* New: Per-playlist tracking — Total imported and Last sync update when switching playlists
+* Improved: Import page first-run state is now per-playlist
 
-= 2.6.4 =
-* New: Fullscreen mode in lightbox with immersive document viewing
-* Minor stability improvements
+= 1.1.1 =
+* New: Drag-to-reorder playlists in Settings (Pro)
+* Improved: Trimmed Archive sample data and removed redundant counter text
 
-= 2.6.3 =
-* New: Redesigned placeholder image settings with side-by-side card selection
-* New: Custom placeholder supports drag & drop upload
-* New: Engagement notice for active free users encouraging ratings and feedback
-* Improved: Token Map hover highlights for grouped elements (titles, subtitles, thumbnails)
-* Fix: Transparent background checkbox now properly toggleable
+= 1.1.0 =
+* Major cleanup: removed legacy gallery components in favor of the Video Sow workflow
+* Rewrote Documentation and Pro pages for Video Sow
+* Maintained Freemius licensing integration
 
-= 2.6.2 =
-* New: YouTube uploads via link now include a Subtitle field, auto-populated with channel name
-* New: WP Media Library title and description now auto-populate Title and Subtitle fields
-* Fix: Enhanced keyboard scrolling inside lightbox
-* Fix: Analytics chart correctly aggregates data monthly for 365-day view
-* Improved upload form UX with subtitle support across all methods
+= 1.0.3 =
+* New: Settings tips card to better use horizontal space
+* Improved: Archive placeholder now indicates real data appears after first import
 
-= 2.6.0 =
-* New: Comprehensive Color Settings with preset themes (Default, Dark, Warm, Forest, Ocean)
-* New: Interactive Token Map — click any gallery element to edit its color visually
-* New: Transparent gallery background option (default for Default preset)
-* New: Custom preset — any manual change is saved as a Custom preset
-* Fix: Gradient Zoom style now centers both title and subtitle under thumbnail
-* Improved color picker alignment and usability
-
-= 2.5.5 =
-* Fix: Update button now triggers in-page update instead of redirecting away
-* Fix: Fallback redirect now scrolls to and highlights the plugin row
-* Improved iframe-to-parent communication for WordPress AJAX updates
-
-= 2.5.4 =
-* Fix: Frontend gallery loading issue on certain themes (changed iframe to eager loading)
-* Fix: Update button no longer hangs indefinitely — falls back to plugins page after 10 seconds
-* Improvement: Vertical alignment of accent color preview in Settings
-
-= 2.5.3 =
-* Fix: Accent color now properly updates on frontend shortcode after saving
-* Improvement: Frontend settings fetch now includes gallery context for per-gallery settings
-
-= 2.5.2 =
-* Fix: Lightbox scroll onboarding now correctly resets when navigating between documents
-* Minor stability improvements
-
-= 2.5.1 =
-* New saturation-based color picker for accent color settings
-* Redesigned accent color section with full-width card preview
-
-= 2.5.0 =
-* Polished Gradient Zoom thumbnail style with dual-tone gradient border
-* Redesigned the Accent Color section of Settings
-
-= 2.4.12 =
-* Fixed analytics activity chart not updating when changing date range
-* Fixed scroll onboarding not showing for existing users after update
-
-= 2.4.11 =
-* Added scroll onboarding hints for multi-page PDFs in lightbox
-* Enter key now saves when editing files
-
-= 2.4.9 =
-* Update notifications now visible for Pro users inside the plugin dashboard
-
-= 2.4.7 =
-* Added gap size setting for gallery spacing customization
-
-= 2.4.6 =
-* Added upload via link feature
-
-= 2.4.2 =
-* Added File Analytics with views and clicks tracking (Pro)
-* Cross-gallery navigation in analytics modal
-
-= 2.3.0 =
-* Added YouTube video support — paste YouTube URLs directly
-* YouTube thumbnails and titles fetched automatically
-
-= 2.2.0 =
-* Added multi-select with Shift+click for bulk operations
-* Added bulk delete functionality
-
-= 2.1.0 =
-* Added section dividers for document organization
-* Added masonry layout option
-
-= 2.0.0 =
-* Complete redesign with modern React-based interface
-* Added lightbox document viewer with zoom and navigation
-* Added multiple thumbnail styles and hover animations
+= 1.0.2 =
+* Free vs Pro split: Tasks menu and transcript extraction are now Pro-only
+* Pro: multi-playlist support with add/remove from Settings
 
 = 1.0.0 =
 * Initial release
 
 == Upgrade Notice ==
 
-= 2.6.3 =
-Redesigned placeholder settings. Engagement notice for free users. Token Map hover improvements.
+= 1.1.3 =
+Standardized plugin slug to `video-sow` and refreshed documentation. Safe upgrade.
 
-= 2.6.2 =
-Lightbox keyboard scrolling fix. Analytics date range filtering and chart aggregation improvements.
-
-= 2.6.1 =
-
-= 2.6.0 =
-New Color Settings with preset themes, interactive visual editor, and transparent background support.
-
-= 2.5.4 =
-Bug fixes for frontend rendering and accent color sync. Improved lightbox onboarding.
-
-= 2.5.0 =
-Redesigned Gradient Zoom style and Accent Color settings.
-
-= 2.4.11 =
-Scroll onboarding for multi-page PDFs. Enter key saves edits.
-
-= 2.4.2 =
-File Analytics now available for Pro users.
-
-= 2.0.0 =
-Major update with new features. Please backup before upgrading.
+= 1.1.0 =
+Major cleanup. Please review your settings after upgrading.
 
 == Additional Information ==
-
-= Using the Shortcode =
-
-Each gallery has a unique shortcode. Simply copy it from the Galleries tab and paste it into any page or post:
-
-`[kindpdfg_gallery id="your-gallery-id"]`
-
-All display settings (columns, styles, animations) are configured in the Settings tab — no shortcode parameters needed.
 
 = Source Code =
 
 The full source code for this plugin is available on GitHub:
-https://github.com/boshorog/pdf-gallery
+https://github.com/boshorog/video-sow
 
 = Support =
 
-For support questions, please visit our support forum or contact us through our website.
+For support, please use the WordPress.org support forum:
+https://wordpress.org/support/plugin/video-sow/
 
 = Privacy =
 
-This plugin does not collect any personal data. All documents are stored on your WordPress installation.
+Video Sow communicates with the YouTube Data API v3 (and, in Pro, optionally with YouTube transcript endpoints) using the API key you provide. No data is sent to KindPixels servers. Imported article content is stored on your WordPress installation only.

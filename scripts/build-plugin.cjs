@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * PDF Gallery Plugin Build Script
- * 
+ * Video Sow Plugin Build Script
+ *
  * Builds and packages both Free and Pro variants of the plugin.
- * 
+ *
  * Usage:
- *   node scripts/build-plugin.js          # Build both variants
- *   node scripts/build-plugin.js free     # Build Free only
- *   node scripts/build-plugin.js pro      # Build Pro only
- * 
+ *   node scripts/build-plugin.cjs          # Build both variants
+ *   node scripts/build-plugin.cjs free     # Build Free only
+ *   node scripts/build-plugin.cjs pro      # Build Pro only
+ *
  * Output:
- *   dist/kindpixels-pdf-gallery-free-{version}.zip
- *   dist/kindpixels-pdf-gallery-pro-{version}.zip
+ *   releases/video-sow-free-{version}.zip
+ *   releases/video-sow-pro-{version}.zip
  */
 
 const { execSync } = require('child_process');
@@ -21,14 +21,15 @@ const path = require('path');
 const archiver = require('archiver');
 
 // Plugin configuration
-const PLUGIN_SLUG = 'kindpixels-pdf-gallery';
+const PLUGIN_SLUG = 'video-sow';
+const MAIN_PHP_FILE = 'videosow.php';
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'releases');
 
 // Files/folders to include in the ZIP (relative to project root)
 const INCLUDE_FILES = [
-  'kindpixels-pdf-gallery.php',
+  MAIN_PHP_FILE,
   'readme.txt',
   'dist/',
 ];
@@ -50,11 +51,11 @@ const EXCLUDE_PATTERNS = [
  * Get plugin version from main PHP file
  */
 function getPluginVersion() {
-  const phpFile = path.join(ROOT_DIR, 'kindpixels-pdf-gallery.php');
+  const phpFile = path.join(ROOT_DIR, MAIN_PHP_FILE);
   const content = fs.readFileSync(phpFile, 'utf8');
   const match = content.match(/Version:\s*([0-9.]+)/i);
   if (!match) {
-    throw new Error('Could not find version in kindpixels-pdf-gallery.php');
+    throw new Error(`Could not find version in ${MAIN_PHP_FILE}`);
   }
   return match[1];
 }
@@ -199,7 +200,7 @@ async function main() {
   }
   
   const version = getPluginVersion();
-  console.log(`\n🚀 PDF Gallery Plugin Builder`);
+  console.log(`\n🚀 Video Sow Plugin Builder`);
   console.log(`   Version: ${version}`);
   console.log(`   Output:  ${OUTPUT_DIR}`);
   
