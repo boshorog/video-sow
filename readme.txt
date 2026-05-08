@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.5
+Stable tag: 1.2.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,13 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.6 =
+* New: Theme structure scanner detects where your active theme renders its post loop and uses those exact selectors on the archive page, so layouts no longer wipe out your site header, menu or footer.
+* Auto-runs on plugin activation and on theme switch; can be re-run manually from Settings → Diagnostic tools (6th tile).
+* Custom archive layouts now restrict all DOM cleanup to the detected loop container — guaranteed safe fallback to "Theme default" when confidence is low.
+* Theme default mode inserts the toolbar inside the loop container, never above the site header.
+* Slightly tighter spacing between plugin icon and name in the admin header.
 
 = 1.2.5 =
 * Fixed plugin header version (build was still reporting 1.2.3).

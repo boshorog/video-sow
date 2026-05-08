@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo } from "lucide-react";
+import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
@@ -868,6 +868,10 @@ const TroubleshootingSection = ({
           </Button>
         </div>
 
+        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+          <ThemeScanTile />
+        </div>
+
         {/* Test playlist */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5 md:col-span-2">
           <div className="flex items-start gap-2">
@@ -953,6 +957,133 @@ const TroubleshootingSection = ({
         </div>
       </div>
     </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────
+   Theme structure scan tile
+   ───────────────────────────────────────────────── */
+
+type ThemeMap = {
+  theme_slug?: string;
+  theme_name?: string;
+  loop_container?: string;
+  article_selector?: string;
+  article_wrapper?: string;
+  pagination_selector?: string;
+  sidebar_selector?: string;
+  confidence?: 'high' | 'medium' | 'low' | string;
+  scanned_at?: number;
+  scan_url?: string;
+  note?: string;
+};
+
+const ThemeScanTile = () => {
+  const [map, setMap] = useState<ThemeMap | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (!e.data || !e.data.type) return;
+      if (e.data.type === 'videosow_theme_map_result') {
+        if (e.data.success && e.data.data) setMap(e.data.data as ThemeMap);
+      }
+      if (e.data.type === 'videosow_theme_scan_result') {
+        setScanning(false);
+        if (e.data.success && e.data.data) {
+          setMap(e.data.data as ThemeMap);
+          toast.success('Theme structure scan complete.');
+        } else {
+          toast.error('Theme scan failed. The plugin will fall back to theme default layout.');
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    // Initial load
+    if (typeof window !== 'undefined' && window.parent !== window) {
+      window.parent.postMessage({ type: 'videosow_get_theme_map' }, '*');
+    }
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const runScan = () => {
+    setScanning(true);
+    window.parent.postMessage({ type: 'videosow_scan_theme' }, '*');
+  };
+
+  const confidence = map?.confidence || 'low';
+  const confColor =
+    confidence === 'high'
+      ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30'
+      : confidence === 'medium'
+        ? 'bg-amber-500/10 text-amber-700 border-amber-500/30'
+        : 'bg-destructive/10 text-destructive border-destructive/30';
+
+  const scannedAgo = map?.scanned_at
+    ? new Date(map.scanned_at * 1000).toLocaleString('en-US')
+    : 'never';
+
+  return (
+    <>
+      <div className="flex items-start gap-2">
+        <LayoutGrid className="w-4 h-4 text-foreground mt-0.5" />
+        <div className="flex-1">
+          <div className="text-sm font-semibold text-foreground">Scan theme structure</div>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            Detects where your active theme renders its post loop so the archive page is inserted without breaking your site's header, menu, sidebar or footer. Re-run after switching themes or major theme updates.
+          </p>
+        </div>
+      </div>
+
+      {map && (
+        <div className="text-[11px] space-y-1 p-2 rounded-md bg-secondary/30 border border-border">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-muted-foreground">
+              Theme: <span className="font-medium text-foreground">{map.theme_name || map.theme_slug || 'unknown'}</span>
+            </span>
+            <span className={`px-1.5 py-0.5 rounded border text-[10px] font-semibold uppercase tracking-wide ${confColor}`}>
+              {confidence}
+            </span>
+          </div>
+          <div className="text-muted-foreground">Last scan: <span className="text-foreground">{scannedAgo}</span></div>
+          {confidence === 'low' && (
+            <div className="text-[11px] text-amber-700 bg-amber-500/10 border border-amber-500/30 rounded px-2 py-1 mt-1">
+              Couldn't reliably detect your theme's post loop — the archive will use the safe "Theme default" layout regardless of your selected layout.
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowDetails((v) => !v)}
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors mt-1"
+          >
+            <ChevronDown className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+            {showDetails ? 'Hide details' : 'View details'}
+          </button>
+          {showDetails && (
+            <div className="font-mono text-[10px] space-y-0.5 pt-1 border-t border-border">
+              <div><span className="text-muted-foreground">loop:</span> {map.loop_container || <em className="not-italic text-destructive">none</em>}</div>
+              <div><span className="text-muted-foreground">article:</span> {map.article_selector || '—'}</div>
+              <div><span className="text-muted-foreground">wrapper:</span> {map.article_wrapper || '—'}</div>
+              <div><span className="text-muted-foreground">pagination:</span> {map.pagination_selector || '—'}</div>
+              <div><span className="text-muted-foreground">sidebar:</span> {map.sidebar_selector || '—'}</div>
+              {map.note && <div className="text-amber-700 not-italic">note: {map.note}</div>}
+            </div>
+          )}
+        </div>
+      )}
+
+      <Button
+        onClick={runScan}
+        disabled={scanning}
+        size="sm"
+        variant="outline"
+        className="h-8 gap-1.5 text-xs w-full"
+      >
+        {scanning ? <Loader2 className="w-3 h-3 animate-spin" /> : <LayoutGrid className="w-3 h-3" />}
+        {scanning ? 'Scanning…' : map?.scanned_at ? 'Re-scan now' : 'Scan now'}
+      </Button>
+    </>
   );
 };
 

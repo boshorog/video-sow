@@ -70,7 +70,7 @@ const Index = () => {
       <div className="max-w-6xl mx-auto">
         {/* Logo Header */}
         <div className="px-6 pt-6 pb-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <img src={videosowLogo} alt={license.isPro ? PRO_NAME : PLUGIN_NAME} className="w-10 h-10" />
             <div className="flex items-baseline gap-2">
               <h1 className="text-2xl text-slate-800"><span className="font-bold">{license.isPro ? PRO_NAME : PLUGIN_NAME}</span></h1>
