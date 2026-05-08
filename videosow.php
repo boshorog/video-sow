@@ -1667,6 +1667,8 @@ function videosow_ajax_save_sermon_importer_config() {
         'archiveMetaDescription'   => isset( $incoming['archiveMetaDescription'] ) ? sanitize_textarea_field( $incoming['archiveMetaDescription'] ) : $current['archiveMetaDescription'],
         'archiveToolbarEnabled'    => isset( $incoming['archiveToolbarEnabled'] ) ? (bool) $incoming['archiveToolbarEnabled'] : $current['archiveToolbarEnabled'],
         'archiveShowSearch'        => isset( $incoming['archiveShowSearch'] ) ? (bool) $incoming['archiveShowSearch'] : $current['archiveShowSearch'],
+        'archiveSidebarEnabled'    => isset( $incoming['archiveSidebarEnabled'] ) ? (bool) $incoming['archiveSidebarEnabled'] : ( isset( $current['archiveSidebarEnabled'] ) ? (bool) $current['archiveSidebarEnabled'] : false ),
+        'singleSidebarEnabled'     => isset( $incoming['singleSidebarEnabled'] ) ? (bool) $incoming['singleSidebarEnabled'] : ( isset( $current['singleSidebarEnabled'] ) ? (bool) $current['singleSidebarEnabled'] : false ),
         'archiveShowSort'          => isset( $incoming['archiveShowSort'] ) ? (bool) $incoming['archiveShowSort'] : $current['archiveShowSort'],
         'archiveShowTags'          => isset( $incoming['archiveShowTags'] ) ? (bool) $incoming['archiveShowTags'] : $current['archiveShowTags'],
         'archiveDefaultSort'       => isset( $incoming['archiveDefaultSort'] ) && in_array( $incoming['archiveDefaultSort'], array( 'date_desc', 'date_asc', 'views_desc' ), true ) ? $incoming['archiveDefaultSort'] : $current['archiveDefaultSort'],
