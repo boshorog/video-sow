@@ -39,9 +39,11 @@ const REQUIRED_FOLDERS = [
   'vendor/',    // Freemius SDK - must exist in project root
 ];
 
-// Files/folders to exclude
+// Files/folders to exclude from ALL variants.
+// Note: `.pro-build` is intentionally NOT excluded — the proBuildMarker Vite
+// plugin creates it for Pro builds and removes it for Free builds, so the
+// dist/ contents already match the variant being packaged.
 const EXCLUDE_PATTERNS = [
-  '.pro-build',  // Will be handled per variant
   '.DS_Store',
   'Thumbs.db',
   '*.map',
