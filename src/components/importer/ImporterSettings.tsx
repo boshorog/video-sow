@@ -976,6 +976,16 @@ type ThemeMap = {
   scanned_at?: number;
   scan_url?: string;
   note?: string;
+  card_classes?: string;
+  title_classes?: string;
+  thumb_classes?: string;
+  excerpt_classes?: string;
+  meta_classes?: string;
+  link_classes?: string;
+  theme_css_vars?: Record<string, string>;
+  body_classes?: string;
+  cards_found?: number;
+  scan_attempts?: { url: string; found: number; error?: string }[];
 };
 
 const ThemeScanTile = () => {
