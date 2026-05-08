@@ -117,6 +117,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         date: r.date,
         status: r.status,
         views: r.views,
+        editLink: r.editLink,
+        permalink: r.permalink,
       }));
 
   const sorted = useMemo(() => {
