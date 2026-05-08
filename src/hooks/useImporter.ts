@@ -40,6 +40,11 @@ export const useImporter = () => {
   const [restingInfo, setRestingInfo] = useState<{ remaining: number; total: number; reason: string } | null>(null);
   const [stageInfo, setStageInfo] = useState<{ stage: string; detail: string } | null>(null);
   const [cancelPending, setCancelPending] = useState(false);
+  const [archive, setArchive] = useState<Array<{
+    id: number; title: string; videoId: string; date: string;
+    status: 'Published' | 'Draft'; views: number;
+    editLink?: string; permalink?: string;
+  }>>([]);
   const [progress, setProgress] = useState<ImporterProgress>({
     phase: 'idle', total: 0, done: 0, already: 0, currentTitle: '', liveImported: [],
   });
