@@ -183,8 +183,14 @@ const SermonImporterWidget = ({
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const isConfigured = !!config.apiKey && !!config.playlistId;
-  const StatusIcon = config.lastSyncStatus === "success" ? CheckCircle2 : config.lastSyncStatus === "error" ? AlertCircle : Clock;
-  const statusColor = config.lastSyncStatus === "success" ? "text-emerald-600" : config.lastSyncStatus === "error" ? "text-destructive" : "text-muted-foreground";
+  // Per-playlist stats: prefer scoped record, fall back to top-level (legacy).
+  const stats = (config.playlistId && config.playlistStats?.[config.playlistId]) || {};
+  const activeTotal = stats.totalImported ?? config.totalImported;
+  const activeSyncAt = stats.lastSyncAt ?? config.lastSyncAt;
+  const activeSyncStatus = stats.lastSyncStatus ?? config.lastSyncStatus;
+  const activeSyncMsg = stats.lastSyncMsg ?? config.lastSyncMsg;
+  const StatusIcon = activeSyncStatus === "success" ? CheckCircle2 : activeSyncStatus === "error" ? AlertCircle : Clock;
+  const statusColor = activeSyncStatus === "success" ? "text-emerald-600" : activeSyncStatus === "error" ? "text-destructive" : "text-muted-foreground";
 
   const isLive = progress && (progress.phase === "scanning" || progress.phase === "importing");
   const pct = progress && progress.total > 0 ? Math.min(100, Math.round((progress.done / progress.total) * 100)) : 0;
@@ -290,7 +296,7 @@ const SermonImporterWidget = ({
         })()}
         <div className="p-3 rounded-lg bg-white border border-border">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
-          <div className="text-xl font-bold text-foreground">{config.totalImported}</div>
+          <div className="text-xl font-bold text-foreground">{activeTotal}</div>
         </div>
         <div className="p-3 rounded-lg bg-white border border-border">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Interval</div>
@@ -423,8 +429,8 @@ const SermonImporterWidget = ({
         <div className="flex items-center gap-2 text-xs">
         <StatusIcon className={`w-4 h-4 ${statusColor}`} />
         <span className="text-muted-foreground">Inst sync:</span>
-        <span className="font-medium text-foreground">{fmtTime(config.lastSyncAt)}</span>
-        {config.lastSyncMsg && <span className="text-muted-foreground">— {config.lastSyncMsg}</span>}
+        <span className="font-medium text-foreground">{fmtTime(activeSyncAt)}</span>
+        {activeSyncMsg && <span className="text-muted-foreground">— {activeSyncMsg}</span>}
         </div>
       )}
 
