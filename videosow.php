@@ -1080,7 +1080,7 @@ function videosow_sermon_archive_toolbar_js() {
   var BATCH = 20;
   var EXCERPT_WORDS = (function(){
     var tb = document.getElementById('videosow-toolbar');
-    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || '40', 10) : 40;
+    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || String(CONFIG_EXCERPT_WORDS), 10) : CONFIG_EXCERPT_WORDS;
     if (!n || isNaN(n) || n < 5) n = 40;
     return n;
   })();
@@ -1598,7 +1598,7 @@ function videosow_sermon_archive_toolbar_js() {
     var grid = document.createElement('div');
     grid.id = 'videosow-grid';
     grid.className = 'videosow-grid';
-    var __vsLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || 'theme';
+    var __vsLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
     grid.setAttribute('data-vs-layout', __vsLayout);
 
     if (rawArticles.length){
