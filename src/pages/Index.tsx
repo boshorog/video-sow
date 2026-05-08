@@ -131,7 +131,13 @@ const Index = () => {
   });
   const [shortcodeCopied, setShortcodeCopied] = useState(false);
   const [galleryNotFound, setGalleryNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const t = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
+    return t;
+  });
+  useEffect(() => {
+    if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
+  }, [activeTab, license.isPro, license.checked]);
 
   useEffect(() => {
     // DEMO MODE: Always start with default gallery, skip WP/localStorage
