@@ -74,6 +74,20 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.1.7 =
+* Articles CPT now lives as a submenu of the Video Sow admin menu (renamed Videos → Articles)
+* New: toggle to show/hide the theme sidebar on the archive page and on single article pages (hidden by default)
+
+= 1.1.6 =
+* Activation redirects to the Video Sow dashboard
+* Playlist validator with green check in Settings; channel name shown above playlist on Import
+* Slug change now flushes rewrite rules so the archive URL updates immediately
+* Cancelled imports finalize cleanly; Archive card on Import page now shows live data
+
+= 1.1.5 =
+* Save button works in the WordPress admin context
+* Pro build no longer reports as Free after upload-over install
+
 = 1.1.4 =
 * Packaging aligned with the standard build flow (`npm run package` produces Free and Pro ZIPs in `releases/`)
 * Removed stale reference source file from the imported plugin
