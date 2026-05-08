@@ -5,7 +5,20 @@ import {
   defaultSermonImporterConfig as defaultImporterConfig,
 } from '@/components/importer/ImporterWidget';
 
-const isInWordPress = () => typeof window !== 'undefined' && window.parent !== window;
+// Detect WordPress context via the localized global injected by PHP.
+// Note: the React app is mounted directly into the admin page (NOT iframed),
+// so window.parent === window. We must detect via the global instead.
+const isInWordPress = () => {
+  if (typeof window === 'undefined') return false;
+  const w = window as any;
+  return !!(w.videosowData?.ajaxUrl || w.kindpdfgData?.ajaxUrl);
+};
+// Always post to self — the same-window bridge in PHP listens on `message`.
+const wpPost = (msg: any) => {
+  if (typeof window === 'undefined') return;
+  window.postMessage(msg, '*');
+  try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch {}
+};
 
 export type ImporterProgress = {
   phase: 'idle' | 'scanning' | 'importing' | 'done';
