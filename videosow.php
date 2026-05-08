@@ -451,16 +451,15 @@ function videosow_register_sermon_cpt() {
     $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
     register_post_type( 'videosow_video', array(
         'labels' => array(
-            'name'          => 'Videos',
-            'singular_name' => 'Predică',
-            'add_new_item'  => 'Adaugă predică',
-            'edit_item'     => 'Editează predică',
-            'menu_name'     => 'Videos',
+            'name'          => 'Articles',
+            'singular_name' => 'Article',
+            'add_new_item'  => 'Add Article',
+            'edit_item'     => 'Edit Article',
+            'menu_name'     => 'Articles',
         ),
         'public'        => true,
         'show_ui'       => true,
-        'show_in_menu'  => true,
-        'menu_position' => 32,
+        'show_in_menu'  => 'video-sow',
         'menu_icon'     => 'dashicons-microphone',
         'has_archive'   => $slug,
         'rewrite'       => array( 'slug' => $slug, 'with_front' => false ),
