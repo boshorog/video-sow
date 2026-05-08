@@ -27,6 +27,7 @@ export interface AiTemplate {
 export interface SermonImporterConfig {
   apiKey: string;
   playlistId: string;
+  playlistIds?: string[];
   slug: string;
   syncIntervalH: number;
   enabled: boolean;
@@ -77,6 +78,7 @@ export interface SermonImporterConfig {
 export const defaultSermonImporterConfig: SermonImporterConfig = {
   apiKey: "",
   playlistId: "",
+  playlistIds: [],
   slug: "articles",
   syncIntervalH: 48,
   enabled: false,
@@ -217,38 +219,68 @@ const SermonImporterWidget = ({
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            if (!config.playlistId) onPlaylistClick?.();
-          }}
-          className={`p-3 rounded-lg text-left transition-colors ${
-            config.playlistId
-              ? 'bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 cursor-pointer'
-              : 'bg-amber-50 hover:bg-amber-100 border border-amber-200 cursor-pointer'
-          }`}
-        >
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
-            <ListMusic className="w-3 h-3" /> Playlist
-            {isPro && config.playlistId && (
-              <span className="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
-            )}
-          </div>
-          {config.playlistId ? (
-            <>
-              <div className="text-sm font-semibold text-emerald-900 truncate" title={playlistName || config.playlistId}>
-                {playlistName || 'Connected playlist'}
+        {(() => {
+          const playlists = (config.playlistIds && config.playlistIds.length > 0)
+            ? config.playlistIds.filter(Boolean)
+            : (config.playlistId ? [config.playlistId] : []);
+          const hasMulti = isPro && playlists.length > 1;
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                if (!config.playlistId) onPlaylistClick?.();
+              }}
+              className={`p-3 rounded-lg text-left transition-colors ${
+                config.playlistId
+                  ? 'bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 cursor-pointer'
+                  : 'bg-amber-50 hover:bg-amber-100 border border-amber-200 cursor-pointer'
+              }`}
+            >
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
+                <ListMusic className="w-3 h-3" /> Playlist
+                {hasMulti && (
+                  <span className="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
+                )}
               </div>
-              <div className="text-[10px] text-emerald-700 truncate">
-                {typeof playlistCount === 'number' ? `${playlistCount} videos` : config.playlistId}
-              </div>
-            </>
-          ) : (
-            <div className="text-sm font-semibold text-amber-700 flex items-center gap-1">
-              Not connected
-            </div>
-          )}
-        </button>
+              {config.playlistId ? (
+                <>
+                  <div className="text-sm font-semibold text-emerald-900 truncate" title={playlistName || config.playlistId}>
+                    {playlistName || 'Connected playlist'}
+                  </div>
+                  <div className="text-[10px] text-emerald-700 truncate">
+                    {typeof playlistCount === 'number' ? `${playlistCount} videos` : config.playlistId}
+                  </div>
+                  {hasMulti && onConfigChange && (
+                    <select
+                      value={config.playlistId}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        const next = { ...config, playlistId: e.target.value };
+                        onConfigChange(next);
+                        if (typeof window !== 'undefined' && window.parent !== window) {
+                          window.parent.postMessage(
+                            { type: 'videosow_save_sermon_importer_config', config: next },
+                            '*'
+                          );
+                        }
+                      }}
+                      className="mt-2 w-full text-[11px] font-mono bg-white border border-emerald-300 rounded px-1.5 py-1 text-emerald-900"
+                    >
+                      {playlists.map((pid) => (
+                        <option key={pid} value={pid}>{pid}</option>
+                      ))}
+                    </select>
+                  )}
+                </>
+              ) : (
+                <div className="text-sm font-semibold text-amber-700 flex items-center gap-1">
+                  Not connected
+                </div>
+              )}
+            </button>
+          );
+        })()}
         <div className="p-3 rounded-lg bg-white border border-border">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
           <div className="text-xl font-bold text-foreground">{config.totalImported}</div>

@@ -131,7 +131,13 @@ const Index = () => {
   });
   const [shortcodeCopied, setShortcodeCopied] = useState(false);
   const [galleryNotFound, setGalleryNotFound] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const t = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
+    return t;
+  });
+  useEffect(() => {
+    if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
+  }, [activeTab, license.isPro, license.checked]);
 
   useEffect(() => {
     // DEMO MODE: Always start with default gallery, skip WP/localStorage
@@ -614,13 +620,15 @@ const Index = () => {
                 <Youtube className="w-4 h-4" />
                 Import
               </TabsTrigger>
-              <TabsTrigger
-                value="tasks"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
-                <ListTodo className="w-4 h-4" />
-                Tasks
-              </TabsTrigger>
+              {license.isPro && (
+                <TabsTrigger
+                  value="tasks"
+                  className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
+                >
+                  <ListTodo className="w-4 h-4" />
+                  Tasks
+                </TabsTrigger>
+              )}
               <TabsTrigger
                 value="settings"
                 className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
@@ -654,9 +662,11 @@ const Index = () => {
               <ImportPage onNavigate={setActiveTab} />
             </TabsContent>
 
-            <TabsContent value="tasks" className="mt-0">
-              <TasksPage />
-            </TabsContent>
+            {license.isPro && (
+              <TabsContent value="tasks" className="mt-0">
+                <TasksPage />
+              </TabsContent>
+            )}
 
             <TabsContent value="settings" className="mt-0">
               <ImporterSettingsPanel />
