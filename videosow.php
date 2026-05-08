@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.3
+ * Version: 1.2.5
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
