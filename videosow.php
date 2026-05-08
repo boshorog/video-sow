@@ -850,7 +850,7 @@ add_action( 'init', 'videosow_schedule_views_refresh' );
 function videosow_sermon_archive_toolbar() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
     $cfg = videosow_get_sermon_importer_config();
-    if ( empty( $cfg['archiveToolbarEnabled'] ) ) return;
+    $toolbar_enabled = ! empty( $cfg['archiveToolbarEnabled'] );
 
     $show_search = ! empty( $cfg['archiveShowSearch'] );
     $show_sort   = ! empty( $cfg['archiveShowSort'] );
@@ -1025,10 +1025,12 @@ function videosow_sermon_archive_toolbar() {
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
     $layout_attr = isset( $cfg['archiveLayout'] ) ? $cfg['archiveLayout'] : 'theme';
     if ( ! in_array( $layout_attr, array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ) $layout_attr = 'theme';
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:block">'
-        . $bar_html
-        . $tags_html
-        . '</div>';
+    if ( $toolbar_enabled ) {
+        echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:block">'
+            . $bar_html
+            . $tags_html
+            . '</div>';
+    }
 }
 add_action( 'wp_footer', 'videosow_sermon_archive_toolbar', 100 );
 
