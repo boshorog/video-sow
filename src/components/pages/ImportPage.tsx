@@ -37,7 +37,7 @@ type ArchiveRow = {
   views: number;
 };
 
-const ARCHIVE: ArchiveRow[] = [
+const SAMPLE_ARCHIVE: ArchiveRow[] = [
   { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-05-07', status: 'Draft',     views: 1200 },
   { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-05-07', status: 'Draft',     views: 843 },
   { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2026-05-06', status: 'Published', views: 4600 },
