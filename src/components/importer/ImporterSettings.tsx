@@ -251,6 +251,8 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
+       <div className="space-y-6 min-w-0">
       <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
         <div className="flex-1 pr-3">
           <Label className="text-sm font-medium text-foreground">Automatic sync</Label>
