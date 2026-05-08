@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.4' );
+define( 'VIDEOSOW_VERSION', '1.2.5' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
