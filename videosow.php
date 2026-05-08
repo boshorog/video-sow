@@ -1361,19 +1361,28 @@ function videosow_sermon_archive_toolbar_js() {
   function buildSyntheticCard(d){
     var card = document.createElement('div');
     card.className = 'videosow-card';
+    // Theme-styling registration: mirror theme card classes so theme CSS hooks in.
+    var themeCardCls = THEME_MAP && THEME_MAP.card_classes ? String(THEME_MAP.card_classes).trim() : '';
+    if (themeCardCls) {
+      themeCardCls.split(/\s+/).forEach(function(c){ if(c) card.classList.add(c); });
+    }
     var article;
     if (TEMPLATE_ARTICLE){
       article = TEMPLATE_ARTICLE.cloneNode(true);
     } else {
       article = document.createElement('article');
       article.className = 'post type-videosow_video';
+      var titleCls   = (THEME_MAP && THEME_MAP.title_classes)   || 'entry-title';
+      var thumbCls   = (THEME_MAP && THEME_MAP.thumb_classes)   || 'post-thumbnail';
+      var excerptCls = (THEME_MAP && THEME_MAP.excerpt_classes) || 'entry-summary';
+      var metaCls    = (THEME_MAP && THEME_MAP.meta_classes)    || 'entry-meta';
       var thumbHtml = d.thumb
-        ? '<a href="#" class="post-thumbnail"><figure><img alt="" loading="lazy" /></figure></a>'
+        ? '<a href="#" class="' + thumbCls + '"><figure><img alt="" loading="lazy" /></figure></a>'
         : '';
       article.innerHTML = thumbHtml
-        + '<div class="entry-meta"><time class="entry-date published"></time></div>'
-        + '<h2 class="entry-title"><a href="#"></a></h2>'
-        + '<div class="entry-summary"><p></p></div>';
+        + '<div class="' + metaCls + '"><time class="entry-date published"></time></div>'
+        + '<h2 class="' + titleCls + '"><a href="#"></a></h2>'
+        + '<div class="' + excerptCls + '"><p></p></div>';
     }
     article.id = 'post-' + d.id + '-kp-view';
     article.classList.add('post-' + d.id);
