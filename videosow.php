@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.2' );
+define( 'VIDEOSOW_VERSION', '1.2.3' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -446,9 +446,39 @@ function videosow_get_sermon_importer_defaults() {
     );
 }
 
+function videosow_english_status_message( $msg ) {
+    $msg = is_string( $msg ) ? $msg : '';
+    if ( $msg === '' ) return '';
+    $plain = function_exists( 'remove_accents' ) ? remove_accents( $msg ) : $msg;
+    if ( stripos( $plain, 'manual' ) !== false && preg_match( '/(\d+)\s+importat(?:e)?/i', $plain, $m ) ) {
+        return sprintf( 'Cancelled manually after %d imported', intval( $m[1] ) );
+    }
+    if ( preg_match( '/^(\d+)\s+importat(?:e)?$/i', trim( $plain ), $m ) ) {
+        return sprintf( '%d imported', intval( $m[1] ) );
+    }
+    return $msg;
+}
+
+function videosow_normalize_config_messages( $cfg ) {
+    if ( isset( $cfg['lastSyncMsg'] ) ) $cfg['lastSyncMsg'] = videosow_english_status_message( $cfg['lastSyncMsg'] );
+    if ( isset( $cfg['log'] ) && is_array( $cfg['log'] ) ) {
+        foreach ( $cfg['log'] as $i => $entry ) {
+            if ( isset( $entry['message'] ) ) $cfg['log'][ $i ]['message'] = videosow_english_status_message( $entry['message'] );
+        }
+    }
+    if ( isset( $cfg['playlistStats'] ) && is_array( $cfg['playlistStats'] ) ) {
+        foreach ( $cfg['playlistStats'] as $pid => $stats ) {
+            if ( is_array( $stats ) && isset( $stats['lastSyncMsg'] ) ) {
+                $cfg['playlistStats'][ $pid ]['lastSyncMsg'] = videosow_english_status_message( $stats['lastSyncMsg'] );
+            }
+        }
+    }
+    return $cfg;
+}
+
 function videosow_get_sermon_importer_config() {
     $saved = get_option( 'videosow_importer_config', array() );
-    return array_merge( videosow_get_sermon_importer_defaults(), is_array( $saved ) ? $saved : array() );
+    return videosow_normalize_config_messages( array_merge( videosow_get_sermon_importer_defaults(), is_array( $saved ) ? $saved : array() ) );
 }
 
 /**
@@ -820,7 +850,7 @@ add_action( 'init', 'videosow_schedule_views_refresh' );
 function videosow_sermon_archive_toolbar() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
     $cfg = videosow_get_sermon_importer_config();
-    if ( empty( $cfg['archiveToolbarEnabled'] ) ) return;
+    $toolbar_enabled = ! empty( $cfg['archiveToolbarEnabled'] );
 
     $show_search = ! empty( $cfg['archiveShowSearch'] );
     $show_sort   = ! empty( $cfg['archiveShowSort'] );
@@ -978,7 +1008,7 @@ function videosow_sermon_archive_toolbar() {
     $opts = array(
         'date_desc'  => 'Newest first',
         'date_asc'   => 'Oldest first',
-        'views_desc' => 'Popularitate',
+        'views_desc' => 'Most viewed',
     );
     $sort_html = '';
     if ( $show_sort ) {
@@ -995,15 +1025,21 @@ function videosow_sermon_archive_toolbar() {
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
     $layout_attr = isset( $cfg['archiveLayout'] ) ? $cfg['archiveLayout'] : 'theme';
     if ( ! in_array( $layout_attr, array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ) $layout_attr = 'theme';
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:none">'
-        . $bar_html
-        . $tags_html
-        . '</div>';
+    if ( $toolbar_enabled ) {
+        echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:block">'
+            . $bar_html
+            . $tags_html
+            . '</div>';
+    }
 }
 add_action( 'wp_footer', 'videosow_sermon_archive_toolbar', 100 );
 
 function videosow_sermon_archive_toolbar_js() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
+    $cfg = videosow_get_sermon_importer_config();
+    $toolbar_enabled = ! empty( $cfg['archiveToolbarEnabled'] );
+    $js_excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
+    $js_layout = isset( $cfg['archiveLayout'] ) && in_array( $cfg['archiveLayout'], array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ? $cfg['archiveLayout'] : 'theme';
     // Build a JS map of post-id => { date, views, tags[] } for client-side sort/filter
     $q = new WP_Query( array(
         'post_type'      => 'videosow_video',
@@ -1030,7 +1066,7 @@ function videosow_sermon_archive_toolbar_js() {
             'url'   => get_permalink( $pid ),
             'date_str' => get_the_date( '', $pid ),
             'date_attr' => get_post_time( 'c', true, $pid ),
-            'excerpt' => wp_strip_all_tags( get_the_excerpt( $pid ) ),
+            'excerpt' => wp_strip_all_tags( get_post_field( 'post_excerpt', $pid ) ),
             'thumb' => $thumb_url ? $thumb_url : '',
             'srcset' => $thumb_srcset ? $thumb_srcset : '',
             'alt'   => $thumb_alt ? $thumb_alt : '',
@@ -1044,9 +1080,12 @@ function videosow_sermon_archive_toolbar_js() {
   var byId = {};
   DATA.forEach(function(d){ byId[d.id] = d; });
   var BATCH = 20;
+  var TOOLBAR_ENABLED = <?php echo $toolbar_enabled ? 'true' : 'false'; ?>;
+  var CONFIG_EXCERPT_WORDS = <?php echo (int) $js_excerpt_words; ?>;
+  var CONFIG_LAYOUT = <?php echo wp_json_encode( $js_layout ); ?>;
   var EXCERPT_WORDS = (function(){
     var tb = document.getElementById('videosow-toolbar');
-    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || '40', 10) : 40;
+    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || String(CONFIG_EXCERPT_WORDS), 10) : CONFIG_EXCERPT_WORDS;
     if (!n || isNaN(n) || n < 5) n = 40;
     return n;
   })();
@@ -1543,7 +1582,6 @@ function videosow_sermon_archive_toolbar_js() {
 
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
-    if (!toolbar) return;
     // Collect articles BEFORE moving anything around.
     var rawArticles = Array.prototype.slice.call(document.querySelectorAll('article[id^="post-"], .post-type-archive-videosow_video article'));
     var seen = {};
@@ -1562,7 +1600,7 @@ function videosow_sermon_archive_toolbar_js() {
     var grid = document.createElement('div');
     grid.id = 'videosow-grid';
     grid.className = 'videosow-grid';
-    var __vsLayout = (toolbar.getAttribute('data-vs-layout') || 'theme');
+    var __vsLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
     grid.setAttribute('data-vs-layout', __vsLayout);
 
     if (rawArticles.length){
@@ -1596,14 +1634,15 @@ function videosow_sermon_archive_toolbar_js() {
       insertHost = mainEl; insertBefore = null;
     }
     insertHost.insertBefore(grid, insertBefore);
-    grid.parentNode.insertBefore(toolbar, grid);
-    toolbar.style.display = '';
-
-    buildTags(toolbar);
-    var s = toolbar.querySelector('#videosow-search');
-    var so = toolbar.querySelector('#videosow-sort');
-    if (s) s.addEventListener('input', function(){ state.q = s.value; if (s.value) ensureAllLoaded(); apply(); });
-    if (so) so.addEventListener('change', function(){ state.sort = so.value; apply(); updateLoadMoreUI(); });
+    if (toolbar) {
+      grid.parentNode.insertBefore(toolbar, grid);
+      toolbar.style.display = '';
+      buildTags(toolbar);
+      var s = toolbar.querySelector('#videosow-search');
+      var so = toolbar.querySelector('#videosow-sort');
+      if (s) s.addEventListener('input', function(){ state.q = s.value; if (s.value) ensureAllLoaded(); apply(); });
+      if (so) so.addEventListener('change', function(){ state.sort = so.value; apply(); updateLoadMoreUI(); });
+    }
     setupLoadMore(grid);
     hideArchiveTail(grid);
     hideNativePagination();
@@ -1873,6 +1912,8 @@ function videosow_ajax_save_sermon_importer_config() {
         'archiveShowSearch'        => isset( $incoming['archiveShowSearch'] ) ? (bool) $incoming['archiveShowSearch'] : $current['archiveShowSearch'],
         'archiveSidebarEnabled'    => isset( $incoming['archiveSidebarEnabled'] ) ? (bool) $incoming['archiveSidebarEnabled'] : ( isset( $current['archiveSidebarEnabled'] ) ? (bool) $current['archiveSidebarEnabled'] : false ),
         'singleSidebarEnabled'     => isset( $incoming['singleSidebarEnabled'] ) ? (bool) $incoming['singleSidebarEnabled'] : ( isset( $current['singleSidebarEnabled'] ) ? (bool) $current['singleSidebarEnabled'] : false ),
+        'archiveLayout'            => isset( $incoming['archiveLayout'] ) && in_array( $incoming['archiveLayout'], array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ? $incoming['archiveLayout'] : ( isset( $current['archiveLayout'] ) ? $current['archiveLayout'] : 'theme' ),
+        'archiveExcerptWords'      => isset( $incoming['archiveExcerptWords'] ) ? max( 5, min( 200, intval( $incoming['archiveExcerptWords'] ) ) ) : ( isset( $current['archiveExcerptWords'] ) ? max( 5, min( 200, intval( $current['archiveExcerptWords'] ) ) ) : 40 ),
         'archiveShowSort'          => isset( $incoming['archiveShowSort'] ) ? (bool) $incoming['archiveShowSort'] : $current['archiveShowSort'],
         'archiveShowTags'          => isset( $incoming['archiveShowTags'] ) ? (bool) $incoming['archiveShowTags'] : $current['archiveShowTags'],
         'archiveDefaultSort'       => isset( $incoming['archiveDefaultSort'] ) && in_array( $incoming['archiveDefaultSort'], array( 'date_desc', 'date_asc', 'views_desc' ), true ) ? $incoming['archiveDefaultSort'] : $current['archiveDefaultSort'],
@@ -2616,14 +2657,31 @@ function videosow_ajax_step_sermon_sync() {
     check_ajax_referer( 'videosow_nonce', 'nonce' );
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
+    $cfg     = videosow_get_sermon_importer_config();
+    $session = get_option( 'videosow_sync_session', array() );
+
     if ( get_transient( 'videosow_sync_cancelled' ) ) {
         delete_transient( 'videosow_sync_cancelled' );
         delete_option( 'videosow_sync_session' );
         wp_send_json_success( array( 'done' => true, 'cancelled' => true ) );
     }
 
-    $cfg     = videosow_get_sermon_importer_config();
-    $session = get_option( 'videosow_sync_session', array() );
+    if ( ! empty( $session['rest_until'] ) ) {
+        $remaining_rest = intval( $session['rest_until'] ) - time();
+        if ( $remaining_rest > 0 ) {
+            wp_send_json_success( array(
+                'done'         => false,
+                'resting'      => true,
+                'progress'     => isset( $session['total'], $session['queue'] ) ? intval( $session['total'] ) - count( $session['queue'] ) : 0,
+                'total'        => isset( $session['total'] ) ? intval( $session['total'] ) : 0,
+                'remaining'    => isset( $session['queue'] ) && is_array( $session['queue'] ) ? count( $session['queue'] ) : 0,
+                'rest_seconds' => $remaining_rest,
+                'rest_reason'  => isset( $session['rest_reason'] ) ? $session['rest_reason'] : 'Coffee break',
+            ) );
+        }
+        unset( $session['rest_until'], $session['rest_reason'] );
+        update_option( 'videosow_sync_session', $session, false );
+    }
     if ( empty( $session ) || empty( $session['queue'] ) ) {
         // Done — finalize log + counters
         if ( ! empty( $session ) ) {
@@ -2686,10 +2744,15 @@ function videosow_ajax_step_sermon_sync() {
         $r_pause = max( 0, intval( isset( $cfg['relaxedPauseS'] ) ? $cfg['relaxedPauseS'] : 10 ) );
         if ( $done > 0 && ( $done % $r_batch ) === 0 && $r_pause > 0 ) {
             $rest_seconds = $r_pause;
-            $rest_reason  = 'long pause (every ' . $r_batch . ' videos)';
+            $rest_reason  = 'Coffee break';
         } elseif ( $r_delay > 0 ) {
             $rest_seconds = $r_delay;
             $rest_reason  = 'pause between videos';
+        }
+        if ( $rest_seconds > 0 ) {
+            $session['rest_until']  = time() + $rest_seconds;
+            $session['rest_reason'] = $rest_reason;
+            update_option( 'videosow_sync_session', $session, false );
         }
     }
 
@@ -3876,7 +3939,7 @@ function videosow_ajax_dashboard_stats() {
 
     $cfg = videosow_get_sermon_importer_config();
     $last_sync_at  = isset( $cfg['lastSyncAt'] ) ? (int) $cfg['lastSyncAt'] : 0;
-    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? (string) $cfg['lastSyncMsg'] : '';
+    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? videosow_english_status_message( (string) $cfg['lastSyncMsg'] ) : '';
     $last_sync_human = $last_sync_at ? human_time_diff( $last_sync_at, current_time( 'timestamp' ) ) . ' ago' : '';
 
     $q = new WP_Query( array(

@@ -50,10 +50,19 @@ export const useImporter = () => {
   });
   const stopRef = useRef(false);
   const stepStartRef = useRef(0);
+  const restTimerRef = useRef<number | null>(null);
 
   // Stall watchdog
   useEffect(() => {
-    if (!isSyncing) { setStallInfo(null); setRestingInfo(null); return; }
+    if (!isSyncing) {
+      setStallInfo(null);
+      setRestingInfo(null);
+      if (restTimerRef.current) {
+        window.clearInterval(restTimerRef.current);
+        restTimerRef.current = null;
+      }
+      return;
+    }
     const t = window.setInterval(() => {
       if (!stepStartRef.current) return;
       const elapsed = Math.round((Date.now() - stepStartRef.current) / 1000);
@@ -139,7 +148,27 @@ export const useImporter = () => {
           else toast.success('Sync complete.');
           wpPost({ type: 'videosow_load_sermon_importer_config' });
           wpPost({ type: 'videosow_list_archive' });
+        } else if (data.rest_seconds && data.rest_seconds > 0) {
+          const totalRest = Math.max(1, Number(data.rest_seconds) || 1);
+          if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+          setRestingInfo({ remaining: totalRest, total: totalRest, reason: data.rest_reason || 'Coffee break' });
+          let left = totalRest;
+          restTimerRef.current = window.setInterval(() => {
+            left -= 1;
+            if (left <= 0) {
+              if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+              restTimerRef.current = null;
+              setRestingInfo(null);
+              if (!stopRef.current) {
+                stepStartRef.current = Date.now();
+                wpPost({ type: 'videosow_step_sermon_sync' });
+              }
+            } else {
+              setRestingInfo((prev) => prev ? { ...prev, remaining: left } : prev);
+            }
+          }, 1000);
         } else {
+          setRestingInfo(null);
           stepStartRef.current = Date.now();
           wpPost({ type: 'videosow_step_sermon_sync' });
         }
@@ -182,7 +211,10 @@ export const useImporter = () => {
     window.addEventListener('message', handler);
     wpPost({ type: 'videosow_load_sermon_importer_config' });
     wpPost({ type: 'videosow_list_archive' });
-    return () => window.removeEventListener('message', handler);
+    return () => {
+      window.removeEventListener('message', handler);
+      if (restTimerRef.current) window.clearInterval(restTimerRef.current);
+    };
   }, []);
 
   const refreshArchive = useCallback((playlistId?: string) => {
