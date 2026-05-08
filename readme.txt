@@ -74,6 +74,18 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.1.9 =
+* Import → Archive card now shows real imported articles (no longer falls back to sample data once imports exist)
+* Deleting an imported article also removes its featured image attachment from the Media Library
+* New: choose 1, 2, or 3 columns for the article cards layout on the archive page
+* Single article page now enforces a proper 16:9 aspect ratio for the YouTube video embed
+* Slug card on the Import page now uses the same large font as the other stat cards
+
+= 1.1.8 =
+* Admin sidebar reorganized: Dashboard (first), Articles, Tags
+* Dashboard stats and Recent Activity now wired to live data
+* Full English localization pass; sidebar settings moved under SEO; full-width content when sidebar is disabled
+
 = 1.1.7 =
 * Articles CPT now lives as a submenu of the Video Sow admin menu (renamed Videos → Articles)
 * New: toggle to show/hide the theme sidebar on the archive page and on single article pages (hidden by default)
