@@ -3729,3 +3729,57 @@ function videosow_ajax_list_archive() {
     wp_send_json_success( array( 'rows' => $rows ) );
 }
 add_action( 'wp_ajax_videosow_list_archive', 'videosow_ajax_list_archive' );
+
+/**
+ * AJAX: dashboard stats — counts and recent activity for the Dashboard tab.
+ */
+function videosow_ajax_dashboard_stats() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+
+    $counts    = wp_count_posts( 'videosow_video' );
+    $published = isset( $counts->publish ) ? (int) $counts->publish : 0;
+    $draft     = isset( $counts->draft ) ? (int) $counts->draft : 0;
+    $pending   = isset( $counts->pending ) ? (int) $counts->pending : 0;
+    $private_  = isset( $counts->private ) ? (int) $counts->private : 0;
+    $future    = isset( $counts->future ) ? (int) $counts->future : 0;
+    $imported  = $published + $draft + $pending + $private_ + $future;
+
+    $cfg = videosow_get_sermon_importer_config();
+    $last_sync_at  = isset( $cfg['lastSyncAt'] ) ? (int) $cfg['lastSyncAt'] : 0;
+    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? (string) $cfg['lastSyncMsg'] : '';
+    $last_sync_human = $last_sync_at ? human_time_diff( $last_sync_at, current_time( 'timestamp' ) ) . ' ago' : '';
+
+    $q = new WP_Query( array(
+        'post_type'      => 'videosow_video',
+        'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+        'posts_per_page' => 6,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'no_found_rows'  => true,
+    ) );
+    $recent = array();
+    foreach ( $q->posts as $p ) {
+        $recent[] = array(
+            'id'        => $p->ID,
+            'title'     => get_the_title( $p ),
+            'when'      => human_time_diff( get_post_time( 'U', true, $p ), current_time( 'timestamp', true ) ) . ' ago',
+            'status'    => $p->post_status === 'publish' ? 'Published' : 'Drafted',
+            'editLink'  => get_edit_post_link( $p->ID, '' ),
+            'permalink' => get_permalink( $p ),
+            'videoId'   => (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true ),
+        );
+    }
+
+    wp_send_json_success( array(
+        'imported'      => $imported,
+        'published'     => $published,
+        'draft'         => $draft + $pending,
+        'lastSyncAt'    => $last_sync_at,
+        'lastSyncMsg'   => $last_sync_msg,
+        'lastSyncHuman' => $last_sync_human,
+        'totalImported' => isset( $cfg['totalImported'] ) ? (int) $cfg['totalImported'] : $imported,
+        'recent'        => $recent,
+    ) );
+}
+add_action( 'wp_ajax_videosow_dashboard_stats', 'videosow_ajax_dashboard_stats' );
