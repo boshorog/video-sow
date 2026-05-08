@@ -315,7 +315,7 @@ const SermonImporterWidget = ({
         </div>
         <div className="p-3 rounded-lg bg-white border border-border relative group">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Slug</div>
-          <div className="text-sm font-mono font-semibold text-foreground truncate pr-6">/{config.slug}/</div>
+          <div className="text-xl font-bold font-mono text-foreground truncate pr-6">/{config.slug}/</div>
           {onConfigChange && (
             <button
               type="button"
