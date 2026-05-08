@@ -449,11 +449,11 @@ function videosow_get_sermon_importer_defaults() {
 function videosow_english_status_message( $msg ) {
     $msg = is_string( $msg ) ? $msg : '';
     if ( $msg === '' ) return '';
-    $msg = str_replace( array( 'Popularitate' ), array( 'Most viewed' ), $msg );
-    if ( preg_match( '/Întrerupt\s+manual\s+după\s+(\d+)\s+importate/ui', $msg, $m ) ) {
+    $plain = function_exists( 'remove_accents' ) ? remove_accents( $msg ) : $msg;
+    if ( stripos( $plain, 'manual' ) !== false && preg_match( '/(\d+)\s+importat(?:e)?/i', $plain, $m ) ) {
         return sprintf( 'Cancelled manually after %d imported', intval( $m[1] ) );
     }
-    if ( preg_match( '/^(\d+)\s+importate$/ui', $msg, $m ) ) {
+    if ( preg_match( '/^(\d+)\s+importat(?:e)?$/i', trim( $plain ), $m ) ) {
         return sprintf( '%d imported', intval( $m[1] ) );
     }
     return $msg;
