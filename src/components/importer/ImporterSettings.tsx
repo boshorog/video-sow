@@ -425,17 +425,22 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                       className="flex items-center gap-2 rounded-md hover:bg-secondary/30 transition-colors"
                     >
                       <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
-                      <Input
-                        value={pid}
-                        onChange={(e) => {
-                          const v = parsePlaylist(e.target.value);
-                          const next = [...list];
-                          next[i] = v;
-                          setList(next);
-                        }}
-                        placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
-                        className="h-9 text-sm font-mono flex-1"
-                      />
+                      <div className="relative flex-1">
+                        <Input
+                          value={pid}
+                          onChange={(e) => {
+                            const v = parsePlaylist(e.target.value);
+                            const next = [...list];
+                            next[i] = v;
+                            setList(next);
+                          }}
+                          placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                          className="h-9 text-sm font-mono pr-9"
+                        />
+                        <div className="absolute inset-y-0 right-2.5 flex items-center">
+                          <PlaylistValidator apiKey={config.apiKey} playlistId={pid} />
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
