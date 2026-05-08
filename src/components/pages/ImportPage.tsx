@@ -197,6 +197,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         isPro={license.isPro}
         playlistName={playlistInfo.name}
         playlistCount={playlistInfo.count}
+        channelName={playlistInfo.channel}
         onPlaylistClick={() => onNavigate?.('settings')}
       />
 
