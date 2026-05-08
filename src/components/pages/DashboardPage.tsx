@@ -27,7 +27,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
 
       {/* KPI tiles */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Youtube className="w-4 h-4 text-primary" />
@@ -42,7 +42,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <FileText className="w-4 h-4 text-primary" />
@@ -55,7 +55,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -68,7 +68,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Clock className="w-4 h-4 text-primary" />
