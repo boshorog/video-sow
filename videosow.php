@@ -2651,14 +2651,31 @@ function videosow_ajax_step_sermon_sync() {
     check_ajax_referer( 'videosow_nonce', 'nonce' );
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
+    $cfg     = videosow_get_sermon_importer_config();
+    $session = get_option( 'videosow_sync_session', array() );
+
     if ( get_transient( 'videosow_sync_cancelled' ) ) {
         delete_transient( 'videosow_sync_cancelled' );
         delete_option( 'videosow_sync_session' );
         wp_send_json_success( array( 'done' => true, 'cancelled' => true ) );
     }
 
-    $cfg     = videosow_get_sermon_importer_config();
-    $session = get_option( 'videosow_sync_session', array() );
+    if ( ! empty( $session['rest_until'] ) ) {
+        $remaining_rest = intval( $session['rest_until'] ) - time();
+        if ( $remaining_rest > 0 ) {
+            wp_send_json_success( array(
+                'done'         => false,
+                'resting'      => true,
+                'progress'     => isset( $session['total'], $session['queue'] ) ? intval( $session['total'] ) - count( $session['queue'] ) : 0,
+                'total'        => isset( $session['total'] ) ? intval( $session['total'] ) : 0,
+                'remaining'    => isset( $session['queue'] ) && is_array( $session['queue'] ) ? count( $session['queue'] ) : 0,
+                'rest_seconds' => $remaining_rest,
+                'rest_reason'  => isset( $session['rest_reason'] ) ? $session['rest_reason'] : 'Coffee break',
+            ) );
+        }
+        unset( $session['rest_until'], $session['rest_reason'] );
+        update_option( 'videosow_sync_session', $session, false );
+    }
     if ( empty( $session ) || empty( $session['queue'] ) ) {
         // Done — finalize log + counters
         if ( ! empty( $session ) ) {
@@ -2721,10 +2738,15 @@ function videosow_ajax_step_sermon_sync() {
         $r_pause = max( 0, intval( isset( $cfg['relaxedPauseS'] ) ? $cfg['relaxedPauseS'] : 10 ) );
         if ( $done > 0 && ( $done % $r_batch ) === 0 && $r_pause > 0 ) {
             $rest_seconds = $r_pause;
-            $rest_reason  = 'long pause (every ' . $r_batch . ' videos)';
+            $rest_reason  = 'Coffee break';
         } elseif ( $r_delay > 0 ) {
             $rest_seconds = $r_delay;
             $rest_reason  = 'pause between videos';
+        }
+        if ( $rest_seconds > 0 ) {
+            $session['rest_until']  = time() + $rest_seconds;
+            $session['rest_reason'] = $rest_reason;
+            update_option( 'videosow_sync_session', $session, false );
         }
     }
 
