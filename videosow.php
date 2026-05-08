@@ -4148,6 +4148,17 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'scanned_at'        => 0,
         'scan_url'          => '',
         'note'              => '',
+        // v1.2.7 — theme styling registration.
+        'card_classes'      => '',   // space-separated class chain to mirror on synthetic cards
+        'title_classes'     => '',
+        'thumb_classes'     => '',
+        'excerpt_classes'   => '',
+        'meta_classes'      => '',
+        'link_classes'      => '',
+        'theme_css_vars'    => array(), // {--name: value} extracted from inline <style> blocks
+        'body_classes'      => '',
+        'cards_found'       => 0,
+        'scan_attempts'     => array(), // [{url, found}]
     );
     return array_merge( $defaults, $opt );
 }
