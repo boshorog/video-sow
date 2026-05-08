@@ -181,7 +181,13 @@ export const useImporter = () => {
     };
     window.addEventListener('message', handler);
     wpPost({ type: 'videosow_load_sermon_importer_config' });
+    wpPost({ type: 'videosow_list_archive' });
     return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const refreshArchive = useCallback((playlistId?: string) => {
+    if (!isInWordPress()) return;
+    wpPost({ type: 'videosow_list_archive', playlist: playlistId || '' });
   }, []);
 
   const save = useCallback(() => {
