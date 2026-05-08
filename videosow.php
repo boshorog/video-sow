@@ -347,6 +347,8 @@ function videosow_get_sermon_importer_defaults() {
         'archiveMetaDescription'   => '',
         'archiveToolbarEnabled'    => true,
         'archiveShowSearch'        => true,
+        'archiveSidebarEnabled'    => false,
+        'singleSidebarEnabled'     => false,
         'archiveShowSort'          => true,
         'archiveShowTags'          => true,
         'archiveDefaultSort'       => 'date_desc',
