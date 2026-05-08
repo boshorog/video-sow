@@ -105,8 +105,19 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
     }
   };
 
+  const useSample = isFirstRun || imp.archive.length === 0;
+  const sourceRows: ArchiveRow[] = useSample
+    ? SAMPLE_ARCHIVE
+    : imp.archive.map((r) => ({
+        title: r.title,
+        videoId: r.videoId,
+        date: r.date,
+        status: r.status,
+        views: r.views,
+      }));
+
   const sorted = useMemo(() => {
-    const f = ARCHIVE.filter(
+    const f = sourceRows.filter(
       (r) =>
         r.title.toLowerCase().includes(filter.toLowerCase()) ||
         r.videoId.toLowerCase().includes(filter.toLowerCase())
@@ -118,7 +129,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
       return String(av).localeCompare(String(bv)) * dir;
     });
-  }, [filter, sortKey, sortDir]);
+  }, [filter, sortKey, sortDir, sourceRows]);
 
   const SortHeader = ({
     label,
