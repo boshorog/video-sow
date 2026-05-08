@@ -310,6 +310,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
