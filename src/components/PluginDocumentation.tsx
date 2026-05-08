@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Crown, Check, X, Shield, Trash2, BookOpen, FileText, Settings, Upload, Layout, Palette, HelpCircle, Zap } from 'lucide-react';
+import { Crown, Check, X, Trash2, BookOpen, Zap, Settings, Youtube, Languages, ListTodo, Wrench, KeyRound } from 'lucide-react';
 import { useLicense } from '@/hooks/useLicense';
 import { useToast } from '@/hooks/use-toast';
-import { PLUGIN_VERSION } from '@/config/pluginIdentity';
+import { PLUGIN_VERSION, PLUGIN_NAME, PRO_NAME, PLUGIN_PREFIX, AJAX_ACTION } from '@/config/pluginIdentity';
 
 interface PluginDocumentationProps {
   className?: string;
@@ -19,10 +19,9 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
   const [isRemovingLicense, setIsRemovingLicense] = useState(false);
   const { toast } = useToast();
 
-  // Get license owner info from WordPress global
   const getLicenseOwner = () => {
     try {
-      const wpGlobal = (window as any).kindpdfgData || (window as any).wpPDFGallery || (window.parent as any)?.kindpdfgData || (window.parent as any)?.wpPDFGallery;
+      const wpGlobal = (window as any).videosowData || (window as any).kindpdfgData || (window.parent as any)?.videosowData;
       return wpGlobal?.licensedTo || 'Pro User';
     } catch {
       return 'Pro User';
@@ -32,7 +31,7 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
   const handleRemoveLicense = async () => {
     setIsRemovingLicense(true);
     try {
-      const wpGlobal = (window as any).kindpdfgData || (window as any).wpPDFGallery || (window.parent as any)?.kindpdfgData || (window.parent as any)?.wpPDFGallery;
+      const wpGlobal = (window as any).videosowData || (window.parent as any)?.videosowData;
       const ajaxUrl = wpGlobal?.ajaxUrl || (window as any).ajaxurl;
       const nonce = wpGlobal?.nonce;
 
@@ -42,15 +41,10 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
       }
 
       const form = new FormData();
-      form.append('action', 'kindpdfg_freemius_deactivate');
+      form.append('action', `${PLUGIN_PREFIX}_freemius_deactivate`);
       form.append('nonce', nonce);
 
-      const response = await fetch(ajaxUrl, {
-        method: 'POST',
-        credentials: 'same-origin',
-        body: form
-      });
-
+      const response = await fetch(ajaxUrl, { method: 'POST', credentials: 'same-origin', body: form });
       const data = await response.json();
 
       if (data?.success) {
@@ -86,11 +80,34 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
     </tr>
   );
 
-  // If showing only license and comparison, render a simplified view
+  const ComparisonTable = () => (
+    <table className="w-full border-collapse">
+      <thead>
+        <tr className="bg-muted/50">
+          <th className="py-3 px-4 text-left text-sm font-semibold">Feature</th>
+          <th className="py-3 px-4 text-center text-sm font-semibold">Free</th>
+          <th className="py-3 px-4 text-center text-sm font-semibold">
+            <span className="inline-flex items-center gap-1">Pro <Crown className="w-4 h-4 text-amber-500" /></span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <FeatureRow feature="YouTube playlists" free="1" pro="Unlimited" />
+        <FeatureRow feature="Automatic sync (custom interval)" free={true} pro={true} />
+        <FeatureRow feature="Per-video WordPress article" free={true} pro={true} />
+        <FeatureRow feature="YouTube Data API v3 fetching" free={true} pro={true} />
+        <FeatureRow feature="Archive of imported articles" free={true} pro={true} />
+        <FeatureRow feature="Transcript extraction (SEO)" free={false} pro={true} />
+        <FeatureRow feature="YouTube OAuth (transcript backup)" free={false} pro={true} />
+        <FeatureRow feature="Tasks workflow" free={false} pro={true} />
+        <FeatureRow feature="Priority support" free={false} pro={true} />
+      </tbody>
+    </table>
+  );
+
   if (showOnlyLicenseAndComparison) {
     return (
       <div className={className}>
-        {/* Pro License Info */}
         {license.isPro && license.checked && (
           <Card className="mb-6 border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
             <CardContent className="py-4">
@@ -103,7 +120,7 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
                     <p className="text-sm font-medium">
                       Licensed to: <span className="text-primary">{getLicenseOwner()}</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">PDF Gallery Pro v{PLUGIN_VERSION}</p>
+                    <p className="text-xs text-muted-foreground">{PRO_NAME} v{PLUGIN_VERSION}</p>
                   </div>
                 </div>
                 <AlertDialog>
@@ -122,11 +139,7 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={handleRemoveLicense}
-                        disabled={isRemovingLicense}
-                        className="bg-destructive hover:bg-destructive/90"
-                      >
+                      <AlertDialogAction onClick={handleRemoveLicense} disabled={isRemovingLicense} className="bg-destructive hover:bg-destructive/90">
                         {isRemovingLicense ? 'Removing...' : 'Remove License'}
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -136,8 +149,7 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
             </CardContent>
           </Card>
         )}
-        
-        {/* Comparison Table */}
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -146,33 +158,7 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-muted/50">
-                    <th className="py-3 px-4 text-left text-sm font-semibold">Feature</th>
-                    <th className="py-3 px-4 text-center text-sm font-semibold">Free</th>
-                    <th className="py-3 px-4 text-center text-sm font-semibold">
-                      <span className="inline-flex items-center gap-1">
-                        Pro
-                        <Crown className="w-4 h-4 text-amber-500" />
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <FeatureRow feature="Number of Galleries" free="1" pro="Unlimited" />
-                  <FeatureRow feature="Documents per Gallery" free="Unlimited" pro="Unlimited" />
-                  <FeatureRow feature="Batch Upload of Multiple Files" free={false} pro={true} />
-                  <FeatureRow feature="File Analytics" free={false} pro={true} />
-                  <FeatureRow feature="Multiple File Types (PDF, Office, Images, Video, Audio, Archives)" free={true} pro={true} />
-                  <FeatureRow feature="Drag & Drop Reordering" free={true} pro={true} />
-                  <FeatureRow feature="Section Dividers" free={true} pro={true} />
-                  <FeatureRow feature="Many Styling Options" free={true} pro={true} />
-                  <FeatureRow feature="Priority Support" free={false} pro={true} />
-                </tbody>
-              </table>
-            </div>
+            <div className="overflow-x-auto"><ComparisonTable /></div>
           </CardContent>
         </Card>
       </div>
@@ -185,454 +171,148 @@ const PluginDocumentation: React.FC<PluginDocumentationProps> = ({ className, sh
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2">
             <BookOpen className="w-5 h-5" />
-            PDF Gallery Documentation
+            {PLUGIN_NAME} Documentation
             <Badge variant="secondary" className="ml-2">v{PLUGIN_VERSION}</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full">
 
-            {/* Getting Started */}
             <AccordionItem value="getting-started">
               <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-blue-500" />
-                  Getting Started
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-6 text-sm">
-                  <div>
-                    <h4 className="font-medium mb-3 text-base border-b border-border pb-2">1. Add Your Files</h4>
-                    <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-2">
-                      <li>Go to the <strong>Galleries</strong> tab</li>
-                      <li>Click <strong>"Add File(s)"</strong> to upload documents</li>
-                      <li>Arrange your documents using drag & drop</li>
-                    </ol>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-3 text-base border-b border-border pb-2">2. Organize with Dividers</h4>
-                    <p className="text-muted-foreground ml-2">
-                      Use <strong>"Add Divider"</strong> to create section headers and organize your files into logical chapters or categories.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-3 text-base border-b border-border pb-2">3. Customize Appearance</h4>
-                    <p className="text-muted-foreground ml-2">
-                      Visit the <strong>Settings</strong> tab to adjust column layout, thumbnail styles, colors, hover effects, and more.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-3 text-base border-b border-border pb-2">4. Embed Your Gallery</h4>
-                    <ol className="list-decimal list-inside space-y-2 text-muted-foreground ml-2">
-                      <li>Copy the shortcode from the <strong>Preview</strong> tab</li>
-                      <li>Paste the shortcode into any page or post</li>
-                    </ol>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Supported File Types */}
-            <AccordionItem value="file-types">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-cyan-500" />
-                  Supported File Types
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3 text-sm">
-                  <p className="text-muted-foreground">
-                    The following file types are currently supported. You can also add YouTube links to display YouTube videos.
-                  </p>
-                  <div>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">PDF</Badge>
-                      <Badge variant="outline">DOC/DOCX</Badge>
-                      <Badge variant="outline">PPT/PPTX</Badge>
-                      <Badge variant="outline">XLS/XLSX</Badge>
-                      <Badge variant="outline">TXT</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Images</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">JPG/JPEG</Badge>
-                      <Badge variant="outline">PNG</Badge>
-                      <Badge variant="outline">GIF</Badge>
-                      <Badge variant="outline">WEBP</Badge>
-                      <Badge variant="outline">SVG</Badge>
-                      <Badge variant="outline">BMP</Badge>
-                      <Badge variant="outline">ICO</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Audio</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">MP3</Badge>
-                      <Badge variant="outline">WAV</Badge>
-                      <Badge variant="outline">OGG</Badge>
-                      <Badge variant="outline">M4A</Badge>
-                      <Badge variant="outline">FLAC</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Video</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">MP4</Badge>
-                      <Badge variant="outline">WEBM</Badge>
-                      <Badge variant="outline">OGV</Badge>
-                      <Badge variant="outline">MOV</Badge>
-                      <Badge variant="outline">AVI</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">Archives</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">ZIP</Badge>
-                      <Badge variant="outline">RAR</Badge>
-                      <Badge variant="outline">7Z</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-1">eBooks</p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline">EPUB</Badge>
-                      <Badge variant="outline">MOBI</Badge>
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Uploading Files */}
-            <AccordionItem value="uploading">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4 text-green-500" />
-                  Uploading Files
-                </div>
+                <div className="flex items-center gap-2"><Zap className="w-4 h-4 text-blue-500" /> Getting Started</div>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-4 text-sm">
                   <div>
-                    <h4 className="font-medium mb-2">Upload Methods</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>Computer Upload:</strong> Select files from your device</li>
-                      <li><strong>WordPress Media Library:</strong> Choose existing media files</li>
-                      <li><strong>URL Input:</strong> Enter a direct link to a file</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Thumbnails</h4>
+                    <h4 className="font-medium mb-2 text-base border-b border-border pb-2">1. Add your YouTube Data API v3 key</h4>
                     <p className="text-muted-foreground">
-                      Thumbnails are automatically generated for PDF and image files. For other file types, a placeholder icon is displayed. 
-                      You can also upload custom thumbnails for any document.
+                      Open <strong>Settings</strong> and paste a YouTube Data API v3 key. Generate one from
+                      Google Cloud Console → APIs &amp; Services → Credentials, after enabling the
+                      <em> YouTube Data API v3</em>.
                     </p>
                   </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Gallery Management */}
-            <AccordionItem value="management">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Layout className="w-4 h-4 text-purple-500" />
-                  Gallery Management
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 text-sm">
                   <div>
-                    <h4 className="font-medium mb-2">Organizing Documents</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>Drag & Drop:</strong> Reorder documents by dragging them</li>
-                      <li><strong>Section Dividers:</strong> Add headers to group related documents</li>
-                      <li><strong>Bulk Selection:</strong> Select multiple items for batch operations</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Editing Documents</h4>
+                    <h4 className="font-medium mb-2 text-base border-b border-border pb-2">2. Connect a playlist</h4>
                     <p className="text-muted-foreground">
-                      Click the edit icon on any document to modify its title, subtitle, or thumbnail. 
-                      Changes are saved automatically.
+                      Paste any YouTube playlist URL or ID in the Playlist field. {PLUGIN_NAME} will pull the title,
+                      description and thumbnail of every video and turn each into a draft / published WordPress article.
                     </p>
                   </div>
-                  {license.isPro && (
-                    <div>
-                      <h4 className="font-medium mb-2">Multiple Galleries (Pro)</h4>
-                      <p className="text-muted-foreground">
-                        Create unlimited galleries for different purposes. Use the gallery selector dropdown 
-                        to switch between galleries or create new ones.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Shortcodes */}
-            <AccordionItem value="shortcodes">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-orange-500" />
-                  Shortcodes
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 text-sm">
                   <div>
-                    <h4 className="font-medium mb-2">Basic Usage</h4>
-                    <code className="block bg-muted p-3 rounded text-xs">
-                      [kindpdfg_gallery]
-                    </code>
-                    <p className="text-muted-foreground mt-2">Displays the default gallery.</p>
+                    <h4 className="font-medium mb-2 text-base border-b border-border pb-2">3. Configure automatic sync</h4>
+                    <p className="text-muted-foreground">
+                      Choose an interval (minutes / hours / days) and tweak the relaxed-mode pauses to stay friendly with
+                      the YouTube quota. {PLUGIN_NAME} will keep checking for new videos and import them in batches.
+                    </p>
                   </div>
                   <div>
-                    <h4 className="font-medium mb-2">Specific Gallery</h4>
-                    <code className="block bg-muted p-3 rounded text-xs">
-                      [kindpdfg_gallery name="my-gallery-name"]
-                    </code>
-                    <p className="text-muted-foreground mt-2">Displays a specific gallery by name (use lowercase with hyphens).</p>
+                    <h4 className="font-medium mb-2 text-base border-b border-border pb-2">4. Run your first import</h4>
+                    <p className="text-muted-foreground">
+                      Hit <strong>Run Import</strong> on the Import page. Once it completes, the Archive panel will list
+                      every article that was created.
+                    </p>
                   </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* Display Settings */}
             <AccordionItem value="settings">
               <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-slate-500" />
-                  Display Settings
-                </div>
+                <div className="flex items-center gap-2"><Settings className="w-4 h-4 text-slate-500" /> Settings reference</div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium mb-2">Layout Options</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>Thumbnail Shape:</strong> Square, landscape, or portrait aspect ratios</li>
-                      <li><strong>Gap Size:</strong> Spacing between gallery items</li>
-                    </ul>
-                    <p className="text-muted-foreground mt-2 text-xs italic">
-                      Note: On mobile devices, thumbnails display one per row. On tablets, they display two per row regardless of column settings.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Thumbnail Styles</h4>
-                    <p className="text-muted-foreground">
-                      Choose from various thumbnail styles including bordered, shadowed, rounded corners, and more.
-                    </p>
-                  </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p><strong>YouTube Data API v3 Key</strong> — required to fetch video metadata.</p>
+                  <p><strong>Playlist</strong> — the playlist URL or ID to monitor (Pro: multiple playlists).</p>
+                  <p><strong>Automatic sync</strong> — interval in minutes, hours or days.</p>
+                  <p><strong>Relaxed mode</strong> — pause between videos, batch size and pause between batches.</p>
+                  <p><strong>Default post status</strong> — draft, pending, private or publish.</p>
+                  <p><strong>Slug</strong> — controls the URL prefix used for imported articles.</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* Styling */}
-            <AccordionItem value="styling">
+            <AccordionItem value="import">
               <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-pink-500" />
-                  Styling & Customization
-                </div>
+                <div className="flex items-center gap-2"><Youtube className="w-4 h-4 text-red-500" /> Importing videos</div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium mb-2">Color Settings</h4>
-                    <p className="text-muted-foreground">
-                      Fully customize your gallery's appearance with the Color Settings panel. You can control 
-                      colors for gallery background, card backgrounds, titles, subtitles, borders, and section dividers.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Color Presets</h4>
-                    <p className="text-muted-foreground">
-                      Choose from five built-in presets — <strong>Default</strong>, <strong>Dark</strong>, <strong>Warm</strong>, <strong>Forest</strong>, and <strong>Ocean</strong> — 
-                      or create a fully custom color scheme. Changes are saved automatically to the Custom preset.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Interactive Token Map</h4>
-                    <p className="text-muted-foreground">
-                      Click or hover any element in the live preview (thumbnails, titles, dividers, background) 
-                      to instantly select its color picker. Changes reflect in real-time.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Transparent Background</h4>
-                    <p className="text-muted-foreground">
-                      Enable transparent gallery background to let your website's background show through. 
-                      This is especially useful for sites with non-white backgrounds.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Thumbnail Styles</h4>
-                    <p className="text-muted-foreground">
-                      Choose from multiple thumbnail styles including bordered, shadowed, rounded corners, 
-                      gradient zoom, and more. Configure hover animations for interactive effects.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Custom CSS</h4>
-                    <p className="text-muted-foreground">
-                      Advanced users can add custom CSS through WordPress Customizer to further 
-                      style the gallery output.
-                    </p>
-                  </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>The Import page shows the connected playlist, total imported videos, the active interval and the article slug.</p>
+                  <p>Click <strong>Run Import</strong> to trigger a manual sync; otherwise the cron handles it automatically.</p>
+                  <p>The Archive section lists every imported article with a direct link to its WordPress post.</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* Free vs Pro Comparison */}
-            <AccordionItem value="comparison">
-              <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-amber-500" />
-                  Free vs Pro Comparison
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="py-3 px-4 text-left text-sm font-semibold">Feature</th>
-                        <th className="py-3 px-4 text-center text-sm font-semibold">Free</th>
-                        <th className="py-3 px-4 text-center text-sm font-semibold">
-                          <span className="inline-flex items-center gap-1">
-                            Pro
-                            <Crown className="w-4 h-4 text-amber-500" />
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <FeatureRow feature="Number of Galleries" free="1" pro="Unlimited" />
-                      <FeatureRow feature="Documents per Gallery" free="Unlimited" pro="Unlimited" />
-                      <FeatureRow feature="Batch Upload of Multiple Files" free={false} pro={true} />
-                      <FeatureRow feature="File Analytics" free={false} pro={true} />
-                      <FeatureRow feature="Multiple File Types (PDF, Office, Images, Video, Audio)" free={true} pro={true} />
-                      <FeatureRow feature="Drag & Drop Reordering" free={true} pro={true} />
-                      <FeatureRow feature="Section Dividers" free={true} pro={true} />
-                      <FeatureRow feature="Many Styling Options" free={true} pro={true} />
-                      <FeatureRow feature="Priority Support" free={false} pro={true} />
-                    </tbody>
-                  </table>
-                </div>
-                {!license.isPro && (
-                  <div className="mt-4 p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg border border-amber-500/20">
-                    <p className="text-sm text-center">
-                      <a 
-                        href="https://checkout.freemius.com/plugin/20814/plan/34946/" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
-                      >
-                        Upgrade to Pro →
-                      </a>
-                    </p>
-                  </div>
-                )}
-              </AccordionContent>
-            </AccordionItem>
+            {license.isPro && (
+              <>
+                <AccordionItem value="transcripts">
+                  <AccordionTrigger className="text-base font-semibold">
+                    <div className="flex items-center gap-2"><Languages className="w-4 h-4 text-emerald-500" /> Transcripts (Pro)</div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      <p>Enable <strong>Fetch transcript (SEO)</strong> in Settings to automatically pull captions and embed them in the post body for richer indexing.</p>
+                      <p>Specify language priorities (e.g. <code>en, es, fr</code>) — leave empty to use whatever is available.</p>
+                      <p>If InnerTube fails, configure <strong>YouTube OAuth</strong> as a backup to retrieve captions through the official Data API.</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
 
-            {/* Troubleshooting */}
+                <AccordionItem value="tasks">
+                  <AccordionTrigger className="text-base font-semibold">
+                    <div className="flex items-center gap-2"><ListTodo className="w-4 h-4 text-violet-500" /> Tasks workflow (Pro)</div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      <p>The Tasks page lets you queue post-import jobs — rewrite titles, generate excerpts, enrich tags or schedule publication windows.</p>
+                      <p>Tasks run sequentially, respecting your relaxed-mode pauses to avoid hammering external APIs.</p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </>
+            )}
+
             <AccordionItem value="troubleshooting">
               <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-red-500" />
-                  Troubleshooting
-                </div>
+                <div className="flex items-center gap-2"><Wrench className="w-4 h-4 text-orange-500" /> Troubleshooting</div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium mb-2">Thumbnails Not Generating</h4>
-                    <p className="text-muted-foreground">
-                      Ensure your server has sufficient memory and the file size is within limits. 
-                      For large PDFs, thumbnail generation may take a few moments.
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Upload Errors</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Check your PHP <code className="bg-muted px-1 rounded">upload_max_filesize</code> setting</li>
-                      <li>Verify the file type is supported</li>
-                      <li>Ensure file permissions are correct</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Gallery Not Displaying</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li>Verify the shortcode is correct</li>
-                      <li>Check for JavaScript errors in the browser console</li>
-                      <li>Ensure no theme/plugin conflicts</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Need More Help?</h4>
-                    <p className="text-muted-foreground mb-2">
-                      If you're still experiencing issues, reach out to us on the WordPress support forum.
-                    </p>
-                    <a 
-                      href="https://wordpress.org/support/plugin/kindpixels-pdf-gallery/" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-primary hover:underline inline-flex items-center gap-1"
-                    >
-                      Support →
-                    </a>
-                  </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Use the <strong>Diagnostic tools</strong> at the bottom of Settings to repair the local database, clear stale jobs or re-run the last import.</p>
+                  <p>If imports stop, double-check your API key quota in Google Cloud Console.</p>
+                  <p>AJAX action: <code>{AJAX_ACTION}</code>. Plugin prefix: <code>{PLUGIN_PREFIX}_</code>.</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* Support */}
-            <AccordionItem value="support">
+            <AccordionItem value="license">
               <AccordionTrigger className="text-base font-semibold">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-teal-500" />
-                  Support & Resources
-                </div>
+                <div className="flex items-center gap-2"><KeyRound className="w-4 h-4 text-amber-500" /> License &amp; updates</div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium mb-2">Getting Help</h4>
-                    <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                      <li><strong>Documentation:</strong> You're reading it!</li>
-                      <li><strong>WordPress Forums:</strong> Community support for free users</li>
-                      <li><strong>Priority Support:</strong> Email support for Pro users</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">Useful Links</h4>
-                    <ul className="space-y-2">
-                      <li>
-                        <a href="https://kindpixels.com/plugins/pdf-gallery/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                          Plugin Website →
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://checkout.freemius.com/plugin/20814/plan/34946/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                          Upgrade to Pro →
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="pt-2 border-t">
-                    <p className="text-xs text-muted-foreground">
-                      PDF Gallery v{PLUGIN_VERSION} • Made in Romania by Kind Pixels
-                    </p>
-                  </div>
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <p>Free updates are delivered through WordPress.org. Pro updates flow through Freemius — no extra setup required after activating your license.</p>
+                  <p>Manage your license from the <strong>Pro</strong> tab.</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
+
           </Accordion>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Free vs Pro Comparison
+            <Crown className="w-5 h-5 text-amber-500" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto"><ComparisonTable /></div>
         </CardContent>
       </Card>
     </div>
