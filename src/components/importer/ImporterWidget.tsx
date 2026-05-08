@@ -45,6 +45,8 @@ export interface SermonImporterConfig {
   archiveMetaDescription: string;
   archiveToolbarEnabled: boolean;
   archiveShowSearch: boolean;
+  archiveSidebarEnabled: boolean;
+  singleSidebarEnabled: boolean;
   archiveShowSort: boolean;
   archiveShowTags: boolean;
   archiveDefaultSort: "date_desc" | "date_asc" | "views_desc";
@@ -105,6 +107,8 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   archiveShowSearch: true,
   archiveShowSort: true,
   archiveShowTags: true,
+  archiveSidebarEnabled: false,
+  singleSidebarEnabled: false,
   archiveDefaultSort: "date_desc",
   archiveTagCloudMode: "random",
   archiveTagCloudLinesDesktop: 2,

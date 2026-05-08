@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.1.6
+ * Version: 1.1.7
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.6' );
+define( 'VIDEOSOW_VERSION', '1.1.7' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -347,6 +347,8 @@ function videosow_get_sermon_importer_defaults() {
         'archiveMetaDescription'   => '',
         'archiveToolbarEnabled'    => true,
         'archiveShowSearch'        => true,
+        'archiveSidebarEnabled'    => false,
+        'singleSidebarEnabled'     => false,
         'archiveShowSort'          => true,
         'archiveShowTags'          => true,
         'archiveDefaultSort'       => 'date_desc',
@@ -451,16 +453,15 @@ function videosow_register_sermon_cpt() {
     $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
     register_post_type( 'videosow_video', array(
         'labels' => array(
-            'name'          => 'Videos',
-            'singular_name' => 'Predică',
-            'add_new_item'  => 'Adaugă predică',
-            'edit_item'     => 'Editează predică',
-            'menu_name'     => 'Videos',
+            'name'          => 'Articles',
+            'singular_name' => 'Article',
+            'add_new_item'  => 'Add Article',
+            'edit_item'     => 'Edit Article',
+            'menu_name'     => 'Articles',
         ),
         'public'        => true,
         'show_ui'       => true,
-        'show_in_menu'  => true,
-        'menu_position' => 32,
+        'show_in_menu'  => 'video-sow',
         'menu_icon'     => 'dashicons-microphone',
         'has_archive'   => $slug,
         'rewrite'       => array( 'slug' => $slug, 'with_front' => false ),
@@ -587,6 +588,44 @@ function videosow_sermon_archive_css() {
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_sermon_archive_css', 99 );
+
+/* Hide sidebar on archive / single article pages when disabled in settings (default: hidden). */
+function videosow_sermon_sidebar_toggle_css() {
+    $is_archive = is_post_type_archive( 'videosow_video' );
+    $is_single  = is_singular( 'videosow_video' );
+    if ( ! $is_archive && ! $is_single ) return;
+    $cfg = videosow_get_sermon_importer_config();
+    $hide = ( $is_archive && empty( $cfg['archiveSidebarEnabled'] ) ) || ( $is_single && empty( $cfg['singleSidebarEnabled'] ) );
+    if ( ! $hide ) return;
+    $body = $is_archive ? '.post-type-archive-videosow_video' : '.single-videosow_video';
+    echo '<style id="videosow-hide-sidebar-css">'
+        . $body . ' #secondary,'
+        . $body . ' .sidebar,'
+        . $body . ' aside.widget-area,'
+        . $body . ' .widget-area,'
+        . $body . ' #sidebar,'
+        . $body . ' .secondary,'
+        . $body . ' .complementary {display:none !important;}'
+        . $body . ' #primary,'
+        . $body . ' .content-area,'
+        . $body . ' main#main,'
+        . $body . ' .site-main,'
+        . $body . ' .site-content > .content-area,'
+        . $body . ' #content > .content-area {width:100% !important;max-width:100% !important;float:none !important;margin-right:0 !important;margin-left:0 !important;}'
+        . '</style>';
+}
+add_action( 'wp_head', 'videosow_sermon_sidebar_toggle_css', 100 );
+
+/* Force is_active_sidebar() / dynamic_sidebar() to be inert on these pages when disabled. */
+function videosow_sermon_disable_sidebars( $is_active_sidebar, $index ) {
+    $is_archive = is_post_type_archive( 'videosow_video' );
+    $is_single  = is_singular( 'videosow_video' );
+    if ( ! $is_archive && ! $is_single ) return $is_active_sidebar;
+    $cfg = videosow_get_sermon_importer_config();
+    $hide = ( $is_archive && empty( $cfg['archiveSidebarEnabled'] ) ) || ( $is_single && empty( $cfg['singleSidebarEnabled'] ) );
+    return $hide ? false : $is_active_sidebar;
+}
+add_filter( 'is_active_sidebar', 'videosow_sermon_disable_sidebars', 10, 2 );
 
 /* Inject the archive page title into the theme's empty <h2 class="archive-heading"> */
 function videosow_sermon_archive_title_js() {
@@ -1666,6 +1705,8 @@ function videosow_ajax_save_sermon_importer_config() {
         'archiveMetaDescription'   => isset( $incoming['archiveMetaDescription'] ) ? sanitize_textarea_field( $incoming['archiveMetaDescription'] ) : $current['archiveMetaDescription'],
         'archiveToolbarEnabled'    => isset( $incoming['archiveToolbarEnabled'] ) ? (bool) $incoming['archiveToolbarEnabled'] : $current['archiveToolbarEnabled'],
         'archiveShowSearch'        => isset( $incoming['archiveShowSearch'] ) ? (bool) $incoming['archiveShowSearch'] : $current['archiveShowSearch'],
+        'archiveSidebarEnabled'    => isset( $incoming['archiveSidebarEnabled'] ) ? (bool) $incoming['archiveSidebarEnabled'] : ( isset( $current['archiveSidebarEnabled'] ) ? (bool) $current['archiveSidebarEnabled'] : false ),
+        'singleSidebarEnabled'     => isset( $incoming['singleSidebarEnabled'] ) ? (bool) $incoming['singleSidebarEnabled'] : ( isset( $current['singleSidebarEnabled'] ) ? (bool) $current['singleSidebarEnabled'] : false ),
         'archiveShowSort'          => isset( $incoming['archiveShowSort'] ) ? (bool) $incoming['archiveShowSort'] : $current['archiveShowSort'],
         'archiveShowTags'          => isset( $incoming['archiveShowTags'] ) ? (bool) $incoming['archiveShowTags'] : $current['archiveShowTags'],
         'archiveDefaultSort'       => isset( $incoming['archiveDefaultSort'] ) && in_array( $incoming['archiveDefaultSort'], array( 'date_desc', 'date_asc', 'views_desc' ), true ) ? $incoming['archiveDefaultSort'] : $current['archiveDefaultSort'],
