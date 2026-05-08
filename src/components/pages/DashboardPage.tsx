@@ -7,14 +7,21 @@ import {
   Settings as SettingsIcon,
   CheckCircle2,
   Clock,
-  TrendingUp,
   Sparkles,
   Wand2,
   PlayCircle,
   ArrowRight,
 } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
+  const { stats, loaded } = useDashboardStats();
+  const imported = stats?.imported ?? 0;
+  const published = stats?.published ?? 0;
+  const draft = stats?.draft ?? 0;
+  const lastSyncHuman = stats?.lastSyncHuman || '—';
+  const lastSyncMsg = stats?.lastSyncMsg || '';
+  const recent = stats?.recent || [];
   return (
     <div className="space-y-6">
       <div>
@@ -35,10 +42,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">128</p>
-            <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +12 this week
-            </p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? imported : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">All-time, across all playlists</p>
           </CardContent>
         </Card>
 
@@ -50,8 +55,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">94</p>
-            <p className="text-xs text-muted-foreground mt-1">34 still in draft</p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? published : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{loaded ? `${draft} still in draft` : ''}</p>
           </CardContent>
         </Card>
 
@@ -59,12 +64,12 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Sparkles className="w-4 h-4 text-primary" />
-              AI tasks run
+              Drafts pending review
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">312</p>
-            <p className="text-xs text-muted-foreground mt-1">~$0.06 spent this month</p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? draft : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">Review &amp; publish in WordPress</p>
           </CardContent>
         </Card>
 
@@ -76,8 +81,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">2h</p>
-            <p className="text-xs text-muted-foreground mt-1">Next run in ~46h</p>
+            <p className="text-3xl font-semibold text-slate-800">{lastSyncHuman}</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">{lastSyncMsg || '—'}</p>
           </CardContent>
         </Card>
       </div>
