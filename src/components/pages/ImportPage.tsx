@@ -43,11 +43,6 @@ const ARCHIVE: ArchiveRow[] = [
   { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2026-05-06', status: 'Published', views: 4600 },
   { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2026-05-05', status: 'Published', views: 2100 },
   { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2026-05-04', status: 'Published', views: 7800 },
-  { title: 'Companion planting that actually works',    videoId: 'oP6qR7sT8uV', date: '2026-05-03', status: 'Published', views: 5400 },
-  { title: 'Watering schedules for raised beds',        videoId: 'wX9yZ0aB1cD', date: '2026-05-02', status: 'Published', views: 3000 },
-  { title: 'Rooftop herb garden masterclass',           videoId: 'eF2gH3iJ4kL', date: '2026-05-01', status: 'Published', views: 6200 },
-  { title: 'Fall mulching: do this, not that',          videoId: 'mN5oP6qR7sT', date: '2026-04-29', status: 'Published', views: 9100 },
-  { title: 'Indoor seed starting cheat sheet',          videoId: 'uV8wX9yZ0aB', date: '2026-04-27', status: 'Published', views: 12000 },
 ];
 
 const formatViews = (n: number) =>
@@ -191,7 +186,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           <div>
             <CardTitle className="text-base">Archive</CardTitle>
             <CardDescription>
-              All articles created by Video Sow. {ARCHIVE.length} entries shown.
+              All articles created by Video Sow.
             </CardDescription>
           </div>
           <div className="relative w-64 max-w-full">
