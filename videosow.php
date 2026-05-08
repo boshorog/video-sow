@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,27 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.5' );
+define( 'VIDEOSOW_VERSION', '1.1.6' );
+
+/**
+ * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
+ * (not the WP plugin list) right after activating the plugin.
+ */
+register_activation_hook( __FILE__, 'videosow_on_activate' );
+function videosow_on_activate() {
+    set_transient( 'videosow_activation_redirect', 1, 60 );
+}
+add_action( 'admin_init', 'videosow_maybe_redirect_after_activation' );
+function videosow_maybe_redirect_after_activation() {
+    if ( ! get_transient( 'videosow_activation_redirect' ) ) return;
+    delete_transient( 'videosow_activation_redirect' );
+    if ( wp_doing_ajax() || wp_doing_cron() ) return;
+    // Don't hijack bulk activations.
+    if ( isset( $_GET['activate-multi'] ) ) return;
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    wp_safe_redirect( admin_url( 'admin.php?page=video-sow' ) );
+    exit;
+}
 
 // Freemius SDK Initialization
 if ( ! function_exists( 'videosow_fs' ) ) {
@@ -222,7 +242,8 @@ class VideoSow_Plugin {
                 videosow_test_playlist:                ['videosow_test_playlist',                'videosow_test_playlist_result'],
                 videosow_get_oauth_redirect_uri:       ['videosow_get_oauth_redirect_uri',       'videosow_oauth_redirect_uri'],
                 videosow_disconnect_oauth:             ['videosow_disconnect_oauth',             'videosow_oauth_disconnected'],
-                videosow_test_oauth:                   ['videosow_test_oauth',                   'videosow_oauth_tested']
+                videosow_test_oauth:                   ['videosow_test_oauth',                   'videosow_oauth_tested'],
+                videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
@@ -1669,8 +1690,16 @@ function videosow_ajax_save_sermon_importer_config() {
         'aiUseAiExcerpt'     => isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
     ) );
     update_option( 'videosow_importer_config', $merged );
-    // Refresh CPT slug + cron
-    flush_rewrite_rules( false );
+    // Refresh CPT slug + cron — re-register CPT so the NEW slug is used by flush_rewrite_rules.
+    if ( post_type_exists( 'videosow_video' ) ) {
+        unregister_post_type( 'videosow_video' );
+    }
+    if ( function_exists( 'videosow_register_sermon_cpt' ) ) {
+        videosow_register_sermon_cpt();
+    }
+    flush_rewrite_rules( true );
+    // Belt-and-suspenders: drop cached rules so they rebuild on the next request too.
+    delete_option( 'rewrite_rules' );
     $next = wp_next_scheduled( 'videosow_sync_event' );
     if ( $next ) wp_unschedule_event( $next, 'videosow_sync_event' );
     if ( $merged['enabled'] && ! empty( $merged['apiKey'] ) && ! empty( $merged['playlistId'] ) ) {
@@ -3579,3 +3608,41 @@ function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
     $html .= '</div></details>';
     return $html;
 }
+
+/**
+ * AJAX: list videos imported by this plugin (videosow_video CPT) for the Import → Archive table.
+ */
+function videosow_ajax_list_archive() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+
+    $playlist = isset( $_POST['playlist'] ) ? sanitize_text_field( wp_unslash( $_POST['playlist'] ) ) : '';
+    $args = array(
+        'post_type'      => 'videosow_video',
+        'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+        'posts_per_page' => 100,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+    );
+    // NOTE: per-playlist filtering is not yet wired (playlist_id meta not stored on import).
+    // For now, always list all imported videos so users can see what was created.
+    // The `playlist` parameter is accepted for forward-compat.
+    $q = new WP_Query( $args );
+    $rows = array();
+    foreach ( $q->posts as $p ) {
+        $vid = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
+        $views = (int) get_post_meta( $p->ID, '_videosow_yt_view_count', true );
+        $rows[] = array(
+            'id'        => $p->ID,
+            'title'     => get_the_title( $p ),
+            'videoId'   => $vid,
+            'date'      => get_the_date( 'Y-m-d', $p ),
+            'status'    => $p->post_status === 'publish' ? 'Published' : 'Draft',
+            'views'     => $views,
+            'editLink'  => get_edit_post_link( $p->ID, '' ),
+            'permalink' => get_permalink( $p ),
+        );
+    }
+    wp_send_json_success( array( 'rows' => $rows ) );
+}
+add_action( 'wp_ajax_videosow_list_archive', 'videosow_ajax_list_archive' );

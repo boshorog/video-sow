@@ -161,9 +161,10 @@ const SermonImporterWidget = ({
   onConfigChange,
   onSave,
   onPlaylistClick,
-  isPro,
+  isPro = false,
   playlistName,
   playlistCount,
+  channelName,
 }: {
   config: SermonImporterConfig;
   progress?: SermonProgress;
@@ -180,6 +181,7 @@ const SermonImporterWidget = ({
   isPro?: boolean;
   playlistName?: string;
   playlistCount?: number;
+  channelName?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const isConfigured = !!config.apiKey && !!config.playlistId;
@@ -257,6 +259,11 @@ const SermonImporterWidget = ({
               </div>
               {config.playlistId ? (
                 <>
+                  {channelName && (
+                    <div className="text-[10px] uppercase tracking-wider text-emerald-700/80 truncate" title={channelName}>
+                      {channelName}
+                    </div>
+                  )}
                   <div className="text-sm font-semibold text-emerald-900 truncate" title={playlistName || config.playlistId}>
                     {playlistName || 'Connected playlist'}
                   </div>

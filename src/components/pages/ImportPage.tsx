@@ -37,7 +37,7 @@ type ArchiveRow = {
   views: number;
 };
 
-const ARCHIVE: ArchiveRow[] = [
+const SAMPLE_ARCHIVE: ArchiveRow[] = [
   { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-05-07', status: 'Draft',     views: 1200 },
   { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-05-07', status: 'Draft',     views: 843 },
   { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2026-05-06', status: 'Published', views: 4600 },
@@ -61,7 +61,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
-  const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number }>({});
+  const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
 
   useEffect(() => {
     const { apiKey, playlistId } = imp.config;
@@ -81,6 +81,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           setPlaylistInfo({
             name: item.snippet?.title,
             count: item.contentDetails?.itemCount,
+            channel: item.snippet?.channelTitle,
           });
         }
       })
@@ -89,6 +90,11 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       cancelled = true;
     };
   }, [imp.config.apiKey, imp.config.playlistId]);
+
+  // Refresh real archive when active playlist changes.
+  useEffect(() => {
+    imp.refreshArchive(imp.config.playlistId);
+  }, [imp.config.playlistId]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -99,8 +105,19 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
     }
   };
 
+  const useSample = isFirstRun || imp.archive.length === 0;
+  const sourceRows: ArchiveRow[] = useSample
+    ? SAMPLE_ARCHIVE
+    : imp.archive.map((r) => ({
+        title: r.title,
+        videoId: r.videoId,
+        date: r.date,
+        status: r.status,
+        views: r.views,
+      }));
+
   const sorted = useMemo(() => {
-    const f = ARCHIVE.filter(
+    const f = sourceRows.filter(
       (r) =>
         r.title.toLowerCase().includes(filter.toLowerCase()) ||
         r.videoId.toLowerCase().includes(filter.toLowerCase())
@@ -112,7 +129,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
       return String(av).localeCompare(String(bv)) * dir;
     });
-  }, [filter, sortKey, sortDir]);
+  }, [filter, sortKey, sortDir, sourceRows]);
 
   const SortHeader = ({
     label,
@@ -180,6 +197,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         isPro={license.isPro}
         playlistName={playlistInfo.name}
         playlistCount={playlistInfo.count}
+        channelName={playlistInfo.channel}
         onPlaylistClick={() => onNavigate?.('settings')}
       />
 

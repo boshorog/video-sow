@@ -152,6 +152,34 @@ interface Props {
   repairProgress?: { processed: number; total: number; updated: number } | null;
 }
 
+/**
+ * Validates a YouTube playlist ID by calling the public Data API directly from
+ * the browser. Renders a green check on success or a red ! on failure.
+ */
+const PlaylistValidator = ({ apiKey, playlistId }: { apiKey: string; playlistId: string }) => {
+  const [state, setState] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+  useEffect(() => {
+    if (!apiKey || !playlistId) { setState('idle'); return; }
+    setState('checking');
+    let cancelled = false;
+    const t = window.setTimeout(() => {
+      fetch(`https://www.googleapis.com/youtube/v3/playlists?part=id&id=${encodeURIComponent(playlistId)}&key=${encodeURIComponent(apiKey)}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (cancelled) return;
+          if (j?.items?.length > 0) setState('ok');
+          else setState('error');
+        })
+        .catch(() => { if (!cancelled) setState('error'); });
+    }, 400);
+    return () => { cancelled = true; window.clearTimeout(t); };
+  }, [apiKey, playlistId]);
+  if (state === 'idle') return null;
+  if (state === 'checking') return <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" aria-label="Validating playlist" />;
+  if (state === 'ok') return <CheckCircle2 className="w-4 h-4 text-emerald-600" aria-label="Playlist validated" />;
+  return <AlertCircle className="w-4 h-4 text-destructive" aria-label="Playlist not found" />;
+};
+
 const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, onCancelSync, isSyncing, onRepair, isRepairing, repairProgress }: Props) => {
   const { isPro } = useLicense();
   const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
@@ -353,12 +381,17 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             return (
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
-                <Input
-                  value={config.playlistId}
-                  onChange={(e) => update("playlistId", parsePlaylist(e.target.value))}
-                  placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
-                  className="h-9 text-sm font-mono"
-                />
+                <div className="relative">
+                  <Input
+                    value={config.playlistId}
+                    onChange={(e) => update("playlistId", parsePlaylist(e.target.value))}
+                    placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                    className="h-9 text-sm font-mono pr-9"
+                  />
+                  <div className="absolute inset-y-0 right-2.5 flex items-center">
+                    <PlaylistValidator apiKey={config.apiKey} playlistId={config.playlistId} />
+                  </div>
+                </div>
                 <p className="text-[11px] text-muted-foreground">Paste the playlist ID, or the full YouTube playlist URL — we'll extract the ID automatically.</p>
               </div>
             );
@@ -392,17 +425,22 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                       className="flex items-center gap-2 rounded-md hover:bg-secondary/30 transition-colors"
                     >
                       <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
-                      <Input
-                        value={pid}
-                        onChange={(e) => {
-                          const v = parsePlaylist(e.target.value);
-                          const next = [...list];
-                          next[i] = v;
-                          setList(next);
-                        }}
-                        placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
-                        className="h-9 text-sm font-mono flex-1"
-                      />
+                      <div className="relative flex-1">
+                        <Input
+                          value={pid}
+                          onChange={(e) => {
+                            const v = parsePlaylist(e.target.value);
+                            const next = [...list];
+                            next[i] = v;
+                            setList(next);
+                          }}
+                          placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                          className="h-9 text-sm font-mono pr-9"
+                        />
+                        <div className="absolute inset-y-0 right-2.5 flex items-center">
+                          <PlaylistValidator apiKey={config.apiKey} playlistId={pid} />
+                        </div>
+                      </div>
                       <Button
                         type="button"
                         variant="ghost"
