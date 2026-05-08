@@ -35,6 +35,8 @@ type ArchiveRow = {
   date: string;
   status: 'Published' | 'Draft';
   views: number;
+  editLink?: string;
+  permalink?: string;
 };
 
 const SAMPLE_ARCHIVE: ArchiveRow[] = [
