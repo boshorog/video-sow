@@ -17,7 +17,7 @@ const isInWordPress = () => {
 const wpPost = (msg: any) => {
   if (typeof window === 'undefined') return;
   window.postMessage(msg, '*');
-  try { if (window.parent && window.parent !== window) wpPost(msg, '*'); } catch {}
+  try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch {}
 };
 
 export type ImporterProgress = {
