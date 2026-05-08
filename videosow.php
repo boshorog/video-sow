@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.6
+ * Version: 1.2.7
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.6' );
+define( 'VIDEOSOW_VERSION', '1.2.7' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -1361,19 +1361,28 @@ function videosow_sermon_archive_toolbar_js() {
   function buildSyntheticCard(d){
     var card = document.createElement('div');
     card.className = 'videosow-card';
+    // Theme-styling registration: mirror theme card classes so theme CSS hooks in.
+    var themeCardCls = THEME_MAP && THEME_MAP.card_classes ? String(THEME_MAP.card_classes).trim() : '';
+    if (themeCardCls) {
+      themeCardCls.split(/\s+/).forEach(function(c){ if(c) card.classList.add(c); });
+    }
     var article;
     if (TEMPLATE_ARTICLE){
       article = TEMPLATE_ARTICLE.cloneNode(true);
     } else {
       article = document.createElement('article');
       article.className = 'post type-videosow_video';
+      var titleCls   = (THEME_MAP && THEME_MAP.title_classes)   || 'entry-title';
+      var thumbCls   = (THEME_MAP && THEME_MAP.thumb_classes)   || 'post-thumbnail';
+      var excerptCls = (THEME_MAP && THEME_MAP.excerpt_classes) || 'entry-summary';
+      var metaCls    = (THEME_MAP && THEME_MAP.meta_classes)    || 'entry-meta';
       var thumbHtml = d.thumb
-        ? '<a href="#" class="post-thumbnail"><figure><img alt="" loading="lazy" /></figure></a>'
+        ? '<a href="#" class="' + thumbCls + '"><figure><img alt="" loading="lazy" /></figure></a>'
         : '';
       article.innerHTML = thumbHtml
-        + '<div class="entry-meta"><time class="entry-date published"></time></div>'
-        + '<h2 class="entry-title"><a href="#"></a></h2>'
-        + '<div class="entry-summary"><p></p></div>';
+        + '<div class="' + metaCls + '"><time class="entry-date published"></time></div>'
+        + '<h2 class="' + titleCls + '"><a href="#"></a></h2>'
+        + '<div class="' + excerptCls + '"><p></p></div>';
     }
     article.id = 'post-' + d.id + '-kp-view';
     article.classList.add('post-' + d.id);
@@ -1628,10 +1637,24 @@ function videosow_sermon_archive_toolbar_js() {
     return getSlot(article);
   }
 
+  function injectThemeCssVars(){
+    if (!THEME_MAP || !THEME_MAP.theme_css_vars) return;
+    var vars = THEME_MAP.theme_css_vars;
+    var picks = ['--primary','--primary-color','--accent','--accent-color','--theme-primary','--brand-color','--link-color','--font-body','--font-heading','--body-font','--heading-font'];
+    var css = '';
+    picks.forEach(function(k){ if (vars[k]) css += k + ':' + vars[k] + ';'; });
+    if (!css) return;
+    var s = document.createElement('style');
+    s.id = 'videosow-theme-vars';
+    s.textContent = '#videosow-grid, .videosow-grid{' + css + '}';
+    document.head.appendChild(s);
+  }
+
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
     var requestedLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
 
+    injectThemeCssVars();
     var loopContainer = resolveLoopContainer();
     var mapConfidence = THEME_MAP && THEME_MAP.confidence ? String(THEME_MAP.confidence) : 'low';
 
@@ -4148,6 +4171,17 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'scanned_at'        => 0,
         'scan_url'          => '',
         'note'              => '',
+        // v1.2.7 — theme styling registration.
+        'card_classes'      => '',   // space-separated class chain to mirror on synthetic cards
+        'title_classes'     => '',
+        'thumb_classes'     => '',
+        'excerpt_classes'   => '',
+        'meta_classes'      => '',
+        'link_classes'      => '',
+        'theme_css_vars'    => array(), // {--name: value} extracted from inline <style> blocks
+        'body_classes'      => '',
+        'cards_found'       => 0,
+        'scan_attempts'     => array(), // [{url, found}]
     );
     return array_merge( $defaults, $opt );
 }
@@ -4190,16 +4224,11 @@ function videosow_dom_first_match( DOMXPath $xp, array $queries, DOMNode $contex
 }
 
 /**
- * Scan the live sermon archive HTML and learn the theme's layout map.
- * Returns the saved map (also persisted to DB).
+ * Fetch a URL with the current admin's cookies so private/admin-rendered
+ * markup is identical to a normal visitor's experience.
  */
-function videosow_scan_active_theme() {
-    if ( ! function_exists( 'get_post_type_archive_link' ) ) return false;
-    $url = get_post_type_archive_link( 'videosow_video' );
-    if ( ! $url ) return false;
-
-    // Sign the request so private/admin-only theme markup still renders the
-    // same way regular visitors see it (via auth cookies of current admin).
+function videosow_scan_fetch( $url ) {
+    if ( ! $url ) return '';
     $cookies = array();
     if ( is_user_logged_in() ) {
         foreach ( $_COOKIE as $k => $v ) {
@@ -4212,25 +4241,156 @@ function videosow_scan_active_theme() {
         'timeout'   => 15,
         'sslverify' => false,
         'cookies'   => $cookies,
-        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.0' ),
+        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.1' ),
     ) );
-    if ( is_wp_error( $resp ) ) return false;
+    if ( is_wp_error( $resp ) ) return '';
     $code = wp_remote_retrieve_response_code( $resp );
-    $html = wp_remote_retrieve_body( $resp );
-    if ( $code >= 400 || ! $html ) return false;
+    if ( $code >= 400 ) return '';
+    return (string) wp_remote_retrieve_body( $resp );
+}
 
-    $dom = new DOMDocument();
-    libxml_use_internal_errors( true );
-    $loaded = $dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
-    libxml_clear_errors();
-    if ( ! $loaded ) return false;
-    $xp = new DOMXPath( $dom );
-
-    // 1) Locate the post articles. Prefer the canonical pattern used by core/themes.
-    $articles = $xp->query( '//article[contains(@id,"post-")]' );
-    if ( ! $articles || $articles->length === 0 ) {
-        $articles = $xp->query( '//article[contains(@class,"post")]' );
+/**
+ * Generic post-card detection. Walks the DOM looking for any element whose
+ * children form a "repeated card pattern": 3+ similar siblings, each
+ * containing a heading and at least one anchor with a non-empty href.
+ * Required because many themes (Masco, Elementor-built, custom block themes)
+ * render post cards as <div>s rather than <article> elements.
+ */
+function videosow_detect_card_pattern( DOMDocument $dom, DOMXPath $xp ) {
+    $best = null;
+    $candidate_xpaths = array(
+        '//main', '//*[@id="main"]', '//*[@id="primary"]', '//*[@id="content"]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," site-main ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," content-area ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," posts-wrapper ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," elementor-posts-container ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," blog-content ")]',
+        '//*[contains(@class,"posts")]', '//*[contains(@class,"grid")]',
+        '//*[contains(@class,"row")]', '//section', '//div[@id]',
+    );
+    $seen = array();
+    foreach ( $candidate_xpaths as $q ) {
+        $list = $xp->query( $q );
+        if ( ! $list ) continue;
+        for ( $i = 0; $i < $list->length; $i++ ) {
+            $cand = $list->item( $i );
+            if ( ! ( $cand instanceof DOMElement ) ) continue;
+            $hash = spl_object_hash( $cand );
+            if ( isset( $seen[ $hash ] ) ) continue;
+            $seen[ $hash ] = true;
+            $groups = array();
+            foreach ( $cand->childNodes as $child ) {
+                if ( ! ( $child instanceof DOMElement ) ) continue;
+                $cls = trim( (string) $child->getAttribute( 'class' ) );
+                $parts = $cls === '' ? array() : preg_split( '/\s+/', $cls );
+                $key_parts = array();
+                foreach ( $parts as $p ) {
+                    if ( $p === '' ) continue;
+                    if ( preg_match( '/^(post-\d+|hentry|has-|wp-|is-|loaded|active|first|last|odd|even)/', $p ) ) continue;
+                    $key_parts[] = $p;
+                }
+                sort( $key_parts );
+                $key = strtolower( $child->tagName ) . '|' . implode( ',', array_slice( $key_parts, 0, 3 ) );
+                if ( ! isset( $groups[ $key ] ) ) $groups[ $key ] = array();
+                $groups[ $key ][] = $child;
+            }
+            foreach ( $groups as $key => $sibs ) {
+                if ( count( $sibs ) < 3 ) continue;
+                $valid = 0;
+                foreach ( $sibs as $s ) {
+                    $h = $xp->query( './/h1|.//h2|.//h3|.//h4', $s );
+                    $a = $xp->query( './/a[@href and string-length(@href)>1]', $s );
+                    if ( $h && $h->length && $a && $a->length ) $valid++;
+                }
+                if ( $valid < 3 ) continue;
+                $depth = 0; $cur = $cand;
+                while ( $cur && $cur->parentNode ) { $depth++; $cur = $cur->parentNode; }
+                $score = $valid * 100 + $depth;
+                if ( ! $best || $score > $best['score'] ) {
+                    $valid_cards = array();
+                    foreach ( $sibs as $s ) {
+                        $h = $xp->query( './/h1|.//h2|.//h3|.//h4', $s );
+                        $a = $xp->query( './/a[@href and string-length(@href)>1]', $s );
+                        if ( $h && $h->length && $a && $a->length ) $valid_cards[] = $s;
+                    }
+                    $best = array( 'container' => $cand, 'cards' => $valid_cards, 'score' => $score );
+                }
+            }
+        }
     }
+    return $best;
+}
+
+/** Extract :root/html/body CSS custom properties from inline <style> blocks. */
+function videosow_extract_css_vars( DOMXPath $xp ) {
+    $vars = array();
+    $styles = $xp->query( '//style' );
+    if ( ! $styles ) return $vars;
+    for ( $i = 0; $i < $styles->length; $i++ ) {
+        $css = (string) $styles->item( $i )->textContent;
+        if ( strpos( $css, '--' ) === false ) continue;
+        if ( preg_match_all( '/(?:^|[},])\s*(?::root|html|body)\s*\{([^}]+)\}/i', $css, $blocks ) ) {
+            foreach ( $blocks[1] as $block ) {
+                if ( preg_match_all( '/(--[a-zA-Z0-9_\-]+)\s*:\s*([^;]+);/', $block, $m, PREG_SET_ORDER ) ) {
+                    foreach ( $m as $pair ) {
+                        $name = trim( $pair[1] );
+                        $val  = trim( $pair[2] );
+                        if ( strlen( $val ) > 200 ) continue;
+                        if ( ! isset( $vars[ $name ] ) ) $vars[ $name ] = $val;
+                    }
+                }
+            }
+        }
+        if ( count( $vars ) > 200 ) break;
+    }
+    return $vars;
+}
+
+/** Find a representative descendant in a sample card and return its class chain. */
+function videosow_extract_card_part_class( DOMElement $card, DOMXPath $xp, $kind ) {
+    $candidates = array();
+    switch ( $kind ) {
+        case 'title':   $candidates = array( './/*[contains(@class,"entry-title")]', './/*[contains(@class,"post-title")]', './/*[contains(@class,"title")]', './/h2', './/h3' ); break;
+        case 'thumb':   $candidates = array( './/*[contains(@class,"post-thumbnail")]', './/*[contains(@class,"thumbnail")]', './/*[contains(@class,"featured-image")]', './/figure', './/img/..' ); break;
+        case 'excerpt': $candidates = array( './/*[contains(@class,"entry-summary")]', './/*[contains(@class,"excerpt")]', './/*[contains(@class,"description")]', './/p' ); break;
+        case 'meta':    $candidates = array( './/*[contains(@class,"entry-meta")]', './/*[contains(@class,"post-meta")]', './/*[contains(@class,"meta")]', './/time/..' ); break;
+        case 'link':    $candidates = array( './/a[contains(@class,"more")]', './/a[contains(@class,"button")]', './/a[contains(@class,"btn")]', './/a' ); break;
+    }
+    foreach ( $candidates as $q ) {
+        $list = $xp->query( $q, $card );
+        if ( $list && $list->length ) {
+            $node = $list->item( 0 );
+            if ( $node instanceof DOMElement ) {
+                $cls = trim( (string) $node->getAttribute( 'class' ) );
+                if ( $cls !== '' ) return $cls;
+            }
+        }
+    }
+    return '';
+}
+
+/**
+ * Scan the live site for the active theme's archive structure.
+ * Tries multiple URLs and picks the richest result. Captures both structural
+ * selectors and theme-styling hints (class chains + CSS variables) so that
+ * our custom layouts can mirror the theme's appearance.
+ */
+function videosow_scan_active_theme() {
+    if ( ! function_exists( 'get_post_type_archive_link' ) ) return false;
+
+    $urls = array();
+    $primary = get_post_type_archive_link( 'videosow_video' );
+    if ( $primary ) $urls[] = $primary;
+    $blog_page = (int) get_option( 'page_for_posts' );
+    if ( $blog_page ) $urls[] = get_permalink( $blog_page );
+    $urls[] = home_url( '/?post_type=post' );
+    $urls[] = home_url( '/' );
+    $cats = get_terms( array( 'taxonomy' => 'category', 'number' => 1, 'hide_empty' => true ) );
+    if ( ! is_wp_error( $cats ) && ! empty( $cats ) ) {
+        $cat_link = get_term_link( $cats[0] );
+        if ( ! is_wp_error( $cat_link ) ) $urls[] = $cat_link;
+    }
+    $urls = array_values( array_unique( array_filter( $urls ) ) );
 
     $theme = wp_get_theme();
     $map = array(
@@ -4243,107 +4403,142 @@ function videosow_scan_active_theme() {
         'sidebar_selector'  => '',
         'confidence'        => 'low',
         'scanned_at'        => time(),
-        'scan_url'          => $url,
+        'scan_url'          => '',
         'note'              => '',
+        'card_classes'      => '',
+        'title_classes'     => '',
+        'thumb_classes'     => '',
+        'excerpt_classes'   => '',
+        'meta_classes'      => '',
+        'link_classes'      => '',
+        'theme_css_vars'    => array(),
+        'body_classes'      => '',
+        'cards_found'       => 0,
+        'scan_attempts'     => array(),
     );
 
-    if ( ! $articles || $articles->length === 0 ) {
-        $map['note'] = 'No <article> elements found in the archive HTML — falling back to theme default.';
+    $best = null; $attempts = array();
+    foreach ( $urls as $url ) {
+        $html = videosow_scan_fetch( $url );
+        if ( ! $html ) { $attempts[] = array( 'url' => $url, 'found' => 0, 'error' => 'fetch_failed' ); continue; }
+        $dom = new DOMDocument();
+        libxml_use_internal_errors( true );
+        $loaded = $dom->loadHTML( '<?xml encoding="utf-8" ?>' . $html );
+        libxml_clear_errors();
+        if ( ! $loaded ) { $attempts[] = array( 'url' => $url, 'found' => 0, 'error' => 'parse_failed' ); continue; }
+        $xp = new DOMXPath( $dom );
+
+        $articles = $xp->query( '//article[contains(@id,"post-")]' );
+        $cards = array(); $container = null;
+        if ( $articles && $articles->length >= 2 ) {
+            for ( $i = 0; $i < $articles->length; $i++ ) {
+                $a = $articles->item( $i );
+                if ( $a instanceof DOMElement ) $cards[] = $a;
+            }
+            $container = $cards[0]->parentNode;
+            if ( $container instanceof DOMElement ) {
+                $hops = 0;
+                while ( $container instanceof DOMElement && $hops++ < 3 ) {
+                    if ( $container->getAttribute( 'id' ) || $container->getAttribute( 'class' ) ) break;
+                    $container = $container->parentNode;
+                }
+            }
+        } else {
+            $detected = videosow_detect_card_pattern( $dom, $xp );
+            if ( $detected ) { $cards = $detected['cards']; $container = $detected['container']; }
+        }
+
+        $found = count( $cards );
+        $attempts[] = array( 'url' => $url, 'found' => $found );
+
+        if ( $found && ( ! $best || $found > $best['found'] ) ) {
+            $best = array( 'url' => $url, 'dom' => $dom, 'xp' => $xp, 'cards' => $cards, 'container' => $container, 'found' => $found );
+        }
+    }
+
+    $map['scan_attempts'] = $attempts;
+
+    if ( ! $best ) {
+        $map['note'] = 'No post-card pattern found on any candidate URL — falling back to theme default.';
         videosow_save_theme_map( $map );
         return $map;
     }
 
-    // 2) Article selector — class-derived from the first article.
-    $first_article = $articles->item( 0 );
-    $map['article_selector'] = videosow_dom_selector_for( $first_article );
-    if ( ! $map['article_selector'] ) $map['article_selector'] = 'article[id^="post-"]';
+    $xp        = $best['xp'];
+    $cards     = $best['cards'];
+    $container = $best['container'];
+    $first     = $cards[0];
+    $map['scan_url']    = $best['url'];
+    $map['cards_found'] = $best['found'];
 
-    // 3) Wrapper detection — walk up while parent has multiple sibling
-    // children that each contain an article (Bootstrap/Foundation/Elementor
-    // grids, .wp-block-column, etc.).
-    $wrapper = $first_article;
-    $hops = 0;
+    $map['article_selector'] = videosow_dom_selector_for( $first );
+    if ( ! $map['article_selector'] ) $map['article_selector'] = strtolower( $first->tagName ) . '[id^="post-"]';
+
+    $wrapper = $first; $hops = 0;
     while ( $wrapper && $wrapper->parentNode && $wrapper->parentNode instanceof DOMElement && $hops++ < 4 ) {
         $parent = $wrapper->parentNode;
         $tag = strtolower( $parent->tagName );
         if ( $tag === 'main' || $tag === 'body' || $tag === 'html' ) break;
-        $sibling_with_articles = 0;
+        $sibling_cards = 0;
         foreach ( $parent->childNodes as $sib ) {
             if ( ! ( $sib instanceof DOMElement ) ) continue;
-            if ( $sib === $wrapper ) { $sibling_with_articles++; continue; }
+            if ( $sib === $wrapper ) { $sibling_cards++; continue; }
             $inner = $xp->query( './/article[contains(@id,"post-")]', $sib );
-            if ( $inner && $inner->length > 0 ) $sibling_with_articles++;
+            if ( $inner && $inner->length > 0 ) $sibling_cards++;
         }
-        if ( $sibling_with_articles >= 2 ) break;
+        if ( $sibling_cards >= 2 ) break;
         $wrapper = $parent;
     }
     $wrapper_sel = videosow_dom_selector_for( $wrapper );
-    if ( $wrapper && $wrapper !== $first_article && $wrapper_sel && $wrapper_sel !== $map['article_selector'] ) {
+    if ( $wrapper && $wrapper !== $first && $wrapper_sel && $wrapper_sel !== $map['article_selector'] ) {
         $map['article_wrapper'] = $wrapper_sel;
     }
 
-    // 4) Loop container — closest stable ancestor of the article (or wrapper).
-    // Try common WP/theme primitives first.
-    $loop_candidates = array(
-        '//main[@id="main"]',
-        '//main',
-        '//div[@id="primary"]',
-        '//div[@id="content"]',
-        '//div[contains(concat(" ",normalize-space(@class)," ")," site-main ")]',
-        '//div[contains(concat(" ",normalize-space(@class)," ")," content-area ")]',
-        '//div[contains(concat(" ",normalize-space(@class)," ")," entry-content-wrap ")]',
-        '//div[contains(concat(" ",normalize-space(@class)," ")," posts-wrapper ")]',
-        '//div[contains(concat(" ",normalize-space(@class)," ")," elementor-posts-container ")]',
-    );
-    $loop_node = null;
-    foreach ( $loop_candidates as $q ) {
-        $list = $xp->query( $q );
-        if ( ! $list ) continue;
-        for ( $i = 0; $i < $list->length; $i++ ) {
-            $cand = $list->item( $i );
-            $inner = $xp->query( './/article[contains(@id,"post-")]', $cand );
-            if ( $inner && $inner->length > 0 ) { $loop_node = $cand; break 2; }
-        }
-    }
-    // Fallback: closest ancestor of the wrapper that ALSO contains the article
-    // (so we have something stable to insert into).
-    if ( ! $loop_node ) {
-        $cur = $wrapper ? $wrapper->parentNode : $first_article->parentNode;
-        $hops = 0;
-        while ( $cur && $cur instanceof DOMElement && $hops++ < 6 ) {
-            $tag = strtolower( $cur->tagName );
-            if ( $tag === 'body' || $tag === 'html' ) break;
-            $loop_node = $cur;
-            // Stop at the first ancestor that has a stable id/class.
-            if ( $cur->getAttribute( 'id' ) || $cur->getAttribute( 'class' ) ) break;
-            $cur = $cur->parentNode;
-        }
-    }
-    if ( $loop_node instanceof DOMElement ) {
-        $map['loop_container'] = videosow_dom_selector_for( $loop_node );
-    }
+    if ( $container instanceof DOMElement ) $map['loop_container'] = videosow_dom_selector_for( $container );
 
-    // 5) Pagination + sidebar (best-effort, optional).
     $pag = videosow_dom_first_match( $xp, array(
-        '//nav[contains(@class,"pagination")]',
-        '//nav[contains(@class,"navigation")]//*[contains(@class,"nav-links")]',
-        '//*[contains(@class,"page-navigation")]',
-        '//*[@class="nav-links"]',
+        '//nav[contains(@class,"pagination")]', '//*[contains(@class,"page-navigation")]', '//*[@class="nav-links"]',
     ) );
     if ( $pag ) $map['pagination_selector'] = videosow_dom_selector_for( $pag );
 
     $side = videosow_dom_first_match( $xp, array(
-        '//aside[@id="secondary"]',
-        '//aside[contains(@class,"widget-area")]',
-        '//div[contains(@class,"sidebar")]',
+        '//aside[@id="secondary"]', '//aside[contains(@class,"widget-area")]', '//div[contains(@class,"sidebar")]',
     ) );
     if ( $side ) $map['sidebar_selector'] = videosow_dom_selector_for( $side );
 
-    // 6) Confidence scoring.
+    // Theme-styling registration.
+    $card_cls = trim( (string) $first->getAttribute( 'class' ) );
+    if ( $card_cls !== '' ) {
+        $parts = preg_split( '/\s+/', $card_cls );
+        $clean = array();
+        foreach ( $parts as $p ) {
+            if ( $p === '' ) continue;
+            if ( preg_match( '/^(post-\d+|category-|tag-|hentry|status-|format-|type-|has-post-thumbnail)/', $p ) ) continue;
+            $clean[] = $p;
+        }
+        $map['card_classes'] = implode( ' ', array_slice( $clean, 0, 8 ) );
+    }
+    $map['title_classes']   = videosow_extract_card_part_class( $first, $xp, 'title' );
+    $map['thumb_classes']   = videosow_extract_card_part_class( $first, $xp, 'thumb' );
+    $map['excerpt_classes'] = videosow_extract_card_part_class( $first, $xp, 'excerpt' );
+    $map['meta_classes']    = videosow_extract_card_part_class( $first, $xp, 'meta' );
+    $map['link_classes']    = videosow_extract_card_part_class( $first, $xp, 'link' );
+
+    $map['theme_css_vars']  = videosow_extract_css_vars( $xp );
+
+    $body = $xp->query( '//body' );
+    if ( $body && $body->length ) {
+        $b = $body->item( 0 );
+        if ( $b instanceof DOMElement ) $map['body_classes'] = trim( (string) $b->getAttribute( 'class' ) );
+    }
+
     if ( $map['loop_container'] && $map['article_selector'] ) {
-        $map['confidence'] = ( $articles->length >= 2 ) ? 'high' : 'medium';
+        $map['confidence'] = $best['found'] >= 3 ? 'high' : 'medium';
     } else {
         $map['confidence'] = 'low';
+    }
+    if ( $best['url'] !== ( $primary ?: '' ) ) {
+        $map['note'] = 'Detected loop using fallback URL: ' . $best['url'];
     }
 
     videosow_save_theme_map( $map );

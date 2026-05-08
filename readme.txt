@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.6
+Stable tag: 1.2.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,12 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.7 =
+* Theme scanner is now much deeper: probes multiple URLs (video archive, blog page, home, category) and picks the richest result.
+* New generic card-pattern detector recognises post loops on themes that render cards as `<div>`s rather than `<article>` (e.g. Masco, Elementor, custom block themes).
+* Theme styling registration: scanner now captures the theme's card / title / thumbnail / excerpt / meta class chains plus key CSS custom properties, and our custom layouts apply them so they inherit the theme's appearance.
+* Diagnostic tile shows cards-found, scan-attempts log, and the captured styling hints.
 
 = 1.2.6 =
 * New: Theme structure scanner detects where your active theme renders its post loop and uses those exact selectors on the archive page, so layouts no longer wipe out your site header, menu or footer.
