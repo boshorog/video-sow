@@ -161,9 +161,10 @@ const SermonImporterWidget = ({
   onConfigChange,
   onSave,
   onPlaylistClick,
-  isPro,
+  isPro = false,
   playlistName,
   playlistCount,
+  channelName,
 }: {
   config: SermonImporterConfig;
   progress?: SermonProgress;
