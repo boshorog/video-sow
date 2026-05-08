@@ -270,7 +270,8 @@ class VideoSow_Plugin {
                 videosow_get_oauth_redirect_uri:       ['videosow_get_oauth_redirect_uri',       'videosow_oauth_redirect_uri'],
                 videosow_disconnect_oauth:             ['videosow_disconnect_oauth',             'videosow_oauth_disconnected'],
                 videosow_test_oauth:                   ['videosow_test_oauth',                   'videosow_oauth_tested'],
-                videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list']
+                videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list'],
+                videosow_dashboard_stats:              ['videosow_dashboard_stats',              'videosow_dashboard_stats_result']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
