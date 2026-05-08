@@ -67,6 +67,33 @@ const ArchivePageSettingsDialog = ({ open, onOpenChange, config, onChange, onSav
             </div>
           </div>
 
+          {/* LAYOUT / SIDEBAR */}
+          <div className="rounded-lg bg-card border border-border p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <PanelRight className="w-3.5 h-3.5" /> Sidebar
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label className="text-sm">Show sidebar on archive page</Label>
+                <p className="text-[11px] text-muted-foreground">Theme widget area on /{slug}/</p>
+              </div>
+              <Switch
+                checked={config.archiveSidebarEnabled}
+                onCheckedChange={(v) => update("archiveSidebarEnabled", v)}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <Label className="text-sm">Show sidebar on article pages</Label>
+                <p className="text-[11px] text-muted-foreground">Theme widget area on single articles</p>
+              </div>
+              <Switch
+                checked={config.singleSidebarEnabled}
+                onCheckedChange={(v) => update("singleSidebarEnabled", v)}
+              />
+            </div>
+          </div>
+
           {/* SEO */}
           <div className="rounded-lg bg-card border border-border p-4 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
