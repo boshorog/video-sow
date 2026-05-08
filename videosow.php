@@ -3624,11 +3624,9 @@ function videosow_ajax_list_archive() {
         'orderby'        => 'date',
         'order'          => 'DESC',
     );
-    if ( $playlist ) {
-        $args['meta_query'] = array(
-            array( 'key' => '_videosow_playlist_id', 'value' => $playlist ),
-        );
-    }
+    // NOTE: per-playlist filtering is not yet wired (playlist_id meta not stored on import).
+    // For now, always list all imported videos so users can see what was created.
+    // The `playlist` parameter is accepted for forward-compat.
     $q = new WP_Query( $args );
     $rows = array();
     foreach ( $q->posts as $p ) {
