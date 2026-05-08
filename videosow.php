@@ -1010,6 +1010,18 @@ function videosow_sermon_archive_toolbar_js() {
   var byId = {};
   DATA.forEach(function(d){ byId[d.id] = d; });
   var BATCH = 20;
+  var EXCERPT_WORDS = (function(){
+    var tb = document.getElementById('videosow-toolbar');
+    var n = tb ? parseInt(tb.getAttribute('data-excerpt-words') || '40', 10) : 40;
+    if (!n || isNaN(n) || n < 5) n = 40;
+    return n;
+  })();
+  function trimExcerpt(text, words){
+    if (!text) return '';
+    var parts = String(text).trim().split(/\s+/);
+    if (parts.length <= words) return parts.join(' ');
+    return parts.slice(0, words).join(' ') + '…';
+  }
   var allLoaded = false; // true when all synthetic cards are in the DOM
   var loadingMore = false;
 
