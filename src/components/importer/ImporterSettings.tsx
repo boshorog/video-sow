@@ -332,22 +332,98 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           </p>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
-          <Input
-            value={config.playlistId}
-            onChange={(e) => {
-              const raw = e.target.value;
-              let parsed = raw.trim();
-              const m = parsed.match(/[?&]list=([^&\s]+)/);
-              if (m) parsed = m[1];
-              update("playlistId", parsed);
-            }}
-            placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
-            className="h-9 text-sm font-mono"
-          />
-          <p className="text-[11px] text-muted-foreground">Paste the playlist ID, or the full YouTube playlist URL — we'll extract the ID automatically.</p>
-        </div>
+        {(() => {
+          const parsePlaylist = (raw: string) => {
+            let v = raw.trim();
+            const m = v.match(/[?&]list=([^&\s]+)/);
+            if (m) v = m[1];
+            return v;
+          };
+          const list = (config.playlistIds && config.playlistIds.length > 0)
+            ? config.playlistIds
+            : (config.playlistId ? [config.playlistId] : [""]);
+          const setList = (next: string[]) => {
+            const cleaned = next.length > 0 ? next : [""];
+            const active = cleaned.includes(config.playlistId) ? config.playlistId : cleaned[0];
+            onChange({ ...config, playlistIds: cleaned, playlistId: active });
+          };
+          if (!isPro) {
+            return (
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
+                <Input
+                  value={config.playlistId}
+                  onChange={(e) => update("playlistId", parsePlaylist(e.target.value))}
+                  placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                  className="h-9 text-sm font-mono"
+                />
+                <p className="text-[11px] text-muted-foreground">Paste the playlist ID, or the full YouTube playlist URL — we'll extract the ID automatically.</p>
+              </div>
+            );
+          }
+          return (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-medium text-muted-foreground">Playlists</Label>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO · Multi-playlist</span>
+              </div>
+              <div className="space-y-2">
+                {list.map((pid, i) => {
+                  const isActive = pid && pid === config.playlistId;
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="active-playlist"
+                        checked={!!isActive}
+                        disabled={!pid}
+                        onChange={() => update("playlistId", pid)}
+                        className="accent-primary"
+                        title="Use this playlist for sync"
+                      />
+                      <Input
+                        value={pid}
+                        onChange={(e) => {
+                          const v = parsePlaylist(e.target.value);
+                          const next = [...list];
+                          next[i] = v;
+                          if (isActive || !config.playlistId) {
+                            onChange({ ...config, playlistIds: next, playlistId: v });
+                          } else {
+                            update("playlistIds", next);
+                          }
+                        }}
+                        placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                        className="h-9 text-sm font-mono flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => setList(list.filter((_, idx) => idx !== i))}
+                        disabled={list.length === 1 && !pid}
+                        title="Remove playlist"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5 mt-1"
+                onClick={() => setList([...list, ""])}
+              >
+                <Plus className="w-3.5 h-3.5" /> Add playlist
+              </Button>
+              <p className="text-[11px] text-muted-foreground">Add multiple playlists; pick the active one with the radio. Switch between them quickly from the Import page.</p>
+            </div>
+          );
+        })()}
 
         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex-1 pr-3">
