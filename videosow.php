@@ -26,6 +26,11 @@ define( 'VIDEOSOW_VERSION', '1.2.6' );
 register_activation_hook( __FILE__, 'videosow_on_activate' );
 function videosow_on_activate() {
     set_transient( 'videosow_activation_redirect', 1, 60 );
+    set_transient( 'videosow_pending_theme_scan', 1, DAY_IN_SECONDS );
+}
+add_action( 'switch_theme', 'videosow_on_switch_theme' );
+function videosow_on_switch_theme() {
+    set_transient( 'videosow_pending_theme_scan', 1, DAY_IN_SECONDS );
 }
 add_action( 'admin_init', 'videosow_maybe_redirect_after_activation' );
 function videosow_maybe_redirect_after_activation() {
@@ -37,6 +42,16 @@ function videosow_maybe_redirect_after_activation() {
     if ( ! current_user_can( 'manage_options' ) ) return;
     wp_safe_redirect( admin_url( 'admin.php?page=video-sow' ) );
     exit;
+}
+add_action( 'admin_init', 'videosow_maybe_run_pending_theme_scan', 20 );
+function videosow_maybe_run_pending_theme_scan() {
+    if ( ! get_transient( 'videosow_pending_theme_scan' ) ) return;
+    if ( wp_doing_ajax() || wp_doing_cron() ) return;
+    if ( ! current_user_can( 'manage_options' ) ) return;
+    delete_transient( 'videosow_pending_theme_scan' );
+    if ( function_exists( 'videosow_scan_active_theme' ) ) {
+        @videosow_scan_active_theme();
+    }
 }
 
 // Freemius SDK Initialization
