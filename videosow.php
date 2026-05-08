@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.1' );
+define( 'VIDEOSOW_VERSION', '1.2.2' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -411,6 +411,7 @@ function videosow_get_sermon_importer_defaults() {
         'archiveSidebarEnabled'    => false,
         'singleSidebarEnabled'     => false,
         'archiveColumns'           => 2,
+        'archiveLayout'            => 'theme',
         'archiveExcerptWords'      => 40,
         'archiveShowSort'          => true,
         'archiveShowTags'          => true,
@@ -894,8 +895,39 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video #videosow-grid ~ .entries-divider,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .post-separator,'
         . '.post-type-archive-videosow_video #videosow-grid ~ .wp-block-separator{display:none !important;margin:0 !important;padding:0 !important;border:0 !important;height:0 !important;}'
-        . '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(' . max( 1, min( 3, intval( isset( $cfg['archiveColumns'] ) ? $cfg['archiveColumns'] : 2 ) ) ) . ',minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
-        . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid{grid-template-columns:1fr !important;gap:1.5rem !important;}}'
+        . (function() use ($cfg) {
+            $layout = isset($cfg['archiveLayout']) ? $cfg['archiveLayout'] : 'theme';
+            $cols = $layout === 'magazine-3' ? 3 : ($layout === 'magazine-2' ? 2 : 1);
+            $base = '.post-type-archive-videosow_video .videosow-grid{display:grid !important;grid-template-columns:repeat(' . $cols . ',minmax(0,1fr)) !important;gap:2rem !important;margin:0 !important;width:100% !important;max-width:100% !important;clear:both !important;}'
+                . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid{grid-template-columns:1fr !important;gap:1.5rem !important;}}';
+            // Custom card designs override theme styling — independent of theme markup.
+            $custom = '';
+            if ( $layout === 'magazine-2' || $layout === 'magazine-3' ) {
+                $custom = '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;padding:0 !important;border-top:0 !important;transition:box-shadow .25s ease, transform .25s ease;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;transform:translateY(-2px);}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card > article{background:transparent !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .post-thumbnail,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] figure{margin:0 !important;aspect-ratio:16/9 !important;display:block !important;overflow:hidden !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .post-thumbnail img,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding:0 1.1rem !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta{padding-top:1rem !important;font-size:.78rem !important;color:rgba(0,0,0,.55) !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title{font-size:' . ($layout === 'magazine-3' ? '1.05rem' : '1.2rem') . ' !important;font-weight:700 !important;line-height:1.3 !important;margin:.5rem 0 .6rem 0 !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title a{color:#111 !important;text-decoration:none !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding-bottom:1.1rem !important;color:rgba(0,0,0,.65) !important;font-size:.9rem !important;line-height:1.55 !important;}';
+            } elseif ( $layout === 'list' ) {
+                $custom = '.videosow-grid[data-vs-layout="list"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:grid !important;grid-template-columns:minmax(220px,32%) 1fr !important;gap:0 !important;padding:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;transition:box-shadow .25s ease;}'
+                    . '.videosow-grid[data-vs-layout="list"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:contents !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .post-thumbnail,.videosow-grid[data-vs-layout="list"] figure{margin:0 !important;aspect-ratio:16/9 !important;display:block !important;overflow:hidden !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .post-thumbnail img,.videosow-grid[data-vs-layout="list"] figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .entry-meta,.videosow-grid[data-vs-layout="list"] .entry-title,.videosow-grid[data-vs-layout="list"] .entry-summary{padding:0 1.4rem !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .entry-meta{padding-top:1.2rem !important;font-size:.8rem !important;color:rgba(0,0,0,.55) !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .entry-title{font-size:1.4rem !important;font-weight:700 !important;line-height:1.25 !important;margin:.5rem 0 .65rem 0 !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .entry-title a{color:#111 !important;text-decoration:none !important;}'
+                    . '.videosow-grid[data-vs-layout="list"] .entry-summary{padding-bottom:1.3rem !important;color:rgba(0,0,0,.65) !important;font-size:.95rem !important;line-height:1.55 !important;}'
+                    . '@media (max-width:768px){.videosow-grid[data-vs-layout="list"] > .videosow-card{grid-template-columns:1fr !important;}}';
+            }
+            return $base . $custom;
+        })()
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{display:block !important;width:auto !important;max-width:none !important;min-width:0 !important;float:none !important;clear:none !important;margin:0 !important;padding:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;max-width:none !important;float:none !important;clear:none !important;}'
         . '.post-type-archive-videosow_video .videosow-grid img{opacity:1 !important;visibility:visible !important;display:block !important;}'
@@ -961,7 +993,9 @@ function videosow_sermon_archive_toolbar() {
     $tags_html   = $show_tags ? '<div class="kp-tags" id="videosow-tags"></div>' : '';
     $bar_html    = ( $search_html || $sort_html ) ? '<div class="kp-bar">' . $search_html . $sort_html . '</div>' : '';
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
-    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" style="display:none">'
+    $layout_attr = isset( $cfg['archiveLayout'] ) ? $cfg['archiveLayout'] : 'theme';
+    if ( ! in_array( $layout_attr, array( 'theme', 'magazine-2', 'magazine-3', 'list' ), true ) ) $layout_attr = 'theme';
+    echo '<div id="videosow-toolbar" class="videosow-toolbar" data-tags=\'' . esc_attr( $tags_json ) . '\' data-default-sort="' . esc_attr( $default_sort ) . '" data-excerpt-words="' . esc_attr( $excerpt_words ) . '" data-vs-layout="' . esc_attr( $layout_attr ) . '" style="display:none">'
         . $bar_html
         . $tags_html
         . '</div>';
@@ -1528,6 +1562,8 @@ function videosow_sermon_archive_toolbar_js() {
     var grid = document.createElement('div');
     grid.id = 'videosow-grid';
     grid.className = 'videosow-grid';
+    var __vsLayout = (toolbar.getAttribute('data-vs-layout') || 'theme');
+    grid.setAttribute('data-vs-layout', __vsLayout);
 
     if (rawArticles.length){
       captureTemplate(rawArticles[0], byId[getPostId(rawArticles[0])]);

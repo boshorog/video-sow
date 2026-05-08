@@ -48,6 +48,7 @@ export interface SermonImporterConfig {
   archiveSidebarEnabled: boolean;
   singleSidebarEnabled: boolean;
   archiveColumns: 1 | 2 | 3;
+  archiveLayout: "theme" | "magazine-2" | "magazine-3" | "list";
   archiveExcerptWords: number;
   archiveShowSort: boolean;
   archiveShowTags: boolean;
@@ -112,6 +113,7 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   archiveSidebarEnabled: false,
   singleSidebarEnabled: false,
   archiveColumns: 2,
+  archiveLayout: "theme",
   archiveExcerptWords: 40,
   archiveDefaultSort: "date_desc",
   archiveTagCloudMode: "random",

@@ -385,7 +385,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                   <Input
                     value={config.playlistId}
                     onChange={(e) => update("playlistId", parsePlaylist(e.target.value))}
-                    placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                    placeholder="PLxxxxxxxxxxxxxxxx  or full link"
                     className="h-9 text-sm font-mono pr-9"
                   />
                   <div className="absolute inset-y-0 right-2.5 flex items-center">
@@ -434,7 +434,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
                             next[i] = v;
                             setList(next);
                           }}
-                          placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
+                          placeholder="PLxxxxxxxxxxxxxxxx  or full link"
                           className="h-9 text-sm font-mono pr-9"
                         />
                         <div className="absolute inset-y-0 right-2.5 flex items-center">

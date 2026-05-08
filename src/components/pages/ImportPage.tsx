@@ -236,7 +236,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           )}
           <div className={cn(showEmptyOverlay && 'opacity-30 pointer-events-none select-none')}>
 
-          <Table>
+          <Table className="table-fixed w-full">
             <TableHeader>
               <TableRow>
                 <TableHead>
@@ -257,8 +257,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
             <TableBody>
               {sorted.map((r) => (
                 <TableRow key={r.videoId}>
-                  <TableCell className="font-medium text-slate-700">
-                    <div className="flex items-center gap-3">
+                  <TableCell className="font-medium text-slate-700 max-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       <img
                         src={`https://i.ytimg.com/vi/${r.videoId}/default.jpg`}
                         onError={(e) => {
@@ -269,7 +269,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                         className="w-12 h-9 rounded object-cover bg-muted shrink-0"
                         loading="lazy"
                       />
-                      <span className="truncate">{r.title}</span>
+                      <span className="truncate flex-1 min-w-0" title={r.title}>{r.title}</span>
                       <span className="ml-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-secondary text-muted-foreground shrink-0">
                         {r.videoId}
                       </span>
