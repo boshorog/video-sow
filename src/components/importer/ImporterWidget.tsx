@@ -155,7 +155,7 @@ export interface SermonProgress {
 const fmtTime = (ts: number) => {
   if (!ts) return "Never";
   const d = new Date(ts * 1000);
-  return d.toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" });
+  return d.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 };
 
 const SermonImporterWidget = ({
@@ -358,7 +358,7 @@ const SermonImporterWidget = ({
                 <>
                   <Coffee className="w-3.5 h-3.5 text-amber-600" />
                   <span className="font-medium text-foreground">
-                    Resting… ({restingInfo.remaining}s) — {progress!.done} / {progress!.total}
+                    {restingInfo.reason || "Coffee break"}… ({restingInfo.remaining}s) — {progress!.done} / {progress!.total}
                   </span>
                 </>
               ) : (
@@ -396,7 +396,7 @@ const SermonImporterWidget = ({
               </div>
               {progress!.currentTitle && (
                 <p className="text-[11px] text-muted-foreground truncate">
-                  Ultimul: <span className="text-foreground">{progress!.currentTitle}</span>
+                  Last imported: <span className="text-foreground">{progress!.currentTitle}</span>
                 </p>
               )}
               {progress!.already > 0 && (
