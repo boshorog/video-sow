@@ -74,6 +74,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.5 =
+* Fixed plugin header version (build was still reporting 1.2.3).
+* Import → Archive: view counts now read the correct meta key (no more zero views).
+* Import → Archive: Edit post and View public post action buttons are now wired to real URLs.
+
 = 1.2.4 =
 * Default archive layout is now Magazine · 2 cols.
 * Theme default layout keeps the theme's article rendering and shows the toolbar above it (no duplication).
