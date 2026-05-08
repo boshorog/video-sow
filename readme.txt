@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,6 +74,10 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.1.4 =
+* Packaging aligned with the standard build flow (`npm run package` produces Free and Pro ZIPs in `releases/`)
+* Removed stale reference source file from the imported plugin
+
 = 1.1.3 =
 * Plugin slug standardized to `video-sow` for WordPress.org compliance
 * Documentation and readme rewritten for the Video Sow workflow
@@ -104,6 +108,9 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.1.4 =
+Packaging now matches the standard Free/Pro flow. Safe upgrade.
 
 = 1.1.3 =
 Standardized plugin slug to `video-sow` and refreshed documentation. Safe upgrade.
