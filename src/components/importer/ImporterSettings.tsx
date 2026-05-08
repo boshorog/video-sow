@@ -925,7 +925,7 @@ const TroubleshootingSection = ({
                   <div className="text-muted-foreground">
                     Videos: <span className="text-foreground">{playlistTestResult.data.item_count}</span>
                     {playlistTestResult.data.published_at && (
-                      <> — created: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("ro-RO")}</span></>
+                      <> — created: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("en-US")}</span></>
                     )}
                   </div>
                   <div className="font-mono text-muted-foreground">ID: {playlistTestResult.data.playlist_id}</div>
