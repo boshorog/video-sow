@@ -365,35 +365,40 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           }
           return (
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-medium text-muted-foreground">Playlists</Label>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO · Multi-playlist</span>
-              </div>
+              <Label className="text-xs font-medium text-muted-foreground">Playlists</Label>
               <div className="space-y-2">
                 {list.map((pid, i) => {
-                  const isActive = pid && pid === config.playlistId;
                   return (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="active-playlist"
-                        checked={!!isActive}
-                        disabled={!pid}
-                        onChange={() => update("playlistId", pid)}
-                        className="accent-primary"
-                        title="Use this playlist for sync"
-                      />
+                    <div
+                      key={i}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', String(i));
+                        e.dataTransfer.effectAllowed = 'move';
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const from = parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
+                        if (isNaN(from) || from === i) return;
+                        const next = [...list];
+                        const [moved] = next.splice(from, 1);
+                        next.splice(i, 0, moved);
+                        setList(next);
+                      }}
+                      className="flex items-center gap-2 rounded-md hover:bg-secondary/30 transition-colors"
+                    >
+                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
                       <Input
                         value={pid}
                         onChange={(e) => {
                           const v = parsePlaylist(e.target.value);
                           const next = [...list];
                           next[i] = v;
-                          if (isActive || !config.playlistId) {
-                            onChange({ ...config, playlistIds: next, playlistId: v });
-                          } else {
-                            update("playlistIds", next);
-                          }
+                          setList(next);
                         }}
                         placeholder="PLxxxxxxxxxxxxxxxx  or  https://youtube.com/playlist?list=…"
                         className="h-9 text-sm font-mono flex-1"
@@ -422,7 +427,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
               >
                 <Plus className="w-3.5 h-3.5" /> Add playlist
               </Button>
-              <p className="text-[11px] text-muted-foreground">Add multiple playlists; pick the active one with the radio. Switch between them quickly from the Import page.</p>
+              <p className="text-[11px] text-muted-foreground">Drag to reorder. The top playlist is the default; switch between them on the Import page.</p>
             </div>
           );
         })()}
