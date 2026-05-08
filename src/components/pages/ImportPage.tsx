@@ -221,7 +221,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           </div>
         </CardHeader>
         <CardContent className="relative">
-          {isFirstRun && (
+          {showEmptyOverlay && (
             <div className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-card/60 backdrop-blur-[1px] rounded-b-lg">
               <div className="max-w-md text-center rounded-lg border border-primary/30 bg-card shadow-md px-5 py-4">
                 <div className="flex items-center justify-center gap-2 mb-1.5">
@@ -234,7 +234,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               </div>
             </div>
           )}
-          <div className={cn(isFirstRun && 'opacity-30 pointer-events-none select-none')}>
+          <div className={cn(showEmptyOverlay && 'opacity-30 pointer-events-none select-none')}>
 
           <Table>
             <TableHeader>
