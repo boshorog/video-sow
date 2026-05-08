@@ -37,7 +37,7 @@ const proBuildMarker = () => ({
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/wp-content/plugins/videosow/dist/' : '/',
+  base: mode === 'production' ? '/wp-content/plugins/video-sow/dist/' : '/',
   server: {
     host: "::",
     port: 8080,
