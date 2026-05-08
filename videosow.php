@@ -1582,6 +1582,8 @@ function videosow_sermon_archive_toolbar_js() {
 
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
+    var layoutMode = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
+
     // Collect articles BEFORE moving anything around.
     var rawArticles = Array.prototype.slice.call(document.querySelectorAll('article[id^="post-"], .post-type-archive-videosow_video article'));
     var seen = {};
@@ -1597,11 +1599,43 @@ function videosow_sermon_archive_toolbar_js() {
       return true;
     });
 
+    // ── THEME DEFAULT MODE ──────────────────────────────────────────
+    // Don't replace the theme's rendered articles with a synthetic grid.
+    // Just place the toolbar above the first article so search/sort/tags
+    // operate directly on the theme markup.
+    if (layoutMode === 'theme') {
+      if (toolbar) {
+        var anchorT = null, anchorParentT = null;
+        if (rawArticles.length){
+          var firstSlotT = getSlot(rawArticles[0]);
+          if (firstSlotT && firstSlotT.parentNode){ anchorT = firstSlotT; anchorParentT = firstSlotT.parentNode; }
+        }
+        if (!anchorParentT){
+          var aH = findArchiveAnchor();
+          if (aH && aH.parentNode){ anchorParentT = aH.parentNode; anchorT = aH.nextSibling; }
+        }
+        if (!anchorParentT){
+          anchorParentT = document.querySelector('main') || document.body;
+          anchorT = anchorParentT.firstChild;
+        }
+        anchorParentT.insertBefore(toolbar, anchorT);
+        toolbar.style.display = '';
+        buildTags(toolbar);
+        var sT = toolbar.querySelector('#videosow-search');
+        var soT = toolbar.querySelector('#videosow-sort');
+        if (sT) sT.addEventListener('input', function(){ state.q = sT.value; apply(); });
+        if (soT) soT.addEventListener('change', function(){ state.sort = soT.value; apply(); });
+      }
+      hideNativePagination();
+      apply();
+      return;
+    }
+
+    // ── CUSTOM LAYOUT MODES (magazine-2, magazine-3, list) ─────────
     var grid = document.createElement('div');
     grid.id = 'videosow-grid';
     grid.className = 'videosow-grid';
-    var __vsLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
-    grid.setAttribute('data-vs-layout', __vsLayout);
+    grid.setAttribute('data-vs-layout', layoutMode);
 
     if (rawArticles.length){
       captureTemplate(rawArticles[0], byId[getPostId(rawArticles[0])]);
@@ -1612,7 +1646,6 @@ function videosow_sermon_archive_toolbar_js() {
         var card = buildSyntheticCard(d);
         hydrateMedia(card);
         grid.appendChild(card);
-        getSlot(a).classList.add('kp-source-hidden');
       });
     } else {
       // Fallback: theme didn't render recognizable <article> cards on this page.
@@ -1631,9 +1664,21 @@ function videosow_sermon_archive_toolbar_js() {
       insertHost = anchor.parentNode; insertBefore = anchor.nextSibling;
     } else {
       var mainEl = document.querySelector('main') || document.body;
-      insertHost = mainEl; insertBefore = null;
+      insertHost = mainEl; insertBefore = mainEl.firstChild;
     }
     insertHost.insertBefore(grid, insertBefore);
+
+    // Physically REMOVE the original theme article wrappers so they
+    // can't appear duplicated below (e.g. under the footer) on themes
+    // that bypass our display:none rules.
+    rawArticles.forEach(function(a){
+      var slot = getSlot(a);
+      var node = (slot && slot.parentNode) ? slot : a;
+      if (node && node.parentNode && !grid.contains(node)) {
+        node.parentNode.removeChild(node);
+      }
+    });
+
     if (toolbar) {
       grid.parentNode.insertBefore(toolbar, grid);
       toolbar.style.display = '';
