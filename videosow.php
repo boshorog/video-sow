@@ -589,6 +589,44 @@ function videosow_sermon_archive_css() {
 }
 add_action( 'wp_head', 'videosow_sermon_archive_css', 99 );
 
+/* Hide sidebar on archive / single article pages when disabled in settings (default: hidden). */
+function videosow_sermon_sidebar_toggle_css() {
+    $is_archive = is_post_type_archive( 'videosow_video' );
+    $is_single  = is_singular( 'videosow_video' );
+    if ( ! $is_archive && ! $is_single ) return;
+    $cfg = videosow_get_sermon_importer_config();
+    $hide = ( $is_archive && empty( $cfg['archiveSidebarEnabled'] ) ) || ( $is_single && empty( $cfg['singleSidebarEnabled'] ) );
+    if ( ! $hide ) return;
+    $body = $is_archive ? '.post-type-archive-videosow_video' : '.single-videosow_video';
+    echo '<style id="videosow-hide-sidebar-css">'
+        . $body . ' #secondary,'
+        . $body . ' .sidebar,'
+        . $body . ' aside.widget-area,'
+        . $body . ' .widget-area,'
+        . $body . ' #sidebar,'
+        . $body . ' .secondary,'
+        . $body . ' .complementary {display:none !important;}'
+        . $body . ' #primary,'
+        . $body . ' .content-area,'
+        . $body . ' main#main,'
+        . $body . ' .site-main,'
+        . $body . ' .site-content > .content-area,'
+        . $body . ' #content > .content-area {width:100% !important;max-width:100% !important;float:none !important;margin-right:0 !important;margin-left:0 !important;}'
+        . '</style>';
+}
+add_action( 'wp_head', 'videosow_sermon_sidebar_toggle_css', 100 );
+
+/* Force is_active_sidebar() / dynamic_sidebar() to be inert on these pages when disabled. */
+function videosow_sermon_disable_sidebars( $is_active_sidebar, $index ) {
+    $is_archive = is_post_type_archive( 'videosow_video' );
+    $is_single  = is_singular( 'videosow_video' );
+    if ( ! $is_archive && ! $is_single ) return $is_active_sidebar;
+    $cfg = videosow_get_sermon_importer_config();
+    $hide = ( $is_archive && empty( $cfg['archiveSidebarEnabled'] ) ) || ( $is_single && empty( $cfg['singleSidebarEnabled'] ) );
+    return $hide ? false : $is_active_sidebar;
+}
+add_filter( 'is_active_sidebar', 'videosow_sermon_disable_sidebars', 10, 2 );
+
 /* Inject the archive page title into the theme's empty <h2 class="archive-heading"> */
 function videosow_sermon_archive_title_js() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
