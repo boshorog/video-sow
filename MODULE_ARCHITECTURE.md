@@ -41,12 +41,12 @@ The codebase is organized into distinct modules with clear responsibilities:
 **Exports:**
 ```typescript
 // Identity
-PLUGIN_SLUG          // 'kindpixels-pdf-gallery'
-PLUGIN_PREFIX        // 'kindpdfg'
-JS_GLOBAL_NAME       // 'kindpdfgData'
-PLUGIN_NAME          // 'PDF Gallery'
-PRO_NAME             // 'PDF Gallery Pro'
-PLUGIN_VERSION       // '2.4.8'
+PLUGIN_SLUG          // 'video-sow'
+PLUGIN_PREFIX        // 'videosow'
+JS_GLOBAL_NAME       // 'videosowData'
+PLUGIN_NAME          // 'Video Sow'
+PRO_NAME             // 'Video Sow Pro'
+PLUGIN_VERSION       // '1.1.3'
 
 // Branding
 BRANDING.author      // 'Kind Pixels'
