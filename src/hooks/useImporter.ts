@@ -230,6 +230,7 @@ export const useImporter = () => {
     config, setConfig, loaded,
     isSaving, isSyncing, isRepairing, repairProgress,
     progress, stallInfo, restingInfo, stageInfo, cancelPending,
+    archive, refreshArchive,
     save, sync, cancelSync, repair,
   };
 };
