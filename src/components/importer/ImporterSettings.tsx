@@ -506,8 +506,26 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         )}
 
       </div>
+       </div>
 
-      <TroubleshootingSection
+       <aside className="lg:sticky lg:top-4 rounded-lg border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/[0.02] p-4 space-y-3">
+         <div className="flex items-center gap-2">
+           <Wrench className="w-4 h-4 text-primary" />
+           <h5 className="text-sm font-bold text-foreground">Tips & quick start</h5>
+         </div>
+         <ol className="text-xs text-muted-foreground space-y-2 list-decimal list-inside">
+           <li>Paste your <strong className="text-foreground">YouTube Data API v3 key</strong> from Google Cloud Console.</li>
+           <li>Add the <strong className="text-foreground">Playlist URL</strong> — we'll extract the ID automatically.</li>
+           <li>Hit <strong className="text-foreground">Save</strong>, then run a <strong className="text-foreground">full backfill</strong> from the Import page.</li>
+           <li>Enable <strong className="text-foreground">Automatic sync</strong> so new videos are imported in the background.</li>
+           <li>Use <strong className="text-foreground">Relaxed mode</strong> if you hit YouTube rate limits on large playlists.</li>
+         </ol>
+         <div className="pt-2 border-t border-primary/15 text-[11px] text-muted-foreground">
+           <p>Need help? Use the <strong className="text-foreground">Diagnostic tools</strong> below to test transcripts or repair metadata.</p>
+         </div>
+       </aside>
+      </div>
+
         config={config}
         onRepair={onRepair}
         isRepairing={isRepairing}
