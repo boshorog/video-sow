@@ -305,18 +305,44 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                       >
                         <Youtube className="w-3.5 h-3.5" />
                       </a>
-                      <button
-                        title="Edit post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        title="View public post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </button>
+                      {r.editLink ? (
+                        <a
+                          href={r.editLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Edit post"
+                          className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <button
+                          title="Edit post (unavailable for sample data)"
+                          disabled
+                          className="p-1.5 rounded-md text-muted-foreground/40 cursor-not-allowed"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {r.permalink ? (
+                        <a
+                          href={r.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View public post"
+                          className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      ) : (
+                        <button
+                          title="View public post (unavailable for sample data)"
+                          disabled
+                          className="p-1.5 rounded-md text-muted-foreground/40 cursor-not-allowed"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
