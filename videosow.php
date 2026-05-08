@@ -1599,12 +1599,60 @@ function videosow_sermon_archive_toolbar_js() {
     });
   }
 
+  // Resolve the loop container the active theme uses for the post loop.
+  // Comes from the server-side theme structure scan (videosow_theme_map_*).
+  // If we cannot find it, we always fall back to the safe "theme default"
+  // mode so we never accidentally wipe header/menu/footer.
+  function resolveLoopContainer(){
+    var sel = THEME_MAP && THEME_MAP.loop_container ? String(THEME_MAP.loop_container) : '';
+    if (sel) {
+      try {
+        var el = document.querySelector(sel);
+        if (el) return el;
+      } catch(e){}
+    }
+    return null;
+  }
+  function resolveArticleSelector(){
+    var sel = THEME_MAP && THEME_MAP.article_selector ? String(THEME_MAP.article_selector) : '';
+    return sel || 'article[id^="post-"]';
+  }
+  function resolveWrapperOf(article){
+    var wrapSel = THEME_MAP && THEME_MAP.article_wrapper ? String(THEME_MAP.article_wrapper) : '';
+    if (wrapSel) {
+      try {
+        var w = article.closest ? article.closest(wrapSel) : null;
+        if (w) return w;
+      } catch(e){}
+    }
+    return getSlot(article);
+  }
+
   function init(){
     var toolbar = document.getElementById('videosow-toolbar');
-    var layoutMode = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
+    var requestedLayout = (toolbar && toolbar.getAttribute('data-vs-layout')) || CONFIG_LAYOUT || 'theme';
 
-    // Collect articles BEFORE moving anything around.
-    var rawArticles = Array.prototype.slice.call(document.querySelectorAll('article[id^="post-"], .post-type-archive-videosow_video article'));
+    var loopContainer = resolveLoopContainer();
+    var mapConfidence = THEME_MAP && THEME_MAP.confidence ? String(THEME_MAP.confidence) : 'low';
+
+    // Safety: if we don't have a confident loop container, force theme-default.
+    // Otherwise the synthetic-grid path could remove nodes outside the loop
+    // and visually wipe the site header / menu / footer on unfamiliar themes.
+    var layoutMode = requestedLayout;
+    if (layoutMode !== 'theme' && (!loopContainer || mapConfidence === 'low')) {
+      layoutMode = 'theme';
+    }
+
+    // Collect articles BEFORE moving anything around. When we have a loop
+    // container, restrict the search to it so we never touch header/footer.
+    var articleSel = resolveArticleSelector();
+    var searchRoot = loopContainer || document;
+    var rawArticles;
+    try {
+      rawArticles = Array.prototype.slice.call(searchRoot.querySelectorAll(articleSel + ', article[id^="post-"]'));
+    } catch(e) {
+      rawArticles = Array.prototype.slice.call(searchRoot.querySelectorAll('article[id^="post-"]'));
+    }
     var seen = {};
     var seenPid = {};
     rawArticles = rawArticles.filter(function(a){
@@ -1620,12 +1668,22 @@ function videosow_sermon_archive_toolbar_js() {
 
     // ── THEME DEFAULT MODE ──────────────────────────────────────────
     // Don't replace the theme's rendered articles with a synthetic grid.
-    // Just place the toolbar above the first article so search/sort/tags
-    // operate directly on the theme markup.
+    // Just place the toolbar inside the loop container, above the first
+    // rendered article, so search/sort/tags operate on theme markup.
     if (layoutMode === 'theme') {
       if (toolbar) {
         var anchorT = null, anchorParentT = null;
-        if (rawArticles.length){
+        if (loopContainer && rawArticles.length){
+          // Insert before the wrapper of the first article, INSIDE the loop.
+          var wrap0 = resolveWrapperOf(rawArticles[0]);
+          if (wrap0 && wrap0.parentNode && loopContainer.contains(wrap0)){
+            anchorParentT = wrap0.parentNode; anchorT = wrap0;
+          }
+        }
+        if (!anchorParentT && loopContainer){
+          anchorParentT = loopContainer; anchorT = loopContainer.firstChild;
+        }
+        if (!anchorParentT && rawArticles.length){
           var firstSlotT = getSlot(rawArticles[0]);
           if (firstSlotT && firstSlotT.parentNode){ anchorT = firstSlotT; anchorParentT = firstSlotT.parentNode; }
         }
@@ -1674,25 +1732,42 @@ function videosow_sermon_archive_toolbar_js() {
       });
     }
 
-    var anchor = findArchiveAnchor();
-    var firstSlot = rawArticles.length ? getSlot(rawArticles[0]) : null;
+    // Insert grid INSIDE the detected loop container — never above it. This
+    // keeps the theme's site header/menu/sidebar/footer fully intact.
     var insertHost = null, insertBefore = null;
-    if (firstSlot && firstSlot.parentNode){
-      insertHost = firstSlot.parentNode; insertBefore = firstSlot;
-    } else if (anchor && anchor.parentNode){
-      insertHost = anchor.parentNode; insertBefore = anchor.nextSibling;
+    if (loopContainer) {
+      if (rawArticles.length) {
+        var firstWrap = resolveWrapperOf(rawArticles[0]);
+        if (firstWrap && firstWrap.parentNode && loopContainer.contains(firstWrap)) {
+          insertHost = firstWrap.parentNode; insertBefore = firstWrap;
+        }
+      }
+      if (!insertHost) {
+        insertHost = loopContainer; insertBefore = loopContainer.firstChild;
+      }
     } else {
-      var mainEl = document.querySelector('main') || document.body;
-      insertHost = mainEl; insertBefore = mainEl.firstChild;
+      // Should not happen because of the safety fallback above, but just in case.
+      var anchor = findArchiveAnchor();
+      var firstSlot = rawArticles.length ? getSlot(rawArticles[0]) : null;
+      if (firstSlot && firstSlot.parentNode){
+        insertHost = firstSlot.parentNode; insertBefore = firstSlot;
+      } else if (anchor && anchor.parentNode){
+        insertHost = anchor.parentNode; insertBefore = anchor.nextSibling;
+      } else {
+        var mainEl = document.querySelector('main') || document.body;
+        insertHost = mainEl; insertBefore = mainEl.firstChild;
+      }
     }
     insertHost.insertBefore(grid, insertBefore);
 
-    // Physically REMOVE the original theme article wrappers so they
-    // can't appear duplicated below (e.g. under the footer) on themes
-    // that bypass our display:none rules.
+    // Physically REMOVE only the original article wrappers, and ONLY when
+    // they live inside the loop container. This guarantees we never strip
+    // the site header/menu/footer/sidebar even on exotic themes.
+    var cleanupRoot = loopContainer || document.body;
     rawArticles.forEach(function(a){
-      var slot = getSlot(a);
-      var node = (slot && slot.parentNode) ? slot : a;
+      var node = resolveWrapperOf(a);
+      if (!node) node = a;
+      if (!cleanupRoot.contains(node)) return;
       if (node && node.parentNode && !grid.contains(node)) {
         node.parentNode.removeChild(node);
       }
