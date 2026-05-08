@@ -107,6 +107,8 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   archiveShowSearch: true,
   archiveShowSort: true,
   archiveShowTags: true,
+  archiveSidebarEnabled: false,
+  singleSidebarEnabled: false,
   archiveDefaultSort: "date_desc",
   archiveTagCloudMode: "random",
   archiveTagCloudLinesDesktop: 2,
