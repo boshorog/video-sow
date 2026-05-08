@@ -439,7 +439,7 @@ const SermonImporterWidget = ({
       ) : (
         <div className="flex items-center gap-2 text-xs">
         <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-        <span className="text-muted-foreground">Inst sync:</span>
+        <span className="text-muted-foreground">Last sync:</span>
         <span className="font-medium text-foreground">{fmtTime(activeSyncAt)}</span>
         {activeSyncMsg && <span className="text-muted-foreground">— {activeSyncMsg}</span>}
         </div>

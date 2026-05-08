@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.1.7
+ * Version: 1.1.8
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.1.7' );
+define( 'VIDEOSOW_VERSION', '1.1.8' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -106,6 +106,8 @@ class VideoSow_Plugin {
 
     public function init() {
         add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+        // Late hook so the CPT's auto-attached submenu is already in place.
+        add_action( 'admin_menu', array( $this, 'rename_dashboard_submenu' ), 999 );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
         add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ), 99, 1 );
         add_action( 'admin_print_styles', array( $this, 'hide_other_plugin_notices' ) );
@@ -115,7 +117,32 @@ class VideoSow_Plugin {
         // Simple "play in grid" SVG icon for Video Sow
         $icon_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10000 10000"><path fill="black" d="M5077.58 271.49c359.5,148.68 639.53,490.99 798.78,835.37 183.34,396.52 181.43,795.95 7.72,1194.2 -51.71,118.55 -118.41,232.85 -164.61,353.5 -43.98,132.79 -62.72,328.88 -96.15,474.35 -19.51,85.06 -52.7,236.61 -56.3,323.98 -0.38,10.18 6.81,11.22 17.59,18.23 37.48,-3.19 304.12,-157.63 340.15,-183.27 271,-193 829,-324 1020.6,-576.51 690.01,-909.09 1876.59,-814.34 2722.04,-196.94 83.68,61.07 168.2,123.27 239.64,201.8 -103.03,228.7 -380.15,513.57 -561.97,672.79 -589.89,516.47 -1421.71,658.43 -2112.11,250.85 -246.76,-145.68 -179.91,-184.89 41.38,-304.79 275.82,-149.44 564.04,-240.67 863.19,-329.11 132.86,-40.26 327.53,-74.61 446.47,-130.58l10.17 -4.83c-594.94,-109.81 -1475.79,218.39 -1985.68,511.71 -1120.8,644.89 -1931.2,1444.48 -2279.94,2714.28 -90.64,326.76 -129.66,665.69 -115.66,1004.54 1.83,43.45 1.07,195.43 52.17,204.53 107.26,-31.66 261.91,-129.27 365.47,-187.56l597.72 -339.23 1062.67 -606.03c137.15,-78.39 522.73,-275.28 613.06,-375.26 82.68,-92.86 125.52,-214.56 119.09,-338.77 -16.75,-321.87 -325.31,-427.2 -548.35,-556.08 -142.04,-82.15 -497.36,-263.7 -598.71,-354.85 60.97,-113.27 630.89,-539.69 761.76,-580 128.2,32.17 644.76,351.05 764.16,434.59 51.79,35.79 100.51,75.79 145.71,119.59 547.29,527.61 543.46,1408.01 0.54,1935.1 -184.19,178.83 -404.25,285.85 -625.84,410.68l-573.67 323.47 -2038.93 1158.97 -1449.2 827.69 -488.8 276.05c-94.5,52.78 -195.72,113.44 -294.06,157.34 -508.17,227.25 -1169.73,118.56 -1564.3,-278.42 -244.27,-245.83 -384.72,-561.59 -412.43,-905.02 -11.19,-138.68 -7.41,-283.78 -7.43,-422.45l-0.04 -629.66 0.12 -4596.41c0.98,-450.57 100.14,-796.48 426.67,-1129.65 245.33,-250.33 657.73,-402.04 1005.63,-397.18 199.26,4 395.99,45.52 579.89,122.38 122.52,52.54 280.11,149.29 399.04,218.46l519.13 298.14c465.97,264.44 930.36,531.69 1393.11,801.72 86.23,50.97 222.69,125.22 279.03,182.78 -64.64,227.45 -242.3,626.93 -391.13,809.95 -65.63,-29.38 -50.3,-30.2 -115.91,-67.96l-411.85 -235.81 -1463.21 -838.26c-136.83,-78.75 -449.4,-272.56 -580.87,-331.11 -62,-28.12 -128.72,-44.37 -196.7,-47.92 -145.89,-6.97 -250.19,40.36 -359.5,135.25 -117.52,102.01 -147.8,233.6 -151.75,383.2 -3.69,139.46 -1.87,284.58 -1.69,425.41l0.63 745.4 0.61 2348.46 -0.1 1415.9c-0.17,174.09 -10.85,590.43 7.24,747.15 13.56,110.3 61.13,213.63 136.11,295.71 154.18,165.76 402.02,175.93 594.06,81.92 112.74,-55.23 211.89,-111.9 320.64,-174.02l491.78 -282.01c146.11,-83.91 679.24,-376.1 774.98,-466.44 39.51,-100.13 34.48,-482.57 41.91,-615.06 8.93,-154.28 24.13,-308.1 45.55,-461.15 29.42,-209.13 63.43,-359.73 53.79,-575.74 -10.18,-202.31 -52.68,-401.73 -125.87,-590.58 -121.09,-313.83 -420.56,-796.77 -732.59,-936 41.78,85.86 106.08,194.66 155.79,275.28 113.67,184.49 392.02,703.17 337.89,906.48 -22.93,13.92 -40.24,15.52 -67.2,11.16 -937.76,-152.36 -1342.57,-1092.38 -1230.52,-1957.84 5.29,-157.68 197.98,-116.78 310.83,-105.19 756.76,77.65 1495.09,608.44 1590.8,1402.7 6.48,53.77 30.06,250.19 91.03,256.09 52.96,-47.35 158.91,-275.67 201.77,-353.69 53.42,-96.6 109.38,-191.83 167.82,-285.51 197.9,-314.4 503.87,-665.69 679.96,-972.37 113.18,-200.68 208.71,-410.79 285.58,-627.97 164.84,-458.31 256.63,-899.88 212.95,-1390.06 -12.16,-136.5 -41.53,-293.41 -100.35,-418.11 -27.54,121.81 -34.27,319.15 -43.91,449.82 -12.62,192.88 -38.78,384.63 -78.32,573.84 -12.17,57.7 -26.17,172.47 -92.4,180.33 -59.43,-18.91 -141.66,-113.33 -183.55,-161.41 -248.85,-285.49 -354.47,-592.79 -329.18,-970.27 25.76,-384.34 245.02,-931.99 536.37,-1184.11z"/></svg>';
         $icon_base64 = 'data:image/svg+xml;base64,' . base64_encode( $icon_svg );
-        add_menu_page( '', 'Video Sow', 'manage_options', 'video-sow', array( $this, 'render_admin_page' ), $icon_base64, 100 );
+        add_menu_page( 'Video Sow', 'Video Sow', 'manage_options', 'video-sow', array( $this, 'render_admin_page' ), $icon_base64, 100 );
+        // Explicit Tags submenu (so it appears under the Video Sow parent — the
+        // taxonomy is not auto-attached when its CPT uses show_in_menu=parent).
+        add_submenu_page(
+            'video-sow',
+            'Tags',
+            'Tags',
+            'manage_categories',
+            'edit-tags.php?taxonomy=videosow_tag&post_type=videosow_video'
+        );
+    }
+
+    /**
+     * Rename the auto-generated first submenu entry (which mirrors the parent
+     * menu title) to "Dashboard". Runs after both add_menu_page and the CPT's
+     * show_in_menu auto-attachment have populated $submenu['video-sow'].
+     */
+    public function rename_dashboard_submenu() {
+        global $submenu;
+        if ( ! isset( $submenu['video-sow'] ) ) return;
+        foreach ( $submenu['video-sow'] as $idx => $row ) {
+            if ( isset( $row[2] ) && $row[2] === 'video-sow' ) {
+                $submenu['video-sow'][ $idx ][0] = 'Dashboard';
+                break;
+            }
+        }
     }
 
     public function hide_other_plugin_notices() {
@@ -243,7 +270,8 @@ class VideoSow_Plugin {
                 videosow_get_oauth_redirect_uri:       ['videosow_get_oauth_redirect_uri',       'videosow_oauth_redirect_uri'],
                 videosow_disconnect_oauth:             ['videosow_disconnect_oauth',             'videosow_oauth_disconnected'],
                 videosow_test_oauth:                   ['videosow_test_oauth',                   'videosow_oauth_tested'],
-                videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list']
+                videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list'],
+                videosow_dashboard_stats:              ['videosow_dashboard_stats',              'videosow_dashboard_stats_result']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
@@ -472,18 +500,20 @@ function videosow_register_sermon_cpt() {
 
     register_taxonomy( 'videosow_tag', 'videosow_video', array(
         'labels'            => array(
-            'name'          => 'Tags videos',
-            'singular_name' => 'Etichetă predică',
+            'name'          => 'Tags',
+            'singular_name' => 'Tag',
             'menu_name'     => 'Tags',
-            'all_items'     => 'All etichetele',
-            'add_new_item'  => 'Adaugă etichetă',
+            'all_items'     => 'All Tags',
+            'add_new_item'  => 'Add Tag',
+            'edit_item'     => 'Edit Tag',
+            'search_items'  => 'Search Tags',
         ),
         'public'            => true,
         'show_ui'           => true,
         'show_admin_column' => true,
         'show_in_rest'      => true,
         'hierarchical'      => false,
-        'rewrite'           => array( 'slug' => 'eticheta-predica' ),
+        'rewrite'           => array( 'slug' => 'videosow-tag' ),
     ) );
 }
 add_action( 'init', 'videosow_register_sermon_cpt' );
@@ -606,12 +636,26 @@ function videosow_sermon_sidebar_toggle_css() {
         . $body . ' #sidebar,'
         . $body . ' .secondary,'
         . $body . ' .complementary {display:none !important;}'
+        // Force the main content column to span the full row even when the theme
+        // wraps it in a Bootstrap/Foundation/Twenty-* grid that reserves space
+        // for the (now-hidden) sidebar.
         . $body . ' #primary,'
         . $body . ' .content-area,'
         . $body . ' main#main,'
         . $body . ' .site-main,'
+        . $body . ' .entry-content,'
         . $body . ' .site-content > .content-area,'
-        . $body . ' #content > .content-area {width:100% !important;max-width:100% !important;float:none !important;margin-right:0 !important;margin-left:0 !important;}'
+        . $body . ' #content > .content-area,'
+        . $body . ' #content-wrap > .content-area,'
+        . $body . ' .col-main,'
+        . $body . ' .main-content {width:100% !important;max-width:100% !important;float:none !important;margin-right:0 !important;margin-left:0 !important;}'
+        // Bootstrap / Foundation / generic grid columns that wrap the article.
+        . $body . ' [class*="col-md-"],'
+        . $body . ' [class*="col-lg-"],'
+        . $body . ' [class*="col-sm-"],'
+        . $body . ' [class*="col-xs-"],'
+        . $body . ' .columns,'
+        . $body . ' .column {flex:0 0 100% !important;width:100% !important;max-width:100% !important;}'
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_sermon_sidebar_toggle_css', 100 );
@@ -1235,7 +1279,7 @@ function videosow_sermon_archive_toolbar_js() {
     var btn = document.createElement('button');
     btn.id = 'videosow-load-more';
     btn.type = 'button';
-    btn.textContent = 'Încarcă mai multe';
+    btn.textContent = 'Load more';
     btn.style.cssText = 'background:#111;color:#fff;border:0;border-radius:9999px;padding:.65rem 1.4rem;font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;';
     btn.addEventListener('click', loadMore);
     wrap.appendChild(btn);
@@ -1557,26 +1601,25 @@ function videosow_ai_process_sermon( $cfg, $title, $description, $transcript, $e
 
     $tags_list = is_array( $existing_tags ) ? implode( ', ', array_slice( $existing_tags, 0, 200 ) ) : '';
 
-    $system = "Ești asistent editorial pentru o biserică creștină. " .
-        "Returnează STRICT un obiect JSON valid cu cheile opționale: " .
-        "\"description\" (string HTML simplu cu <p>), \"tags\" (array de string-uri scurte), " .
-        "\"excerpt\" (string max 160 caractere), \"title\" (string). " .
-        "Include doar cheile pe care utilizatorul ți le cere prin instrucțiuni. " .
-        "Nu inventa citate biblice sau afirmații care nu apar în surse. " .
-        "Răspunde în limba română.";
+    $system = "You are an editorial assistant. " .
+        "Return STRICTLY a single valid JSON object with optional keys: " .
+        "\"description\" (simple HTML string with <p>), \"tags\" (array of short strings), " .
+        "\"excerpt\" (string max 160 characters), \"title\" (string). " .
+        "Include only the keys the user requests via instructions. " .
+        "Do not invent quotes or claims that are not in the sources.";
 
-    $user = "=== INSTRUCȚIUNI ===\n" . $cfg['aiInstructions'] . "\n\n";
+    $user = "=== INSTRUCTIONS ===\n" . $cfg['aiInstructions'] . "\n\n";
     if ( ! empty( $tags_list ) ) {
         if ( ! empty( $cfg['aiRestrictTags'] ) ) {
-            $user .= "=== TAGURI EXISTENTE PE SITE (OBLIGATORIU: alege EXCLUSIV din această listă, scrise IDENTIC; NU crea taguri noi, NU modifica forma; dacă niciunul nu se potrivește, returnează \"tags\": []) ===\n" . $tags_list . "\n\n";
+            $user .= "=== EXISTING SITE TAGS (REQUIRED: choose EXCLUSIVELY from this list, written IDENTICALLY; do NOT create new tags, do NOT change form; if none match, return \"tags\": []) ===\n" . $tags_list . "\n\n";
         } else {
-            $user .= "=== TAGURI EXISTENTE PE SITE (folosește-le prioritar) ===\n" . $tags_list . "\n\n";
+            $user .= "=== EXISTING SITE TAGS (use them with priority) ===\n" . $tags_list . "\n\n";
         }
     }
-    $user .= "=== TITLU ACTUAL ===\n" . $title . "\n\n";
-    $user .= "=== DESCRIERE CURENTĂ ===\n" . $description . "\n\n";
+    $user .= "=== CURRENT TITLE ===\n" . $title . "\n\n";
+    $user .= "=== CURRENT DESCRIPTION ===\n" . $description . "\n\n";
     if ( ! empty( $transcript ) ) {
-        $user .= "=== TRANSCRIERE ===\n" . $transcript . "\n";
+        $user .= "=== TRANSCRIPT ===\n" . $transcript . "\n";
     }
 
     $req = videosow_ai_build_request( $cfg, array(
@@ -1771,7 +1814,7 @@ function videosow_ajax_repair_sermon_metadata() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
 
     $cfg = videosow_get_sermon_importer_config();
-    if ( empty( $cfg['apiKey'] ) ) wp_send_json_error( 'Lipsește API Key' );
+    if ( empty( $cfg['apiKey'] ) ) wp_send_json_error( 'Missing API Key' );
 
     $offset = isset( $_POST['offset'] ) ? max( 0, intval( $_POST['offset'] ) ) : 0;
     $batch  = 50;
@@ -1938,11 +1981,11 @@ function videosow_ajax_diagnose_transcript() {
 
     // OAuth probe with detailed HTTP info for diagnosis.
     $oauth_tracks = array();
-    $oauth_note   = 'OAuth neconfigurat';
+    $oauth_note   = 'OAuth not configured';
     if ( videosow_youtube_oauth_is_configured( $cfg ) ) {
         $token = videosow_youtube_oauth_access_token( $cfg );
         if ( ! $token ) {
-            $oauth_note = 'OAuth: refresh token invalid (token endpoint a eșuat)';
+            $oauth_note = 'OAuth: invalid refresh token (token endpoint failed)';
         } else {
             // Identify which channel the OAuth token actually belongs to.
             $oauth_channel_label = '';
@@ -1958,7 +2001,7 @@ function videosow_ajax_diagnose_transcript() {
                     $title = isset( $jc['items'][0]['snippet']['title'] ) ? $jc['items'][0]['snippet']['title'] : '';
                     $oauth_channel_label = $title . ' (' . $oauth_channel_id . ')';
                 } else {
-                    $oauth_channel_label = 'niciun canal asociat tokenului';
+                    $oauth_channel_label = 'no channel associated with the token';
                 }
             } else {
                 $oauth_channel_label = 'channels?mine HTTP ' . ( is_wp_error( $rc ) ? $rc->get_error_message() : wp_remote_retrieve_response_code( $rc ) );
@@ -1999,15 +2042,15 @@ function videosow_ajax_diagnose_transcript() {
                             'name' => isset( $sn['name'] ) ? $sn['name'] : '',
                         );
                     }
-                    $oauth_note = 'OAuth OK (HTTP 200) — ' . count( $oauth_tracks ) . ' track(uri) manuale';
+                    $oauth_note = 'OAuth OK (HTTP 200) — ' . count( $oauth_tracks ) . ' manual track(s)';
                 } elseif ( $hc >= 200 && $hc < 300 ) {
                     $oauth_note = 'OAuth OK (HTTP 200) — items=[]';
                     if ( $oauth_channel_label || $video_owner_label ) {
-                        $oauth_note .= ' | Canal OAuth: ' . ( $oauth_channel_label ?: '?' ) . ' | Proprietar video: ' . ( $video_owner_label ?: '?' );
+                        $oauth_note .= ' | OAuth channel: ' . ( $oauth_channel_label ?: '?' ) . ' | Video owner: ' . ( $video_owner_label ?: '?' );
                         if ( $oauth_channel_id && $video_owner_id && $oauth_channel_id !== $video_owner_id ) {
-                            $oauth_note .= ' ⚠ Token-ul OAuth NU aparține canalului video-ului — re-autentifică-te cu contul Google care deține canalul (atenție la Brand Accounts: trebuie selectat brandul la consimțământ).';
+                            $oauth_note .= ' ⚠ The OAuth token does NOT belong to the video\'s channel — re-authenticate with the Google account that owns the channel (note: with Brand Accounts you must select the brand at consent).';
                         } elseif ( $oauth_channel_id && $video_owner_id ) {
-                            $oauth_note .= ' ✓ Conturile coincid — video-ul probabil nu are subtitrări marcate disponibile prin Data API.';
+                            $oauth_note .= ' ✓ Accounts match — the video probably has no caption tracks available via the Data API.';
                         }
                     }
                 } else {
@@ -2024,13 +2067,13 @@ function videosow_ajax_diagnose_transcript() {
                     // Friendly summaries for the most common cases.
                     $friendly = '';
                     if ( $err_reason_code === 'quotaExceeded' || stripos( $err_reason, 'quota' ) !== false ) {
-                        $friendly = 'Quota Google depășită pentru azi (resetare ~10:00 ora României)';
+                        $friendly = 'Google quota exceeded for today (resets around midnight Pacific Time)';
                     } elseif ( $err_reason_code === 'rateLimitExceeded' || $err_reason_code === 'userRateLimitExceeded' ) {
-                        $friendly = 'Rate limit Google atins — reîncearcă peste câteva minute';
+                        $friendly = 'Google rate limit hit — try again in a few minutes';
                     } elseif ( $hc === 401 ) {
-                        $friendly = 'Token OAuth expirat sau invalid — reconectează contul Google';
+                        $friendly = 'OAuth token expired or invalid — reconnect the Google account';
                     } elseif ( $hc === 403 && $err_reason_code === 'forbidden' ) {
-                        $friendly = 'Acces refuzat — contul OAuth nu deține acest video';
+                        $friendly = 'Access denied — the OAuth account does not own this video';
                     }
                     if ( $friendly ) {
                         $oauth_note = 'OAuth HTTP ' . $hc . ' — ' . $friendly;
@@ -2070,9 +2113,9 @@ function videosow_ajax_test_playlist() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
     $cfg = videosow_get_sermon_importer_config();
     $api_key = isset( $cfg['apiKey'] ) ? $cfg['apiKey'] : '';
-    if ( empty( $api_key ) ) wp_send_json_error( 'Lipsește YouTube API Key în setări.' );
+    if ( empty( $api_key ) ) wp_send_json_error( 'Missing YouTube API Key in settings.' );
     $raw = isset( $_POST['playlist'] ) ? trim( wp_unslash( $_POST['playlist'] ) ) : '';
-    if ( $raw === '' ) wp_send_json_error( 'Introdu un ID sau un URL de playlist.' );
+    if ( $raw === '' ) wp_send_json_error( 'Enter a playlist ID or URL.' );
     // Extract playlist id from URL or accept raw id (PL..., UU..., LL..., FL..., OL...).
     $playlist_id = '';
     if ( preg_match( '~[?&]list=([A-Za-z0-9_-]+)~', $raw, $m ) ) {
@@ -2089,7 +2132,7 @@ function videosow_ajax_test_playlist() {
         'key'  => $api_key,
     ), 'https://www.googleapis.com/youtube/v3/playlists' );
     $r = wp_remote_get( $meta_url, array( 'timeout' => 15 ) );
-    if ( is_wp_error( $r ) ) wp_send_json_error( 'Eroare rețea: ' . $r->get_error_message() );
+    if ( is_wp_error( $r ) ) wp_send_json_error( 'Network error: ' . $r->get_error_message() );
     $code = wp_remote_retrieve_response_code( $r );
     $body = json_decode( wp_remote_retrieve_body( $r ), true );
     if ( $code !== 200 ) {
@@ -2230,7 +2273,7 @@ function videosow_ajax_test_oauth() {
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
     $cfg = videosow_get_sermon_importer_config();
     $token = videosow_youtube_oauth_access_token( $cfg );
-    if ( ! $token ) wp_send_json_error( 'Nu am putut obține access token. Reconectează.' );
+    if ( ! $token ) wp_send_json_error( 'Could not obtain access token. Please reconnect.' );
     $resp = wp_remote_get( 'https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true', array(
         'timeout' => 20,
         'headers' => array( 'Authorization' => 'Bearer ' . $token ),
@@ -2336,7 +2379,7 @@ function videosow_ajax_scan_sermon_playlist() {
     delete_transient( 'videosow_sync_cancelled' );
     $cfg = videosow_get_sermon_importer_config();
     if ( empty( $cfg['apiKey'] ) || empty( $cfg['playlistId'] ) ) {
-        wp_send_json_error( 'Lipsește API Key sau Playlist ID' );
+        wp_send_json_error( 'Missing API Key or Playlist ID' );
     }
 
     $api_key    = $cfg['apiKey'];
@@ -2418,7 +2461,7 @@ function videosow_ajax_cancel_sermon_sync() {
     $imported = isset( $session['imported'] ) && is_array( $session['imported'] ) ? $session['imported'] : array();
 
     if ( ! empty( $imported ) ) {
-        videosow_log_sync( $cfg, 'error', sprintf( 'Întrerupt manual după %d importate', count( $imported ) ), $imported );
+        videosow_log_sync( $cfg, 'error', sprintf( 'Cancelled manually after %d imported', count( $imported ) ), $imported );
     }
     set_transient( 'videosow_sync_cancelled', 1, 10 * MINUTE_IN_SECONDS );
     delete_option( 'videosow_sync_session' );
@@ -2462,7 +2505,7 @@ function videosow_ajax_step_sermon_sync() {
         // Done — finalize log + counters
         if ( ! empty( $session ) ) {
             $imported = isset( $session['imported'] ) ? $session['imported'] : array();
-            $msg = sprintf( '%d importate', count( $imported ) );
+            $msg = sprintf( '%d imported', count( $imported ) );
             videosow_log_sync( $cfg, 'success', $msg, $imported );
             $cfg2 = videosow_get_sermon_importer_config();
             $cfg2['firstSyncDone'] = true;
@@ -2501,7 +2544,7 @@ function videosow_ajax_step_sermon_sync() {
     $is_finished = $remaining === 0;
     if ( $is_finished ) {
         $imported = $session['imported'];
-        $msg = sprintf( '%d importate', count( $imported ) );
+        $msg = sprintf( '%d imported', count( $imported ) );
         videosow_log_sync( $cfg, 'success', $msg, $imported );
         $cfg2 = videosow_get_sermon_importer_config();
         $cfg2['firstSyncDone'] = true;
@@ -2520,10 +2563,10 @@ function videosow_ajax_step_sermon_sync() {
         $r_pause = max( 0, intval( isset( $cfg['relaxedPauseS'] ) ? $cfg['relaxedPauseS'] : 10 ) );
         if ( $done > 0 && ( $done % $r_batch ) === 0 && $r_pause > 0 ) {
             $rest_seconds = $r_pause;
-            $rest_reason  = 'pauză lungă (la fiecare ' . $r_batch . ' video-uri)';
+            $rest_reason  = 'long pause (every ' . $r_batch . ' videos)';
         } elseif ( $r_delay > 0 ) {
             $rest_seconds = $r_delay;
-            $rest_reason  = 'pauză între video-uri';
+            $rest_reason  = 'pause between videos';
         }
     }
 
@@ -2839,7 +2882,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
 function videosow_run_sermon_sync( $manual = false ) {
     $cfg = videosow_get_sermon_importer_config();
     if ( empty( $cfg['apiKey'] ) || empty( $cfg['playlistId'] ) ) {
-        return videosow_log_sync( $cfg, 'error', 'Lipsește API Key sau Playlist ID', array() );
+        return videosow_log_sync( $cfg, 'error', 'Missing API Key or Playlist ID', array() );
     }
 
     $is_backfill = empty( $cfg['firstSyncDone'] );
@@ -2938,7 +2981,7 @@ function videosow_run_sermon_sync( $manual = false ) {
     } while ( ! empty( $page_token ) );
 
     $cfg['firstSyncDone'] = true;
-    $msg = sprintf( '%d importate, %d sărite', count( $imported ), $skipped );
+    $msg = sprintf( '%d imported, %d skipped', count( $imported ), $skipped );
     return videosow_log_sync( $cfg, 'success', $msg, $imported );
 }
 
@@ -3687,3 +3730,57 @@ function videosow_ajax_list_archive() {
     wp_send_json_success( array( 'rows' => $rows ) );
 }
 add_action( 'wp_ajax_videosow_list_archive', 'videosow_ajax_list_archive' );
+
+/**
+ * AJAX: dashboard stats — counts and recent activity for the Dashboard tab.
+ */
+function videosow_ajax_dashboard_stats() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+
+    $counts    = wp_count_posts( 'videosow_video' );
+    $published = isset( $counts->publish ) ? (int) $counts->publish : 0;
+    $draft     = isset( $counts->draft ) ? (int) $counts->draft : 0;
+    $pending   = isset( $counts->pending ) ? (int) $counts->pending : 0;
+    $private_  = isset( $counts->private ) ? (int) $counts->private : 0;
+    $future    = isset( $counts->future ) ? (int) $counts->future : 0;
+    $imported  = $published + $draft + $pending + $private_ + $future;
+
+    $cfg = videosow_get_sermon_importer_config();
+    $last_sync_at  = isset( $cfg['lastSyncAt'] ) ? (int) $cfg['lastSyncAt'] : 0;
+    $last_sync_msg = isset( $cfg['lastSyncMsg'] ) ? (string) $cfg['lastSyncMsg'] : '';
+    $last_sync_human = $last_sync_at ? human_time_diff( $last_sync_at, current_time( 'timestamp' ) ) . ' ago' : '';
+
+    $q = new WP_Query( array(
+        'post_type'      => 'videosow_video',
+        'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+        'posts_per_page' => 6,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'no_found_rows'  => true,
+    ) );
+    $recent = array();
+    foreach ( $q->posts as $p ) {
+        $recent[] = array(
+            'id'        => $p->ID,
+            'title'     => get_the_title( $p ),
+            'when'      => human_time_diff( get_post_time( 'U', true, $p ), current_time( 'timestamp', true ) ) . ' ago',
+            'status'    => $p->post_status === 'publish' ? 'Published' : 'Drafted',
+            'editLink'  => get_edit_post_link( $p->ID, '' ),
+            'permalink' => get_permalink( $p ),
+            'videoId'   => (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true ),
+        );
+    }
+
+    wp_send_json_success( array(
+        'imported'      => $imported,
+        'published'     => $published,
+        'draft'         => $draft + $pending,
+        'lastSyncAt'    => $last_sync_at,
+        'lastSyncMsg'   => $last_sync_msg,
+        'lastSyncHuman' => $last_sync_human,
+        'totalImported' => isset( $cfg['totalImported'] ) ? (int) $cfg['totalImported'] : $imported,
+        'recent'        => $recent,
+    ) );
+}
+add_action( 'wp_ajax_videosow_dashboard_stats', 'videosow_ajax_dashboard_stats' );

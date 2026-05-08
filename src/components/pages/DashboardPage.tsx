@@ -7,14 +7,21 @@ import {
   Settings as SettingsIcon,
   CheckCircle2,
   Clock,
-  TrendingUp,
   Sparkles,
   Wand2,
   PlayCircle,
   ArrowRight,
 } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 
 const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
+  const { stats, loaded } = useDashboardStats();
+  const imported = stats?.imported ?? 0;
+  const published = stats?.published ?? 0;
+  const draft = stats?.draft ?? 0;
+  const lastSyncHuman = stats?.lastSyncHuman || '—';
+  const lastSyncMsg = stats?.lastSyncMsg || '';
+  const recent = stats?.recent || [];
   return (
     <div className="space-y-6">
       <div>
@@ -35,10 +42,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">128</p>
-            <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" /> +12 this week
-            </p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? imported : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">All-time, across all playlists</p>
           </CardContent>
         </Card>
 
@@ -50,8 +55,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">94</p>
-            <p className="text-xs text-muted-foreground mt-1">34 still in draft</p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? published : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{loaded ? `${draft} still in draft` : ''}</p>
           </CardContent>
         </Card>
 
@@ -59,12 +64,12 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Sparkles className="w-4 h-4 text-primary" />
-              AI tasks run
+              Drafts pending review
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">312</p>
-            <p className="text-xs text-muted-foreground mt-1">~$0.06 spent this month</p>
+            <p className="text-3xl font-semibold text-slate-800">{loaded ? draft : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">Review &amp; publish in WordPress</p>
           </CardContent>
         </Card>
 
@@ -76,8 +81,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">2h</p>
-            <p className="text-xs text-muted-foreground mt-1">Next run in ~46h</p>
+            <p className="text-3xl font-semibold text-slate-800">{lastSyncHuman}</p>
+            <p className="text-xs text-muted-foreground mt-1 truncate">{lastSyncMsg || '—'}</p>
           </CardContent>
         </Card>
       </div>
@@ -141,24 +146,39 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           <CardDescription>The last few videos picked up by Video Sow.</CardDescription>
         </CardHeader>
         <CardContent>
-          <ul className="divide-y divide-border">
-            {[
-              { title: 'How to plant tomatoes the right way', when: '2 hours ago', status: 'Drafted' },
-              { title: 'Pruning citrus in mid-season — full guide', when: '5 hours ago', status: 'Drafted' },
-              { title: 'Composting in apartments without smell', when: 'Yesterday', status: 'Published' },
-              { title: 'Soil testing for beginners (live Q&A)', when: '2 days ago', status: 'Published' },
-              { title: 'Greenhouse setup on a budget', when: '3 days ago', status: 'Published' },
-            ].map((row, i) => (
-              <li key={i} className="flex items-center gap-3 py-2.5 text-sm">
-                <PlayCircle className="w-4 h-4 text-primary shrink-0" />
-                <span className="flex-1 truncate text-slate-700">{row.title}</span>
-                <span className="text-xs text-muted-foreground shrink-0">{row.when}</span>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-secondary text-foreground shrink-0">
-                  {row.status}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {recent.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">
+              {loaded ? 'No imports yet — run your first sync from the Import tab.' : 'Loading…'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {recent.map((row) => {
+                const link = row.editLink || row.permalink;
+                const Tag: any = link ? 'a' : 'div';
+                return (
+                  <li key={row.id} className="flex items-center gap-3 py-2.5 text-sm">
+                    <PlayCircle className="w-4 h-4 text-primary shrink-0" />
+                    <Tag
+                      {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
+                    >
+                      {row.title}
+                    </Tag>
+                    <span className="text-xs text-muted-foreground shrink-0">{row.when}</span>
+                    <span
+                      className={`text-[11px] px-2 py-0.5 rounded-full shrink-0 ${
+                        row.status === 'Published'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {row.status}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </CardContent>
       </Card>
 
