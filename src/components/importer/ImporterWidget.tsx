@@ -73,6 +73,13 @@ export interface SermonImporterConfig {
   totalImported: number;
   log: SermonLogEntry[];
   firstSyncDone: boolean;
+  playlistStats?: Record<string, {
+    totalImported?: number;
+    lastSyncAt?: number;
+    lastSyncStatus?: string;
+    lastSyncMsg?: string;
+    firstSyncDone?: boolean;
+  }>;
 }
 
 export const defaultSermonImporterConfig: SermonImporterConfig = {
