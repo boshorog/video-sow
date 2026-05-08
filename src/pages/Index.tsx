@@ -42,7 +42,7 @@ const ImporterSettingsPanel = () => {
 };
 
 import { Gallery, GalleryItem, GalleryState } from '@/types/gallery';
-import pdfGalleryLogo from '@/assets/pdf-gallery-logo.svg';
+import pdfGalleryLogo from '@/assets/videosow-logo.svg';
 
 // DevLicenseSelector is lazy-loaded only in dev environments to exclude from production builds
 const DevLicenseSelector = import.meta.env.DEV 

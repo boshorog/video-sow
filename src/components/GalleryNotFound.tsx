@@ -1,5 +1,5 @@
 import React from 'react';
-import logoSvg from '@/assets/pdf-gallery-logo.svg';
+import logoSvg from '@/assets/videosow-logo.svg';
 
 const GalleryNotFound: React.FC = () => {
   return (
