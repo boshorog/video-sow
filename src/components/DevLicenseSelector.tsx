@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Crown, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -8,10 +7,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { STORAGE_KEYS } from '@/config/pluginIdentity';
 
 type DevLicenseMode = 'free' | 'pro';
 
-const DEV_LICENSE_KEY = 'kindpdfg_dev_license_mode';
+const DEV_LICENSE_KEY = STORAGE_KEYS.devLicenseMode;
 
 /**
  * Development-only license mode selector
@@ -82,7 +82,6 @@ export const useDevLicense = () => {
       } catch {}
     };
 
-    // Check on storage changes (cross-tab)
     window.addEventListener('storage', checkMode);
     return () => window.removeEventListener('storage', checkMode);
   }, []);
