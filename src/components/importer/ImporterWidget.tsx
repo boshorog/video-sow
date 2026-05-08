@@ -47,6 +47,7 @@ export interface SermonImporterConfig {
   archiveShowSearch: boolean;
   archiveSidebarEnabled: boolean;
   singleSidebarEnabled: boolean;
+  archiveColumns: 1 | 2 | 3;
   archiveShowSort: boolean;
   archiveShowTags: boolean;
   archiveDefaultSort: "date_desc" | "date_asc" | "views_desc";
