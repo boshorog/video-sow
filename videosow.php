@@ -671,6 +671,37 @@ function videosow_sermon_disable_sidebars( $is_active_sidebar, $index ) {
 }
 add_filter( 'is_active_sidebar', 'videosow_sermon_disable_sidebars', 10, 2 );
 
+/* Force 16:9 aspect ratio on YouTube embeds inside single article pages. */
+function videosow_single_video_aspect_css() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    echo '<style id="videosow-single-aspect-css">'
+        . '.single-videosow_video .entry-content iframe[src*="youtube"],'
+        . '.single-videosow_video .entry-content iframe[src*="youtu.be"],'
+        . '.single-videosow_video .entry-content .wp-block-embed-youtube iframe,'
+        . '.single-videosow_video .entry-content .wp-block-embed iframe,'
+        . '.single-videosow_video .entry-content .wp-embedded-content,'
+        . '.single-videosow_video .entry-content .videosow-yt-embed iframe,'
+        . '.single-videosow_video .entry-content embed,'
+        . '.single-videosow_video .entry-content object{display:block;width:100% !important;max-width:100% !important;height:auto !important;aspect-ratio:16/9 !important;}'
+        // Fallback for browsers without aspect-ratio: wrap with padding-bottom trick is not possible
+        // here, but aspect-ratio is supported in all modern browsers (95%+).
+        . '.single-videosow_video .entry-content .wp-block-embed__wrapper{position:relative;}'
+        . '.single-videosow_video .entry-content figure.wp-block-embed{margin-left:0 !important;margin-right:0 !important;}'
+        . '</style>';
+}
+add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
+
+/* Delete attached featured image (and the YouTube thumbnail attachment) when an
+ * imported article is permanently deleted. Keeps wp-content/uploads tidy. */
+function videosow_delete_thumbnail_with_post( $post_id ) {
+    if ( get_post_type( $post_id ) !== 'videosow_video' ) return;
+    $thumb_id = (int) get_post_thumbnail_id( $post_id );
+    if ( $thumb_id > 0 ) {
+        wp_delete_attachment( $thumb_id, true );
+    }
+}
+add_action( 'before_delete_post', 'videosow_delete_thumbnail_with_post', 10, 1 );
+
 /* Inject the archive page title into the theme's empty <h2 class="archive-heading"> */
 function videosow_sermon_archive_title_js() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
