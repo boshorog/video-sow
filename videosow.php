@@ -3951,7 +3951,7 @@ function videosow_ajax_list_archive() {
     $rows = array();
     foreach ( $q->posts as $p ) {
         $vid = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
-        $views = (int) get_post_meta( $p->ID, '_videosow_yt_view_count', true );
+        $views = (int) get_post_meta( $p->ID, '_videosow_yt_views', true );
         $rows[] = array(
             'id'        => $p->ID,
             'title'     => get_the_title( $p ),
