@@ -181,6 +181,7 @@ const SermonImporterWidget = ({
   isPro?: boolean;
   playlistName?: string;
   playlistCount?: number;
+  channelName?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const isConfigured = !!config.apiKey && !!config.playlistId;
