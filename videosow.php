@@ -1205,24 +1205,35 @@ function videosow_sermon_archive_toolbar_js() {
     var summary = article.querySelector('.kp-slot-excerpt') || article.querySelector('.entry-summary');
     if (summary){
       var p = summary.querySelector('p') || summary;
-      if (d.excerpt){ p.textContent = d.excerpt; summary.style.display = ''; }
+      var text = d.excerpt ? trimExcerpt(d.excerpt, EXCERPT_WORDS) : '';
+      if (text){ p.textContent = text; summary.style.display = ''; }
       else { p.textContent = ''; summary.style.display = 'none'; }
     }
-    // Thumbnail
+    // Thumbnail — make sure the cover image links to the article.
     var thumbA = article.querySelector('.post-thumbnail, a:has(img), figure');
-    if (thumbA){
-      var link = thumbA.tagName === 'A' ? thumbA : (thumbA.querySelector('a') || thumbA.closest('a'));
-      if (link && link.tagName === 'A') link.setAttribute('href', d.url || '#');
-      var img = thumbA.querySelector('img') || article.querySelector('img');
-      if (img){
-        if (d.thumb){
-          img.setAttribute('src', d.thumb);
-          if (d.srcset) img.setAttribute('srcset', d.srcset); else img.removeAttribute('srcset');
-          img.setAttribute('alt', d.alt || '');
-          img.removeAttribute('data-src'); img.removeAttribute('data-lazy-src'); img.removeAttribute('data-srcset');
-          img.classList.remove('lazyload','lazy');
-          img.style.opacity = '1'; img.style.visibility = 'visible';
-        }
+    var img = (thumbA ? thumbA.querySelector('img') : null) || article.querySelector('img');
+    if (img){
+      if (d.thumb){
+        img.setAttribute('src', d.thumb);
+        if (d.srcset) img.setAttribute('srcset', d.srcset); else img.removeAttribute('srcset');
+        img.setAttribute('alt', d.alt || '');
+        img.removeAttribute('data-src'); img.removeAttribute('data-lazy-src'); img.removeAttribute('data-srcset');
+        img.classList.remove('lazyload','lazy');
+        img.style.opacity = '1'; img.style.visibility = 'visible';
+      }
+      // Ensure the image (and its figure wrapper) is wrapped in an <a> pointing
+      // to the article. Cloned theme markup may have <figure><img></figure>
+      // without a link.
+      var existingLink = img.closest && img.closest('a');
+      if (!existingLink){
+        var wrapTarget = (img.parentNode && img.parentNode.tagName === 'FIGURE') ? img.parentNode : img;
+        var newLink = document.createElement('a');
+        newLink.className = 'post-thumbnail';
+        newLink.setAttribute('href', d.url || '#');
+        wrapTarget.parentNode.insertBefore(newLink, wrapTarget);
+        newLink.appendChild(wrapTarget);
+      } else {
+        existingLink.setAttribute('href', d.url || '#');
       }
     }
     // Strip any leftover duplicates that might have come from template
