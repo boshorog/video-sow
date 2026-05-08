@@ -55,7 +55,9 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const license = useLicense();
   const imp = useImporter();
   const canSync = !!imp.config.apiKey && !!imp.config.playlistId && !imp.isSyncing;
-  const isFirstRun = !imp.config.firstSyncDone;
+  const activeStats = (imp.config.playlistId && imp.config.playlistStats?.[imp.config.playlistId]) || undefined;
+  const activeFirstSyncDone = activeStats?.firstSyncDone ?? imp.config.firstSyncDone;
+  const isFirstRun = !activeFirstSyncDone;
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
