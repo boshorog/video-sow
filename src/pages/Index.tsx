@@ -1,30 +1,19 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Check, Copy, FileImage, Layers, Settings, BookOpen, Crown, ExternalLink, Eye, LayoutGrid, LayoutDashboard, Youtube, ListTodo } from 'lucide-react';
-import PDFAdmin from '@/components/PDFAdmin';
-import PDFGallery from '@/components/PDFGallery';
-import PDFSettings from '@/components/PDFSettings';
-import SettingsProposal2 from '@/components/SettingsProposal2';
+import { Settings, BookOpen, Crown, ExternalLink, LayoutDashboard, Youtube, ListTodo } from 'lucide-react';
 import PluginDocumentation from '@/components/PluginDocumentation';
 import ProBanner from '@/components/ProBanner';
 import ProWelcome from '@/components/ProWelcome';
-import GalleryNotFoundShowcase from '@/components/GalleryNotFoundShowcase';
-import UpdateNoticeShowcase from '@/components/UpdateNoticeShowcase';
-import GalleryNotFound from '@/components/GalleryNotFound';
-import SettingsScopeSelectorShowcase from '@/components/SettingsScopeSelectorShowcase';
-import LightboxShowcase from '@/components/LightboxShowcase';
 import { UpdateNotice } from '@/components/UpdateNotice';
-import { EngagementNotice } from '@/components/EngagementNotice';
 import { useLicense } from '@/hooks/useLicense';
 import { PLUGIN_VERSION, PLUGIN_NAME, PRO_NAME } from '@/config/pluginIdentity';
-import { isDemoMode, saveDemoState } from '@/config/demoMode';
+import { isDemoMode } from '@/config/demoMode';
 import DashboardPage from '@/components/pages/DashboardPage';
 import ImportPage from '@/components/pages/ImportPage';
 import TasksPage from '@/components/pages/TasksPage';
 import ImporterSettings from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
+import videosowLogo from '@/assets/videosow-logo.svg';
 
 const ImporterSettingsPanel = () => {
   const imp = useImporter();
@@ -41,23 +30,13 @@ const ImporterSettingsPanel = () => {
   );
 };
 
-import { Gallery, GalleryItem, GalleryState } from '@/types/gallery';
-import pdfGalleryLogo from '@/assets/videosow-logo.svg';
-
-// DevLicenseSelector is lazy-loaded only in dev environments to exclude from production builds
-const DevLicenseSelector = import.meta.env.DEV 
+// DevLicenseSelector is lazy-loaded only in dev environments
+const DevLicenseSelector = import.meta.env.DEV
   ? lazy(() => import('@/components/DevLicenseSelector').then(m => ({ default: m.DevLicenseSelector })))
   : null;
 
-
-// Kind Pixels Logo SVG Component
-const KindPixelsLogo = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 9000 1000" 
-    className={className}
-    style={{ shapeRendering: 'geometricPrecision', ...style }}
-  >
+const KindPixelsLogo = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9000 1000" className={className} style={{ shapeRendering: 'geometricPrecision' }}>
     <g fill="currentColor">
       <path d="M2233.79 555.7l-96.37 2.35 0.57 -175.04 -154.7 2.06 -1.6 -173.14 -146.85 1.12 -1.7 -195.94c-45.96,-0.29 -167.39,-6.91 -203.53,4.62 -9.91,32.31 -5.94,860.17 -4.64,962.85l209.94 -1.1 -3.27 -571.32 90.2 1.07 1.69 176.67 153.21 -3.04 -2.48 178.11 158.77 -2.95 1.29 222.53 205.19 -1.84 0.06 -725.81c0.21,-51.66 6.58,-198.67 -2.68,-239.63l-199.38 0.41 -3.71 538.02z"/>
       <path d="M2782.42 218.02l361.8 -1.5 -3.39 565 -357.76 1.61 -0.65 -565.11zm-204.16 766.15l621.63 0.37 -3.28 -179.36 156.21 1.76 -0 -620.01 -153.1 -2.28 -7.42 -169.54 -612.09 2.48c-13.52,53.35 -2.85,843.35 -1.95,966.58z"/>
@@ -73,504 +52,18 @@ const KindPixelsLogo = ({ className, style }: { className?: string; style?: Reac
   </svg>
 );
 
-// Initial PDF data (fallback for development)
-const initialPDFs: GalleryItem[] = [
-  {
-    id: '1',
-    title: 'Newsletter January 2024',
-    date: 'January 2024',
-    pdfUrl: '/src/assets/newsletter-thumbnail-1.jpg',
-    thumbnail: '/src/assets/newsletter-thumbnail-1.jpg',
-    fileType: 'pdf'
-  },
-  {
-    id: '2',
-    title: 'Newsletter February 2024',
-    date: 'February 2024',
-    pdfUrl: '/src/assets/newsletter-thumbnail-2.jpg',
-    thumbnail: '/src/assets/newsletter-thumbnail-2.jpg',
-    fileType: 'pdf'
-  },
-  {
-    id: '3',
-    title: 'Newsletter March 2024',
-    date: 'March 2024',
-    pdfUrl: '/src/assets/newsletter-thumbnail-3.jpg',
-    thumbnail: '/src/assets/newsletter-thumbnail-3.jpg',
-    fileType: 'pdf'
-  },
-  {
-    id: '4',
-    title: 'Newsletter April 2024',
-    date: 'April 2024',
-    pdfUrl: '/src/assets/newsletter-thumbnail-4.jpg',
-    thumbnail: '/src/assets/newsletter-thumbnail-4.jpg',
-    fileType: 'pdf'
-  }
-];
-
 const Index = () => {
-  // IMPORTANT: useLicense must be called unconditionally at the top
   const rawLicense = useLicense();
   const isDemo = isDemoMode();
-  
-  // In demo mode, force Free version
   const license = isDemo ? { ...rawLicense, isPro: false, status: 'free' as const, checked: true, isDevMode: false } : rawLicense;
-  
-  const [galleryState, setGalleryState] = useState<GalleryState>({
-    galleries: [],
-    currentGalleryId: ''
-  });
-  const [settings, setSettings] = useState({
-    thumbnailStyle: 'default',
-    accentColor: '#7FB3DC',
-    thumbnailShape: '3-2',
-    pdfIconPosition: 'top-right',
-    defaultPlaceholder: 'default',
-    gapSize: 3
-  });
-  const [shortcodeCopied, setShortcodeCopied] = useState(false);
-  const [galleryNotFound, setGalleryNotFound] = useState(false);
+
   const [activeTab, setActiveTab] = useState<string>(() => {
-    const t = new URLSearchParams(window.location.search).get('tab') || 'dashboard';
-    return t;
+    return new URLSearchParams(window.location.search).get('tab') || 'dashboard';
   });
+
   useEffect(() => {
     if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
   }, [activeTab, license.isPro, license.checked]);
-
-  useEffect(() => {
-    // DEMO MODE: Always start with default gallery, skip WP/localStorage
-    if (isDemo) {
-      const demoGallery: Gallery = {
-        id: 'demo',
-        name: 'Demo Gallery',
-        items: [
-          { id: 'div-1', type: 'divider', text: 'First Section' },
-          { id: 'pdf-1', title: 'Sample Document 1', date: 'January 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2501_Ce-Ne-Rezerva-Viitorul.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-2', title: 'Sample Document 2', date: 'February 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2502_De-La-Februs-La-Hristos.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-3', title: 'Sample Document 3', date: 'March 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2503_De-la-Moarte-la-Viata.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-4', title: 'Sample Document 4', date: 'April 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2504_Cand-Isus-Ne-Cheama-Pe-Nume.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-5', title: 'Sample Document 5', date: 'May 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2505_Inaltarea-Mantuitorului.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-6', title: 'Sample Document 6', date: 'June 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2506_Putere-Pentru-O-Viata-Transformata.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-7', title: 'Sample Document 7', date: 'July 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2507_Va-Gasi-Rod.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'div-2', type: 'divider', text: 'Second Section' },
-          { id: 'pdf-8', title: 'Sample Document 1', date: 'January 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2401_Un-Gand-Pentru-Anul-Nou.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-9', title: 'Sample Document 2', date: 'February 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2402_Risipa-De-Iubire.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-10', title: 'Sample Document 3', date: 'March 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2403_Lucruri-Noi.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-11', title: 'Sample Document 4', date: 'April 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2404_O-Sarbatoare-Dulce-Amaruie.pdf', thumbnail: '', fileType: 'pdf' },
-        ] as GalleryItem[],
-        createdAt: new Date().toISOString(),
-      };
-      setGalleryState({ galleries: [demoGallery], currentGalleryId: 'demo' });
-      return;
-    }
-
-    const wp = (typeof window !== 'undefined' && ((window as any).kindpdfgData || (window as any).wpPDFGallery)) ? ((window as any).kindpdfgData || (window as any).wpPDFGallery) : null;
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    // Debug: Reset galleries if ?reset_galleries=1 is present
-    if (urlParams.get('reset_galleries') === '1') {
-      console.log('[PDF Gallery] Resetting galleries...');
-      
-      // Clear localStorage first
-      localStorage.removeItem('kindpdfg_backup');
-      localStorage.removeItem('kindpdfg_galleries');
-      
-      // If in WordPress, also reset via AJAX
-      if (wp?.ajaxUrl && wp?.nonce) {
-        const form = new FormData();
-        form.append('action', 'kindpdfg_action');
-        form.append('action_type', 'reset_galleries');
-        form.append('nonce', wp.nonce);
-        
-        fetch(wp.ajaxUrl, {
-          method: 'POST',
-          credentials: 'same-origin',
-          body: form,
-        }).then(() => {
-          // Remove the param and reload after AJAX completes
-          urlParams.delete('reset_galleries');
-          const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-          window.location.replace(newUrl);
-        }).catch(() => {
-          // Even on error, reload
-          urlParams.delete('reset_galleries');
-          const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-          window.location.replace(newUrl);
-        });
-        return;
-      }
-      
-      // Not in WordPress - just reload
-      urlParams.delete('reset_galleries');
-      const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
-      window.location.replace(newUrl);
-      return;
-    }
-    
-    const ajaxUrl = wp?.ajaxUrl || urlParams.get('ajax');
-    const nonce = wp?.nonce || urlParams.get('nonce') || '';
-    const requestedGalleryName = urlParams.get('name') || '';
-    if (ajaxUrl && nonce) {
-      // Fetch galleries from WordPress
-      const form = new FormData();
-      form.append('action', 'kindpdfg_action');
-      form.append('action_type', 'get_galleries');
-      form.append('nonce', nonce);
-      if (requestedGalleryName) { form.append('requested_gallery_name', requestedGalleryName); }
-      fetch(ajaxUrl, {
-        method: 'POST',
-        credentials: 'same-origin',
-        body: form,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.success && data?.data) {
-            let galleries = data.data.galleries || [];
-            let currentGalleryId = data.data.current_gallery_id || '';
-            
-            if (galleries.length === 0) {
-              // Try to restore from local backup if available
-              try {
-                const backupRaw = localStorage.getItem('kindpdfg_backup');
-                const backup = backupRaw ? JSON.parse(backupRaw) : null;
-                if (Array.isArray(backup) && backup.length > 0) {
-                  // Ensure galleries have proper structure with names
-                  const restoredGalleries = backup.map((gallery: any) => ({
-                    id: gallery.id || 'main',
-                    name: gallery.name || 'Main Gallery',
-                    items: Array.isArray(gallery.items) ? gallery.items : [],
-                    createdAt: gallery.createdAt || new Date().toISOString(),
-                  }));
-                  
-                  // Attempt server restore so it persists
-                  const restoreForm = new FormData();
-                  restoreForm.append('action', 'kindpdfg_action');
-                  restoreForm.append('action_type', 'save_galleries');
-                  restoreForm.append('nonce', nonce);
-                  restoreForm.append('galleries', JSON.stringify(restoredGalleries));
-                  restoreForm.append('current_gallery_id', restoredGalleries[0]?.id || 'main');
-                  fetch(ajaxUrl, { method: 'POST', credentials: 'same-origin', body: restoreForm }).catch(() => {});
-                  setGalleryState({
-                    galleries: restoredGalleries,
-                    currentGalleryId: restoredGalleries[0]?.id || 'main',
-                  });
-                  return; // Done
-                }
-              } catch {}
-
-              // Create test gallery with sample data
-              const testGallery: Gallery = {
-                id: 'test',
-                name: 'Test Gallery',
-                items: [
-                  { id: 'div-1', type: 'divider', text: 'First Section' },
-                  { id: 'pdf-1', title: 'Sample Document 1', date: 'January 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2501_Ce-Ne-Rezerva-Viitorul.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-2', title: 'Sample Document 2', date: 'February 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2502_De-La-Februs-La-Hristos.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-3', title: 'Sample Document 3', date: 'March 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2503_De-la-Moarte-la-Viata.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-4', title: 'Sample Document 4', date: 'April 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2504_Cand-Isus-Ne-Cheama-Pe-Nume.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-5', title: 'Sample Document 5', date: 'May 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2505_Inaltarea-Mantuitorului.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-6', title: 'Sample Document 6', date: 'June 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2506_Putere-Pentru-O-Viata-Transformata.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-7', title: 'Sample Document 7', date: 'July 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2507_Va-Gasi-Rod.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'div-2', type: 'divider', text: 'Second Section' },
-                  { id: 'pdf-8', title: 'Sample Document 1', date: 'January 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2401_Un-Gand-Pentru-Anul-Nou.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-9', title: 'Sample Document 2', date: 'February 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2402_Risipa-De-Iubire.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-10', title: 'Sample Document 3', date: 'March 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2403_Lucruri-Noi.pdf', thumbnail: '', fileType: 'pdf' },
-                  { id: 'pdf-11', title: 'Sample Document 4', date: 'April 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2404_O-Sarbatoare-Dulce-Amaruie.pdf', thumbnail: '', fileType: 'pdf' },
-                ] as GalleryItem[],
-                createdAt: new Date().toISOString(),
-              };
-              setGalleryState({
-                galleries: [testGallery],
-                currentGalleryId: 'test'
-              });
-              // Persist default test gallery on fresh install
-              try { localStorage.setItem('kindpdfg_backup', JSON.stringify([testGallery])); } catch {}
-              if (ajaxUrl && nonce) {
-                const saveForm = new FormData();
-                saveForm.append('action', 'kindpdfg_action');
-                saveForm.append('action_type', 'save_galleries');
-                saveForm.append('nonce', nonce);
-                saveForm.append('galleries', JSON.stringify([testGallery]));
-                saveForm.append('current_gallery_id', 'test');
-                fetch(ajaxUrl, { method: 'POST', credentials: 'same-origin', body: saveForm }).catch(() => {});
-              }
-            } else {
-              // If no current gallery is set, use the first gallery
-              if (requestedGalleryName) {
-                const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
-                const match = galleries.find((g: Gallery) => slug(g.name) === slug(requestedGalleryName));
-                if (match) { 
-                  currentGalleryId = match.id; 
-                } else {
-                  // Requested gallery name doesn't match any gallery
-                  setGalleryNotFound(true);
-                }
-              }
-              if (!currentGalleryId && galleries.length > 0 && !requestedGalleryName) {
-                currentGalleryId = galleries[0].id;
-              }
-
-              // Server data is the source of truth - save to local backup
-              try {
-                localStorage.setItem('kindpdfg_backup', JSON.stringify(galleries));
-              } catch {}
-              
-              setGalleryState({
-                galleries,
-                currentGalleryId: currentGalleryId
-              });
-            }
-          } else {
-            // Create test gallery for development
-            const testGallery: Gallery = {
-              id: 'test',
-              name: 'Test Gallery',
-              items: [
-                { id: 'div-1', type: 'divider', text: 'First Section' },
-                { id: 'pdf-1', title: 'Sample Document 1', date: 'January 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2501_Ce-Ne-Rezerva-Viitorul.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-2', title: 'Sample Document 2', date: 'February 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2502_De-La-Februs-La-Hristos.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-3', title: 'Sample Document 3', date: 'March 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2503_De-la-Moarte-la-Viata.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-4', title: 'Sample Document 4', date: 'April 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2504_Cand-Isus-Ne-Cheama-Pe-Nume.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-5', title: 'Sample Document 5', date: 'May 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2505_Inaltarea-Mantuitorului.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-6', title: 'Sample Document 6', date: 'June 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2506_Putere-Pentru-O-Viata-Transformata.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-7', title: 'Sample Document 7', date: 'July 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2507_Va-Gasi-Rod.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'div-2', type: 'divider', text: 'Second Section' },
-                { id: 'pdf-8', title: 'Sample Document 1', date: 'January 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2401_Un-Gand-Pentru-Anul-Nou.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-9', title: 'Sample Document 2', date: 'February 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2402_Risipa-De-Iubire.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-10', title: 'Sample Document 3', date: 'March 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2403_Lucruri-Noi.pdf', thumbnail: '', fileType: 'pdf' },
-                { id: 'pdf-11', title: 'Sample Document 4', date: 'April 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2404_O-Sarbatoare-Dulce-Amaruie.pdf', thumbnail: '', fileType: 'pdf' },
-              ] as GalleryItem[],
-              createdAt: new Date().toISOString(),
-            };
-            setGalleryState({
-              galleries: [testGallery],
-              currentGalleryId: 'test'
-            });
-          }
-        })
-        .catch(() => {
-          // Non-WP environment: try to restore from localStorage first
-          try {
-            const backupRaw = localStorage.getItem('kindpdfg_backup');
-            const backup = backupRaw ? JSON.parse(backupRaw) : null;
-            if (Array.isArray(backup) && backup.length > 0) {
-              const restoredGalleries = backup.map((gallery: any) => ({
-                id: gallery.id || 'main',
-                name: gallery.name || 'Main Gallery',
-                items: Array.isArray(gallery.items) ? gallery.items : [],
-                createdAt: gallery.createdAt || new Date().toISOString(),
-              }));
-              setGalleryState({
-                galleries: restoredGalleries,
-                currentGalleryId: restoredGalleries[0]?.id || 'main',
-              });
-              return;
-            }
-          } catch {}
-
-          // Create test gallery for development if no backup exists
-          const testGallery: Gallery = {
-            id: 'test',
-            name: 'Test Gallery',
-            items: [
-              { id: 'div-1', type: 'divider', text: 'First Section' },
-              { id: 'pdf-1', title: 'Sample Document 1', date: 'January 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2501_Ce-Ne-Rezerva-Viitorul.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-2', title: 'Sample Document 2', date: 'February 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2502_De-La-Februs-La-Hristos.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-3', title: 'Sample Document 3', date: 'March 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2503_De-la-Moarte-la-Viata.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-4', title: 'Sample Document 4', date: 'April 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2504_Cand-Isus-Ne-Cheama-Pe-Nume.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-5', title: 'Sample Document 5', date: 'May 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2505_Inaltarea-Mantuitorului.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-6', title: 'Sample Document 6', date: 'June 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2506_Putere-Pentru-O-Viata-Transformata.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-7', title: 'Sample Document 7', date: 'July 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2507_Va-Gasi-Rod.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'div-2', type: 'divider', text: 'Second Section' },
-              { id: 'pdf-8', title: 'Sample Document 1', date: 'January 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2401_Un-Gand-Pentru-Anul-Nou.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-9', title: 'Sample Document 2', date: 'February 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2402_Risipa-De-Iubire.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-10', title: 'Sample Document 3', date: 'March 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2403_Lucruri-Noi.pdf', thumbnail: '', fileType: 'pdf' },
-              { id: 'pdf-11', title: 'Sample Document 4', date: 'April 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2404_O-Sarbatoare-Dulce-Amaruie.pdf', thumbnail: '', fileType: 'pdf' },
-            ] as GalleryItem[],
-            createdAt: new Date().toISOString(),
-          };
-          setGalleryState({
-            galleries: [testGallery],
-            currentGalleryId: 'test'
-          });
-          // Save default test gallery to localStorage
-          try { localStorage.setItem('kindpdfg_backup', JSON.stringify([testGallery])); } catch {}
-        });
-
-      // Also fetch settings (needed for frontend visitors too)
-      const settingsForm = new FormData();
-      settingsForm.append('action', 'kindpdfg_action');
-      settingsForm.append('action_type', 'get_settings');
-      settingsForm.append('nonce', nonce);
-      // Pass gallery name so PHP can resolve per-gallery settings (critical for frontend shortcode)
-      if (requestedGalleryName) {
-        settingsForm.append('requested_gallery_name', requestedGalleryName);
-      }
-
-      fetch(ajaxUrl, {
-        method: 'POST',
-        credentials: 'same-origin',
-        body: settingsForm,
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.success && data?.data?.settings) {
-            setSettings(data.data.settings);
-          }
-        })
-        .catch(() => {});
-    } else {
-      // Fallback test galleries for development or when no config is provided
-      const testGallery: Gallery = {
-        id: 'test',
-        name: 'Test Gallery',
-        items: [
-          { id: 'div-1', type: 'divider', text: 'First Section' },
-          { id: 'pdf-1', title: 'Sample Document 1', date: 'January 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2501_Ce-Ne-Rezerva-Viitorul.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-2', title: 'Sample Document 2', date: 'February 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2502_De-La-Februs-La-Hristos.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-3', title: 'Sample Document 3', date: 'March 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2503_De-la-Moarte-la-Viata.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-4', title: 'Sample Document 4', date: 'April 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2504_Cand-Isus-Ne-Cheama-Pe-Nume.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-5', title: 'Sample Document 5', date: 'May 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2505_Inaltarea-Mantuitorului.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-6', title: 'Sample Document 6', date: 'June 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2506_Putere-Pentru-O-Viata-Transformata.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-7', title: 'Sample Document 7', date: 'July 2025', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2507_Va-Gasi-Rod.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'div-2', type: 'divider', text: 'Second Section' },
-          { id: 'pdf-8', title: 'Sample Document 1', date: 'January 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2401_Un-Gand-Pentru-Anul-Nou.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-9', title: 'Sample Document 2', date: 'February 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2402_Risipa-De-Iubire.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-10', title: 'Sample Document 3', date: 'March 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2403_Lucruri-Noi.pdf', thumbnail: '', fileType: 'pdf' },
-          { id: 'pdf-11', title: 'Sample Document 4', date: 'April 2024', pdfUrl: 'https://www.antiohia.ro/wp-content/uploads/2025/09/newsletter2404_O-Sarbatoare-Dulce-Amaruie.pdf', thumbnail: '', fileType: 'pdf' },
-        ] as GalleryItem[],
-        createdAt: new Date().toISOString(),
-      };
-      setGalleryState({
-        galleries: [testGallery],
-        currentGalleryId: 'test'
-      });
-    }
-  }, []);
-
-  // Ensure first gallery is selected by default whenever galleries load
-  useEffect(() => {
-    if (galleryState.galleries.length > 0) {
-      const exists = galleryState.galleries.some(g => g.id === galleryState.currentGalleryId);
-      if (!galleryState.currentGalleryId || !exists) {
-        setGalleryState(prev => ({ ...prev, currentGalleryId: prev.galleries[0].id }));
-      }
-    }
-  }, [galleryState.galleries, galleryState.currentGalleryId]);
-
-  // Fetch settings for the currently selected gallery (so "Current Gallery" scope persists)
-  useEffect(() => {
-    const wp = (typeof window !== 'undefined' && ((window as any).kindpdfgData || (window as any).wpPDFGallery)) ? ((window as any).kindpdfgData || (window as any).wpPDFGallery) : null;
-    const urlParams = new URLSearchParams(window.location.search);
-    const ajaxUrl = wp?.ajaxUrl || urlParams.get('ajax');
-    const nonce = wp?.nonce || urlParams.get('nonce') || '';
-
-    if (!ajaxUrl || !nonce || !galleryState.currentGalleryId) return;
-
-    const form = new FormData();
-    form.append('action', 'kindpdfg_action');
-    form.append('action_type', 'get_settings');
-    form.append('nonce', nonce);
-    form.append('gallery_id', galleryState.currentGalleryId);
-
-    fetch(ajaxUrl, {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: form,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.success && data?.data?.settings) {
-          setSettings(data.data.settings);
-        }
-      })
-      .catch(() => {});
-  }, [galleryState.currentGalleryId]);
-
-  const copyShortcode = async () => {
-    const currentGallery = galleryState.galleries.find(g => g.id === galleryState.currentGalleryId);
-    const galleryName = currentGallery?.name || 'main';
-    const shortcode = `[kindpdfg_gallery name="${galleryName.toLowerCase().replace(/[^a-z0-9-_]/g, '-')}"]`;
-    try {
-      await navigator.clipboard.writeText(shortcode);
-      setShortcodeCopied(true);
-      setTimeout(() => setShortcodeCopied(false), 2000);
-    } catch (e) {}
-  };
-
-  const currentGallery = galleryState.galleries.find(g => g.id === galleryState.currentGalleryId);
-  const currentItems = currentGallery?.items || [];
-
-  const toBoolean = (v: any, fallback: boolean) => {
-    if (v === undefined || v === null) return fallback;
-    if (v === true || v === 'true' || v === 1 || v === '1' || v === 'yes' || v === 'on') return true;
-    if (v === false || v === 'false' || v === 0 || v === '0' || v === 'no' || v === 'off') return false;
-    return !!v;
-  };
-
-  // Ratings default: off. Lightbox default: on (expected gallery behavior).
-  const galleryRatingsEnabled = toBoolean((settings as any)?.ratingsEnabled, false);
-  const galleryLightboxEnabled = toBoolean((settings as any)?.lightboxEnabled, true);
-
-
-  // Check if we should show admin interface (dev preview or WordPress admin)
-  const urlParams = new URLSearchParams(window.location.search);
-  const wp = (typeof window !== 'undefined' && ((window as any).kindpdfgData || (window as any).wpPDFGallery)) ? ((window as any).kindpdfgData || (window as any).wpPDFGallery) : null;
-  const isWordPressAdmin = !!wp?.isAdmin || urlParams.get('admin') === 'true';
-  const hostname = window.location.hostname;
-  const isDevPreview = hostname.includes('lovable.app') || hostname.includes('lovableproject.com') || hostname === 'localhost';
-
-  // Show admin interface in WordPress admin area, dev preview, or demo mode
-  const showAdmin = isDevPreview || isWordPressAdmin || isDemo;
-
-  // DEV: Show showcase for gallery not found designs
-  const showGalleryNotFoundShowcase = urlParams.get('showcase') === 'gallery-not-found';
-  if (showGalleryNotFoundShowcase) {
-    return <GalleryNotFoundShowcase />;
-  }
-
-  // DEV: Show showcase for settings scope selector
-  const showSettingsScopeShowcase = urlParams.get('showcase') === 'settings-scope';
-  if (showSettingsScopeShowcase) {
-    return <SettingsScopeSelectorShowcase />;
-  }
-
-  // DEV: Show showcase for lightbox styles
-  const showLightboxShowcase = urlParams.get('showcase') === 'lightbox';
-  if (showLightboxShowcase) {
-    return <LightboxShowcase />;
-  }
-
-  // DEV: Show showcase for update notice designs
-  const showUpdateNoticeShowcase = urlParams.get('showcase') === 'update-notice';
-  if (showUpdateNoticeShowcase) {
-    return <UpdateNoticeShowcase />;
-  }
-
-  if (!showAdmin) {
-    // Show gallery not found state if requested gallery doesn't exist
-    if (galleryNotFound) {
-      return (
-        <div className="w-full">
-          <GalleryNotFound />
-        </div>
-      );
-    }
-    // Show only the frontend gallery for regular WordPress visitors
-    return (
-      <div className="w-full">
-        <PDFGallery 
-          items={currentItems} 
-          settings={settings}
-          showRatings={galleryRatingsEnabled}
-          lightboxEnabled={galleryLightboxEnabled}
-          galleryId={currentGallery?.id || 'default'}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className={`${isDemo ? '' : 'min-h-screen'} bg-background`}>
@@ -578,8 +71,8 @@ const Index = () => {
         {/* Logo Header */}
         <div className="px-6 pt-6 pb-6">
           <div className="flex items-center gap-3">
-            <img src={pdfGalleryLogo} alt={license.isPro ? PRO_NAME : PLUGIN_NAME} className="w-9 h-9" />
-             <div className="flex items-baseline gap-2">
+            <img src={videosowLogo} alt={license.isPro ? PRO_NAME : PLUGIN_NAME} className="w-9 h-9" />
+            <div className="flex items-baseline gap-2">
               <h1 className="text-2xl text-slate-800"><span className="font-bold">{license.isPro ? PRO_NAME : PLUGIN_NAME}</span></h1>
               <span className="text-xs text-slate-400">v{PLUGIN_VERSION}</span>
               {isDemo && (
@@ -591,62 +84,40 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Update Notice and Engagement Notice - hidden in demo mode */}
         {!isDemo && (
           <div className="px-6">
             <UpdateNotice currentVersion={PLUGIN_VERSION} />
-            <EngagementNotice totalFiles={galleryState.galleries.reduce((sum, g) => sum + g.items.filter(i => !('type' in i)).length, 0)} />
           </div>
         )}
 
-        {/* Pro Welcome Message - shows after license activation */}
         {license.isPro && <ProWelcome className="mx-6 mb-6" />}
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Tab Navigation with Underline Style */}
           <div className="px-6">
             <TabsList className="flex border-b border-slate-200 bg-transparent p-0 h-auto">
-              <TabsTrigger
-                value="dashboard"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
+              <TabsTrigger value="dashboard" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
               </TabsTrigger>
-              <TabsTrigger
-                value="import"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
+              <TabsTrigger value="import" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                 <Youtube className="w-4 h-4" />
                 Import
               </TabsTrigger>
               {license.isPro && (
-                <TabsTrigger
-                  value="tasks"
-                  className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-                >
+                <TabsTrigger value="tasks" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                   <ListTodo className="w-4 h-4" />
                   Tasks
                 </TabsTrigger>
               )}
-              <TabsTrigger
-                value="settings"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
+              <TabsTrigger value="settings" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                 <Settings className="w-4 h-4" />
                 Settings
               </TabsTrigger>
-              <TabsTrigger
-                value="docs"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
+              <TabsTrigger value="docs" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                 <BookOpen className="w-4 h-4" />
                 Documentation
               </TabsTrigger>
-              <TabsTrigger
-                value="pro"
-                className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none"
-              >
+              <TabsTrigger value="pro" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                 Pro
                 <Crown className="w-4 h-4 text-amber-500" />
               </TabsTrigger>
@@ -686,49 +157,22 @@ const Index = () => {
           </div>
         </Tabs>
 
-        {/* Footer - hidden in demo mode */}
         {!isDemo && (
           <div className="px-6 mt-8">
             <div className="border-t border-slate-200 pt-4 pb-6">
               <div className="flex items-center justify-between">
-                {/* Left: Support Links */}
                 <div className="flex items-center gap-6">
-                  <a 
-                    href="https://wordpress.org/support/plugin/kindpixels-pdf-gallery/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
-                  >
-                    Support
-                    <ExternalLink className="w-3 h-3" />
+                  <a href="https://wordpress.org/support/plugin/videosow/" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                    Support <ExternalLink className="w-3 h-3" />
                   </a>
-                  <a 
-                    href="https://wordpress.org/support/plugin/kindpixels-pdf-gallery/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
-                  >
-                    Request a Feature
-                    <ExternalLink className="w-3 h-3" />
+                  <a href="https://wordpress.org/support/plugin/videosow/" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                    Request a Feature <ExternalLink className="w-3 h-3" />
                   </a>
-                  <a 
-                    href="https://wordpress.org/plugins/kindpixels-pdf-gallery/#reviews" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1"
-                  >
-                    Rate Us ★★★★★
-                    <ExternalLink className="w-3 h-3" />
+                  <a href="https://wordpress.org/plugins/videosow/#reviews" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                    Rate Us ★★★★★ <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
-                
-                {/* Right: Kind Pixels Logo */}
-                <a 
-                  href="https://kindpixels.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="kp-footer-logo text-slate-600"
-                >
+                <a href="https://kindpixels.com" target="_blank" rel="noopener noreferrer" className="kp-footer-logo text-slate-600">
                   <KindPixelsLogo className="h-5 w-auto" />
                 </a>
               </div>
@@ -737,7 +181,6 @@ const Index = () => {
         )}
       </div>
 
-      {/* Dev Mode Selector - only in dev preview, excluded from production builds, hidden in demo */}
       {import.meta.env.DEV && !isDemo && license.isDevMode && DevLicenseSelector && (
         <Suspense fallback={null}>
           <DevLicenseSelector />
