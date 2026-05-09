@@ -1,6 +1,7 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
+import { useThemeMap } from "@/hooks/useThemeMap";
 
 export interface SermonLogEntry {
   time: number;
