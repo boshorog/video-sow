@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
 import TodoHeaderShowcase from '@/components/dashboard/TodoHeaderShowcase';
+import DashboardCardShowcase from '@/components/dashboard/DashboardCardShowcase';
 import { highlightAnchor } from '@/lib/highlightAnchor';
 
 const useThemeScan = () => {
