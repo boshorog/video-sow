@@ -1476,6 +1476,18 @@ function videosow_sermon_archive_toolbar_js() {
       if (text){ p.textContent = text; summary.style.display = ''; }
       else { p.textContent = ''; summary.style.display = 'none'; }
     }
+    // Read more link (after the excerpt). Always present so users have a clear CTA.
+    var existingMore = article.querySelector('.videosow-read-more');
+    if (existingMore && existingMore.parentNode) existingMore.parentNode.removeChild(existingMore);
+    if (d.url){
+      var more = document.createElement('a');
+      more.className = 'videosow-read-more';
+      more.setAttribute('href', d.url);
+      more.innerHTML = 'Read more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>';
+      var anchor = summary || article.querySelector('.entry-title') || article;
+      if (anchor && anchor.parentNode === article){ article.insertBefore(more, anchor.nextSibling); }
+      else { article.appendChild(more); }
+    }
     // Thumbnail — make sure the cover image links to the article.
     var thumbA = article.querySelector('.post-thumbnail, a:has(img), figure');
     var img = (thumbA ? thumbA.querySelector('img') : null) || article.querySelector('img');
