@@ -29,11 +29,11 @@ export const DASHBOARD_CARD_REGISTRY: DashboardCardMeta[] = [
   { key: 'published',  title: 'Articles published',  subtitle: 'Live on your site' },
   { key: 'drafts',     title: 'Drafts pending',      subtitle: 'Review & publish in WordPress' },
   { key: 'lastSync',   title: 'Last sync',           subtitle: 'Most recent import run' },
-  { key: 'autosync',   title: 'Auto-sync',           subtitle: 'Next sync countdown',          pro: true },
+  { key: 'autosync',   title: 'Auto-sync',           subtitle: 'Next sync countdown' },
   { key: 'syncHealth', title: 'Sync Health',         subtitle: 'API quota & error tracking' },
   { key: 'taxonomy',   title: 'Taxonomy',            subtitle: 'Top tags this month' },
   { key: 'aiUsage',    title: 'AI usage',            subtitle: 'Tokens spent this month',      pro: true },
-  { key: 'backfill',   title: 'Backfill',            subtitle: 'Currently importing playlist', pro: true },
+  { key: 'backfill',   title: 'Backfill',            subtitle: 'Currently importing playlist' },
 ];
 
 const DEFAULT_ENABLED: DashboardCardKey[] = ['imported', 'published', 'drafts', 'lastSync'];
@@ -303,14 +303,9 @@ const DashboardCards = ({
   const enabled = prefs.filter((p) => p.enabled);
   if (enabled.length === 0) return null;
 
-  const [hero, ...rest] = enabled;
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-fr">
-      <div className="lg:col-span-2 lg:row-span-2">
-        {renderCard(hero.key, isPro, ctx, onUnlock, true)}
-      </div>
-      {rest.map(({ key }) => (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {enabled.map(({ key }) => (
         <div key={key}>{renderCard(key, isPro, ctx, onUnlock, false)}</div>
       ))}
     </div>
