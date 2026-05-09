@@ -116,6 +116,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         title: r.title,
         videoId: r.videoId,
         date: r.date,
+        importedAt: r.importedAt,
         status: r.status,
         views: r.views,
         editLink: r.editLink,
