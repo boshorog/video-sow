@@ -5,6 +5,9 @@ export type ThemeMap = {
   scanned_at?: number;
   theme_slug?: string;
   cards_found?: number;
+  css_assets_scanned?: number;
+  theme_css_rules?: string[];
+  theme_spacing?: Record<string, string>;
 };
 
 /**
