@@ -313,12 +313,20 @@ const SermonImporterWidget = ({
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      {/* ---- Soft slate header ------------------------------------- */}
-      <div className="px-5 py-2.5 flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600">
-        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/15">
-          <Zap className="w-3.5 h-3.5 text-amber-200" />
-        </span>
-        <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-white">Importer console</h3>
+      {/* ---- Navy header with faded logo bleed --------------------- */}
+      <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-700 to-slate-600">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -left-6 w-[180px] h-[180px] opacity-[0.10]"
+          style={{
+            backgroundImage: `url(${vsLogo})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "top left",
+            filter: "brightness(0) invert(1)",
+          }}
+        />
+        <h3 className="relative text-[13px] font-bold uppercase tracking-[0.2em] text-white">Importer console</h3>
         <span className={cn(
           "ml-auto inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.15em]",
           config.enabled && isConfigured ? "text-emerald-300" : "text-slate-300"
