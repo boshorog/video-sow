@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.13
+Stable tag: 1.2.14
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,9 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.14 =
+* Dashboard: combined TO DO header (Setup roadmap title + hero numerator).
 
 = 1.2.13 =
 * Dashboard "TO DO" card refined: uppercase title, neutral grey connector line at all times, softer red-to-white gradient, Pro steps now display the orange crown icon (no Pro badge), and the standalone "Unlock Pro" tile was removed.

@@ -72,7 +72,7 @@ export const PRO_NAME = 'Video Sow Pro';
 /**
  * Plugin version - update this for each release
  */
-export const PLUGIN_VERSION = '1.2.13';
+export const PLUGIN_VERSION = '1.2.14';
 
 /**
  * Short description for meta/SEO
