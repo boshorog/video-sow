@@ -634,6 +634,25 @@ function videosow_sermon_archive_title( $title ) {
 }
 add_filter( 'get_the_archive_title', 'videosow_sermon_archive_title' );
 
+/* Same configured title for post_type_archive_title — themes (e.g. Masco) and
+ * many breadcrumb plugins (Yoast, RankMath, Breadcrumb NavXT) read this filter
+ * instead of get_the_archive_title, so the breadcrumb can show "Funny" rather
+ * than just "Home". */
+function videosow_sermon_post_type_archive_title( $name, $post_type = '' ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) ) return $name;
+    $cfg = videosow_get_sermon_importer_config();
+    if ( ! empty( $cfg['archiveTitle'] ) ) return $cfg['archiveTitle'];
+    return $name;
+}
+add_filter( 'post_type_archive_title', 'videosow_sermon_post_type_archive_title', 10, 2 );
+add_filter( 'single_post_title', function( $title, $post = null ) {
+    // Don't truncate single videosow_video titles — return full post title.
+    if ( $post && get_post_type( $post ) === 'videosow_video' ) {
+        return get_the_title( $post );
+    }
+    return $title;
+}, 10, 2 );
+
 /* SEO meta title + description for the sermon archive */
 function videosow_sermon_archive_document_title( $parts ) {
     if ( is_post_type_archive( 'videosow_video' ) ) {
