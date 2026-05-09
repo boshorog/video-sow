@@ -75,6 +75,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.18 =
+* Dashboard: KPI row now uses a "Hero + companions" layout — first enabled card spans 2x2 as the main tile.
+* Settings → Dashboard cards: drag-and-drop reordering (matches Playlists), constrained to the main settings column, first slot labelled "Main card".
+* Fix: dashboard card preferences now persist across saves (PHP whitelist updated).
+
+= 1.2.17 =
 * Dashboard: KPI row redesigned with a unified "soft tinted" card style (faint red fill, hover highlight, small primary icon, sparkline + trend indicator).
 * Dashboard: card visibility and order are now user-configurable in Settings → Dashboard cards.
 * New cards available: Auto-sync countdown (Pro), Sync Health, Taxonomy / Top tags, AI usage (Pro), Backfill / Importing playlist (Pro).
