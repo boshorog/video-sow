@@ -932,12 +932,12 @@ function videosow_sermon_archive_toolbar() {
 
     // CSS
     echo '<style id="videosow-toolbar-css">'
-        . '.post-type-archive-videosow_video .videosow-toolbar{font-family:inherit !important;margin:-.85rem 0 2.25rem !important;padding-top:.75rem !important;--kp-tag-lines-desktop:' . $lines_desktop . ';--kp-tag-lines-mobile:' . $lines_mobile . ';overflow:visible !important;}'
+        . '.post-type-archive-videosow_video .videosow-toolbar{font-family:inherit !important;margin:0 0 1.5rem !important;padding:0 !important;--kp-tag-lines-desktop:' . $lines_desktop . ';--kp-tag-lines-mobile:' . $lines_mobile . ';overflow:visible !important;}'
         . '.videosow-toolbar *{box-sizing:border-box;}'
-        . '.videosow-toolbar .kp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;background:#ffffff;padding:.85rem 1rem;border:1px solid rgba(0,0,0,.08);border-radius:14px;}'
+        . '.videosow-toolbar .kp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;background:#ffffff;padding:.5rem .65rem;border:1px solid rgba(0,0,0,.08);border-radius:12px;}'
         . '.post-type-archive-videosow_video .videosow-toolbar{overflow:visible;}'
-        . '.videosow-toolbar .kp-search{flex:1 1 280px;min-width:0;}'
-        . '.videosow-toolbar .kp-search input{width:100%;padding:.55rem .85rem;font-size:.95rem;background:rgba(0,0,0,.04);border:0;border-radius:10px;color:#111;outline:none;font-family:inherit !important;}'
+        . '.videosow-toolbar .kp-search{flex:1 1 240px;min-width:0;max-width:560px;}'
+        . '.videosow-toolbar .kp-search input{width:100%;height:2.25rem;line-height:1.2;padding:.35rem .75rem;font-size:.875rem;background:rgba(0,0,0,.04);border:0;border-radius:8px;color:#111;outline:none;font-family:inherit !important;box-shadow:none !important;}'
         . '.videosow-toolbar .kp-search input::placeholder{color:rgba(0,0,0,.45);}'
         . '.videosow-toolbar .kp-sort{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}'
         . '.videosow-toolbar .kp-sort label{font-size:.85rem;color:rgba(0,0,0,.55);font-weight:500;font-family:inherit !important;}'
