@@ -67,18 +67,11 @@ const StatusBadge = ({ step }: { step: ShowcaseStep }) => (
 
 const StepIcon = ({ s }: { s: ShowcaseStep }) => {
   const Icon = s.icon;
-  // Pro icon = orange crown (matches the Pro menu item).
-  if (s.pro && !s.done) {
-    return (
-      <div className="flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-amber-50 border-amber-300">
-        <Crown className="w-5 h-5 text-amber-500" fill="currentColor" />
-      </div>
-    );
-  }
   return (
     <div className={cn(
       'flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-card',
       s.done ? 'bg-emerald-500 border-emerald-500 text-white'
+      : s.pro ? 'bg-amber-50 border-amber-300 text-amber-600'
       : 'border-primary/40 text-primary',
     )}>
       {s.done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
