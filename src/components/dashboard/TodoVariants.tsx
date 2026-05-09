@@ -97,7 +97,10 @@ const TodoVariants = ({ steps, onAction }: Props) => {
           {completed} of {total} done
         </p>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-border/60 overflow-hidden mb-5">
+      <p className="text-xs text-muted-foreground mb-3">
+        Follow these steps to set up Video Sow and start importing your YouTube playlist into clean WordPress articles.
+      </p>
+      <div className="h-1.5 w-full rounded-full bg-primary/15 overflow-hidden mb-5">
         <div className="h-full bg-primary transition-all" style={{ width: `${percent}%` }} />
       </div>
 
@@ -120,6 +123,9 @@ const TodoVariants = ({ steps, onAction }: Props) => {
                 <span className={cn('text-base font-semibold', s.done ? 'text-emerald-800' : 'text-slate-800')}>
                   {i + 1}. {s.title}
                 </span>
+                {s.pro && !s.done && (
+                  <Crown className="w-4 h-4 text-amber-500" fill="currentColor" aria-label="Pro feature" />
+                )}
                 <StatusBadge step={s} />
               </div>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">{s.desc}</p>
