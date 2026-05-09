@@ -1297,6 +1297,46 @@ function videosow_sermon_archive_toolbar_js() {
   // inherit the theme's CSS classes and visual styling for date/excerpt/title.
   var TEMPLATE_ARTICLE = null;
 
+  function markThemeSynthetic(article){
+    if (!article) return;
+    var junk = article.querySelectorAll('.videosow-scan-strip,[data-videosow-strip="1"],.post-categories,.cat-links,.tags-links,.comments-link,.read-more,.more-link,.post-author,.author,.byline');
+    junk.forEach(function(n){ if(n && n.parentNode) n.parentNode.removeChild(n); });
+    var thumb = article.querySelector('.post-thumbnail, a.post-thumbnail, figure, a:has(> figure), a:has(img)');
+    if (thumb) thumb.classList.add('videosow-part-thumb');
+    var title = article.querySelector('.kp-slot-title') || article.querySelector('.entry-title') || article.querySelector('h1,h2,h3');
+    if (title) title.classList.add('videosow-part-title');
+    var meta = article.querySelector('.kp-slot-date-wrap') || article.querySelector('.entry-meta') || article.querySelector('.post-meta') || (article.querySelector('time') && article.querySelector('time').parentNode);
+    if (meta && meta.classList) meta.classList.add('videosow-part-meta');
+    var excerpt = article.querySelector('.kp-slot-excerpt') || article.querySelector('.entry-summary') || article.querySelector('.entry-content') || article.querySelector('p');
+    if (excerpt) excerpt.classList.add('videosow-part-excerpt');
+  }
+
+  function normalizeCardOrder(article){
+    if (!article) return;
+    var thumb = article.querySelector('.videosow-part-thumb') || article.querySelector('.post-thumbnail, a.post-thumbnail, figure, a:has(> figure), a:has(img)');
+    var meta = article.querySelector('.videosow-part-meta') || article.querySelector('.entry-meta,.post-meta,.kp-slot-date-wrap');
+    var title = article.querySelector('.videosow-part-title') || article.querySelector('.kp-slot-title,.entry-title,h1,h2,h3');
+    var excerpt = article.querySelector('.videosow-part-excerpt') || article.querySelector('.kp-slot-excerpt,.entry-summary');
+    [thumb, meta, title, excerpt].forEach(function(n){
+      if (!n || !n.parentNode || n.parentNode !== article) return;
+      article.appendChild(n);
+    });
+  }
+
+  function compactBeforeLoop(node){
+    if (!node || !node.parentNode) return;
+    var parent = node.parentNode;
+    parent.classList && parent.classList.add('videosow-loop-compact');
+    var kids = Array.prototype.slice.call(parent.children);
+    for (var i=0;i<kids.length;i++){
+      var el = kids[i];
+      if (el === node || el.id === 'videosow-toolbar' || el.id === 'videosow-grid') break;
+      if (el.matches && (el.matches('p:empty, hr, .wp-block-spacer, .elementor-spacer, .post-separator, .entries-divider') || (el.textContent || '').trim() === '')) {
+        el.classList.add('videosow-before-loop-empty');
+      }
+    }
+  }
+
   function dedupeBlocks(article){
     if (!article) return;
     // Keep only the first occurrence of each meta/summary block — themes sometimes
@@ -1379,6 +1419,8 @@ function videosow_sermon_archive_toolbar_js() {
       es.innerHTML = '<p></p>';
       clone.appendChild(es);
     }
+    markThemeSynthetic(clone);
+    normalizeCardOrder(clone);
     TEMPLATE_ARTICLE = clone;
   }
 
@@ -1481,6 +1523,8 @@ function videosow_sermon_archive_toolbar_js() {
     article.id = 'post-' + d.id + '-kp-view';
     article.classList.add('post-' + d.id);
     populateArticle(article, d);
+    markThemeSynthetic(article);
+    normalizeCardOrder(article);
     article.__kpCard = card;
     card.__kpArticle = article;
     card.appendChild(article);
