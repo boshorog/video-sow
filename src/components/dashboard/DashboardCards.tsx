@@ -319,32 +319,33 @@ const CardRecent = ({ ctx, hero }: CtxCardProps) => {
       {rows.length === 0 ? (
         <p className="text-xs text-muted-foreground">No imports yet.</p>
       ) : (
-        <ul className="h-full overflow-y-auto pr-1 -mr-1 divide-y divide-primary/10">
-          {rows.map((row) => {
-            const link = row.editLink || row.permalink;
-            const Tag: any = link ? 'a' : 'div';
-            return (
-              <li key={row.id} className="flex items-center gap-2 py-1.5 text-[12px]">
-                <span
-                  className={cn(
-                    'h-1.5 w-1.5 rounded-full shrink-0',
-                    row.status === 'Published' ? 'bg-emerald-500' : 'bg-amber-500',
-                  )}
-                  title={row.status}
-                />
-                <Tag
-                  {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
-                  title={row.title}
-                >
-                  {row.title}
-                </Tag>
-                <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{row.when}</span>
-                {link && <ExternalLink className="w-3 h-3 text-muted-foreground/60 shrink-0" />}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="-mt-2 -mb-2 -mr-3 flex-1 min-h-0 overflow-y-auto pr-1">
+          <ul className="divide-y divide-primary/10">
+            {rows.map((row) => {
+              const link = row.editLink || row.permalink;
+              const Tag: any = link ? 'a' : 'div';
+              return (
+                <li key={row.id} className="flex items-center gap-2 py-1 text-[12px]">
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full shrink-0',
+                      row.status === 'Published' ? 'bg-emerald-500' : 'bg-amber-500',
+                    )}
+                    title={row.status}
+                  />
+                  <Tag
+                    {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
+                    title={row.title}
+                  >
+                    {row.title}
+                  </Tag>
+                  <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{row.when}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </Tile>
   );
