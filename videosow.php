@@ -1344,7 +1344,8 @@ function videosow_sermon_archive_toolbar_js() {
     var meta = article.querySelector('.videosow-part-meta') || article.querySelector('.entry-meta,.post-meta,.kp-slot-date-wrap');
     var title = article.querySelector('.videosow-part-title') || article.querySelector('.kp-slot-title,.entry-title,h1,h2,h3');
     var excerpt = article.querySelector('.videosow-part-excerpt') || article.querySelector('.kp-slot-excerpt,.entry-summary');
-    [thumb, meta, title, excerpt].forEach(function(n){
+    var more = article.querySelector('.videosow-read-more');
+    [thumb, meta, title, excerpt, more].forEach(function(n){
       if (!n || !n.parentNode || n.parentNode !== article) return;
       article.appendChild(n);
     });
