@@ -23,37 +23,21 @@ import { useLicense } from '@/hooks/useLicense';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-type ThemeMap = {
-  confidence?: 'low' | 'medium' | 'high';
-  scanned_at?: number;
-  theme_slug?: string;
-};
+import { useThemeMap } from '@/hooks/useThemeMap';
 
-const useThemeMap = () => {
-  const [map, setMap] = useState<ThemeMap | null>(null);
+const useThemeScan = () => {
+  const { map, scanned } = useThemeMap();
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
-      if (!e.data || !e.data.type) return;
-      if (e.data.type === 'videosow_theme_map_result') {
-        if (e.data.success && e.data.data) setMap(e.data.data as ThemeMap);
-      }
-      if (e.data.type === 'videosow_theme_scan_result') {
+      if (e.data?.type === 'videosow_theme_scan_result') {
         setScanning(false);
-        if (e.data.success && e.data.data) {
-          setMap(e.data.data as ThemeMap);
-          toast.success('Theme structure scan complete.');
-        } else {
-          toast.error('Theme scan failed.');
-        }
+        if (e.data.success) toast.success('Theme structure scan complete.');
+        else toast.error('Theme scan failed.');
       }
     };
     window.addEventListener('message', handler);
-    if (typeof window !== 'undefined') {
-      window.postMessage({ type: 'videosow_get_theme_map' }, '*');
-      try { window.parent?.postMessage({ type: 'videosow_get_theme_map' }, '*'); } catch {}
-    }
     return () => window.removeEventListener('message', handler);
   }, []);
 
@@ -63,7 +47,7 @@ const useThemeMap = () => {
     try { window.parent?.postMessage({ type: 'videosow_scan_theme' }, '*'); } catch {}
   };
 
-  return { map, scanning, runScan };
+  return { map, scanned, scanning, runScan };
 };
 
 type Step = {
