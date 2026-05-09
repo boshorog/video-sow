@@ -220,6 +220,12 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </Card>
       </div>
 
+      {/* TO DO header — visual showcase (5 alternative top-of-card designs). */}
+      <TodoHeaderShowcase
+        completed={[themeOk, !!cfg.apiKey, !!cfg.playlistId, !!cfg.firstSyncDone, !!cfg.enabled, !!cfg.aiApiKey, !!cfg.fetchTranscript].filter(Boolean).length}
+        total={7}
+      />
+
       {/* To do — setup roadmap */}
       <TodoVariants
         steps={buildShowcaseSteps({
