@@ -86,7 +86,7 @@ const Tile = ({
 }) => (
   <div
     className={cn(
-      'relative h-full rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors',
+      'relative h-[220px] flex flex-col rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors overflow-hidden',
       'hover:border-primary/40',
       hero ? 'p-6 lg:p-7' : 'p-5',
       locked && 'opacity-80',
@@ -100,7 +100,7 @@ const Tile = ({
       'font-bold text-slate-800 leading-tight',
       hero ? 'text-lg' : 'text-[15px]',
     )}>{title}</h4>
-    <div className={cn(hero ? 'mt-5' : 'mt-3')}>{children}</div>
+    <div className={cn('flex-1 min-h-0', hero ? 'mt-5' : 'mt-3')}>{children}</div>
     {locked && (
       <button
         onClick={onUnlock}
