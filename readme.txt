@@ -74,6 +74,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.24 =
+* Importer console: action panel shows next sync countdown when auto-sync is on; Source playlist "Not connected" centered.
+* Dashboard: Auto-sync card now wired to real config (next sync countdown). Drafts pending uses Inbox icon. Recent imports list tightened — closer to title / bottom, scrollbar near edge, link icons removed.
+* Admin: WP sidebar icon stays white when the Video Sow menu is current/hover (was rendering dark).
+
 = 1.2.23 =
 * Importer: restored the "View archive" link beneath the Sync / Backfill button in the action panel.
 * Importer: removed the duplicate progress block below the card — coffee breaks, slow-step warnings and sub-stages (scanning / fetching transcript / AI / creating post) now drive the single stage pill, progress bar and note inside the console.
