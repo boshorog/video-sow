@@ -25,9 +25,34 @@ import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
-import TodoHeaderShowcase from '@/components/dashboard/TodoHeaderShowcase';
-import DashboardCardShowcase from '@/components/dashboard/DashboardCardShowcase';
 import { highlightAnchor } from '@/lib/highlightAnchor';
+import { Activity, TrendingUp } from 'lucide-react';
+
+/** Mini sparkline — purely decorative until we wire historical data. */
+const Sparkline = ({ up = true, className = '' }: { up?: boolean; className?: string }) => (
+  <svg viewBox="0 0 100 30" preserveAspectRatio="none" className={className} aria-hidden>
+    <defs>
+      <linearGradient id="vs-spark" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.35" />
+        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
+      </linearGradient>
+    </defs>
+    <path
+      d={up
+        ? 'M0,22 L15,18 L30,20 L45,12 L60,14 L75,8 L100,4 L100,30 L0,30 Z'
+        : 'M0,8 L15,14 L30,10 L45,18 L60,16 L75,22 L100,24 L100,30 L0,30 Z'}
+      fill="url(#vs-spark)"
+    />
+    <path
+      d={up
+        ? 'M0,22 L15,18 L30,20 L45,12 L60,14 L75,8 L100,4'
+        : 'M0,8 L15,14 L30,10 L45,18 L60,16 L75,22 L100,24'}
+      fill="none"
+      stroke="hsl(var(--primary))"
+      strokeWidth="1.5"
+    />
+  </svg>
+);
 
 const useThemeScan = () => {
   const { map, scanned } = useThemeMap();
