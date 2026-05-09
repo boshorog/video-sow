@@ -232,6 +232,12 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           isPro: license.isPro,
         })}
         onAction={(key) => {
+          const proKeys = new Set(['ai', 'transcripts']);
+          // Free users: any pro-gated step jumps straight to the Pro page.
+          if (!license.isPro && proKeys.has(key)) {
+            onNavigate?.('pro');
+            return;
+          }
           const tabFor: Record<string, string> = {
             scan: 'settings',
             apikey: 'settings',
@@ -240,7 +246,6 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             autosync: 'settings',
             ai: 'tasks',
             transcripts: 'settings',
-            pro: 'pro',
           };
           const anchorFor: Record<string, string> = {
             scan: 'scan',
