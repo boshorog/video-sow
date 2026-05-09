@@ -4501,6 +4501,75 @@ function videosow_extract_css_vars( DOMXPath $xp ) {
     return $vars;
 }
 
+function videosow_scan_css_asset_urls( DOMXPath $xp, $base_url ) {
+    $urls = array();
+    $links = $xp->query( '//link[contains(@rel,"stylesheet") and @href]' );
+    if ( $links ) {
+        for ( $i = 0; $i < $links->length; $i++ ) {
+            $href = $links->item( $i )->getAttribute( 'href' );
+            if ( ! $href ) continue;
+            $urls[] = function_exists( 'wp_http_validate_url' ) && wp_http_validate_url( $href ) ? $href : wp_make_link_relative( $href );
+            if ( strpos( $href, 'http' ) !== 0 ) $urls[ count( $urls ) - 1 ] = esc_url_raw( wp_parse_url( home_url( '/' ), PHP_URL_SCHEME ) . '://' . wp_parse_url( home_url( '/' ), PHP_URL_HOST ) . '/' . ltrim( $href, '/' ) );
+        }
+    }
+    return array_values( array_unique( array_filter( $urls ) ) );
+}
+
+function videosow_extract_relevant_css_rules( $css, array $class_tokens ) {
+    $rules = array();
+    if ( ! $css || empty( $class_tokens ) ) return $rules;
+    $css = preg_replace( '~/\*.*?\*/~s', '', (string) $css );
+    foreach ( $class_tokens as $token ) {
+        if ( ! $token || strlen( $token ) < 3 ) continue;
+        if ( preg_match_all( '/([^{}]*\.' . preg_quote( $token, '/' ) . '[^{}]*)\{([^{}]+)\}/i', $css, $m, PREG_SET_ORDER ) ) {
+            foreach ( $m as $r ) {
+                $sel = trim( preg_replace( '/\s+/', ' ', $r[1] ) );
+                $body = trim( $r[2] );
+                if ( strlen( $sel ) > 220 || strlen( $body ) > 500 ) continue;
+                $rules[] = $sel . '{' . $body . '}';
+                if ( count( $rules ) >= 80 ) return array_values( array_unique( $rules ) );
+            }
+        }
+    }
+    return array_values( array_unique( $rules ) );
+}
+
+function videosow_extract_spacing_from_rules( array $rules ) {
+    $spacing = array();
+    foreach ( $rules as $rule ) {
+        if ( preg_match( '/\{(.+)\}/', $rule, $m ) ) {
+            foreach ( array( 'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin', 'gap', 'column-gap', 'row-gap', 'border-radius' ) as $prop ) {
+                if ( ! isset( $spacing[ $prop ] ) && preg_match( '/' . preg_quote( $prop, '/' ) . '\s*:\s*([^;!]+)(?:!important)?\s*;?/i', $m[1], $pm ) ) {
+                    $val = trim( $pm[1] );
+                    if ( strlen( $val ) <= 80 ) $spacing[ $prop ] = $val;
+                }
+            }
+        }
+    }
+    return $spacing;
+}
+
+function videosow_collect_theme_css_intelligence( DOMXPath $xp, $scan_url, array $tokens ) {
+    $rules = array();
+    $inline = $xp->query( '//style' );
+    if ( $inline ) {
+        for ( $i = 0; $i < $inline->length; $i++ ) {
+            $rules = array_merge( $rules, videosow_extract_relevant_css_rules( (string) $inline->item( $i )->textContent, $tokens ) );
+            if ( count( $rules ) >= 80 ) break;
+        }
+    }
+    $assets_scanned = 0;
+    foreach ( array_slice( videosow_scan_css_asset_urls( $xp, $scan_url ), 0, 12 ) as $href ) {
+        $resp = wp_remote_get( $href, array( 'timeout' => 12, 'sslverify' => false, 'headers' => array( 'User-Agent' => 'VideoSowThemeScanner/1.2' ) ) );
+        if ( is_wp_error( $resp ) || wp_remote_retrieve_response_code( $resp ) >= 400 ) continue;
+        $assets_scanned++;
+        $rules = array_merge( $rules, videosow_extract_relevant_css_rules( wp_remote_retrieve_body( $resp ), $tokens ) );
+        if ( count( $rules ) >= 80 ) break;
+    }
+    $rules = array_values( array_unique( array_slice( $rules, 0, 80 ) ) );
+    return array( 'assets' => $assets_scanned, 'rules' => $rules, 'spacing' => videosow_extract_spacing_from_rules( $rules ) );
+}
+
 /** Find a representative descendant in a sample card and return its class chain. */
 function videosow_extract_card_part_class( DOMElement $card, DOMXPath $xp, $kind ) {
     $candidates = array();
