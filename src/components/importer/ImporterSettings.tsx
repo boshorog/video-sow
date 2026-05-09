@@ -748,6 +748,10 @@ const TroubleshootingSection = ({
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+          <ThemeScanTile />
+        </div>
+
         {/* Repair metadata */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <div className="flex items-start gap-2">
