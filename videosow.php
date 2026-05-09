@@ -4260,17 +4260,23 @@ function videosow_ajax_list_archive() {
     $q = new WP_Query( $args );
     $rows = array();
     foreach ( $q->posts as $p ) {
-        $vid = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
+        $vid   = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
         $views = (int) get_post_meta( $p->ID, '_videosow_yt_views', true );
+        $imp   = (int) get_post_meta( $p->ID, '_videosow_imported_at', true );
+        // Fallback for posts created before we tracked import time:
+        // use post_modified (closer to actual import time than post_date,
+        // which is forced to YouTube's publishedAt).
+        if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
         $rows[] = array(
-            'id'        => $p->ID,
-            'title'     => get_the_title( $p ),
-            'videoId'   => $vid,
-            'date'      => get_the_date( 'Y-m-d', $p ),
-            'status'    => $p->post_status === 'publish' ? 'Published' : 'Draft',
-            'views'     => $views,
-            'editLink'  => get_edit_post_link( $p->ID, '' ),
-            'permalink' => get_permalink( $p ),
+            'id'         => $p->ID,
+            'title'      => get_the_title( $p ),
+            'videoId'    => $vid,
+            'date'       => get_the_date( 'Y-m-d', $p ),    // YouTube publish date
+            'importedAt' => $imp ? gmdate( 'Y-m-d', $imp ) : '',
+            'status'     => $p->post_status === 'publish' ? 'Published' : 'Draft',
+            'views'      => $views,
+            'editLink'   => get_edit_post_link( $p->ID, '' ),
+            'permalink'  => get_permalink( $p ),
         );
     }
     wp_send_json_success( array( 'rows' => $rows ) );
