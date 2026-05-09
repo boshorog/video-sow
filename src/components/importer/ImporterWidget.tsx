@@ -539,6 +539,8 @@ const SermonImporterWidget = ({
         />
       )}
 
+      <div className="px-5 py-4 border-t border-slate-100 space-y-3 bg-slate-50/30">
+
       {isLive ? (
         <div className="space-y-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
           <div className="flex items-center justify-between text-xs">
