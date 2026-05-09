@@ -1099,6 +1099,9 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video .videosow-grid .entry-title a{line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + .entry-summary,'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + *{margin-top:1rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1rem 1.25rem .45rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:0 1.25rem !important;margin:0 0 .6rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem 1.15rem !important;margin-top:0 !important;}'
         // Divider between rows
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="1"],'
