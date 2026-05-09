@@ -168,6 +168,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           lastSyncHuman: loaded && !stats?.lastSyncAt ? 'Never' : lastSyncHuman,
           lastSyncMsg,
           loaded,
+          recent,
         }}
         isPro={license.isPro}
         onUnlock={() => onNavigate?.('pro')}
@@ -177,6 +178,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
       <TodoVariants
         steps={buildShowcaseSteps({
           themeOk,
+          configured: !!cfg.archiveTitle || (cfg.slug && cfg.slug !== 'articles'),
           hasApiKey: !!cfg.apiKey,
           hasPlaylist: !!cfg.playlistId,
           firstSyncDone: !!cfg.firstSyncDone,
@@ -187,9 +189,13 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         })}
         onAction={(key) => {
           const proKeys = new Set(['ai', 'transcripts']);
-          // Free users: any pro-gated step jumps straight to the Pro page.
           if (!license.isPro && proKeys.has(key)) {
             onNavigate?.('pro');
+            return;
+          }
+          if (key === 'configure') {
+            onNavigate?.('import');
+            highlightAnchor('slug');
             return;
           }
           const tabFor: Record<string, string> = {
@@ -215,45 +221,6 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           if (anchor) highlightAnchor(anchor);
         }}
       />
-
-      {/* Recent activity — only shown once at least one import exists. */}
-      {recent.length > 0 && (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent activity</CardTitle>
-          <CardDescription>The last few videos picked up by Video Sow.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <ul className="divide-y divide-border">
-              {recent.map((row) => {
-                const link = row.editLink || row.permalink;
-                const Tag: any = link ? 'a' : 'div';
-                return (
-                  <li key={row.id} className="flex items-center gap-3 py-2.5 text-sm">
-                    <PlayCircle className="w-4 h-4 text-primary shrink-0" />
-                    <Tag
-                      {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
-                      className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
-                    >
-                      {row.title}
-                    </Tag>
-                    <span className="text-xs text-muted-foreground shrink-0">{row.when}</span>
-                    <span
-                      className={`text-[11px] px-2 py-0.5 rounded-full shrink-0 ${
-                        row.status === 'Published'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-amber-50 text-amber-700'
-                      }`}
-                    >
-                      {row.status}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-        </CardContent>
-      </Card>
-      )}
     </div>
   );
 };

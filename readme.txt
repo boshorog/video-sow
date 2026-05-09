@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.19
+Stable tag: 1.2.20
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,15 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.20 =
+* Dashboard: KPI cards now use a fixed height so taller and shorter tiles align cleanly across the row.
+* Dashboard: Recent activity moved into a configurable card (last 10 imports, internal scroll); standalone bottom section removed.
+* Setup roadmap: new "Configure the output" step (#2) — links to Import and halo-highlights the Slug card.
+* Setup roadmap: anchor highlight pulses twice instead of three times across the board.
+* Importer: removed the persistent "Theme structure scanned" notice — only the "not scanned yet" hint shows when relevant.
+* Import → Archive: every column header is now sortable (Title, Video date, Import date, Status, Views) with always-visible arrows; Title column allowance reduced and other columns spaced evenly.
+* Fix: Drafts in Recent activity no longer display the YouTube publish date — legacy drafts without a tracked import time show "—".
 
 = 1.2.19 =
 * Dashboard: KPI row reverted to a uniform 4-column grid — extra enabled cards wrap onto a new row.
