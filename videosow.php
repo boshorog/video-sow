@@ -1938,6 +1938,7 @@ function videosow_sermon_archive_toolbar_js() {
 
     if (toolbar) {
       grid.parentNode.insertBefore(toolbar, grid);
+      compactBeforeLoop(toolbar);
       toolbar.style.display = '';
       buildTags(toolbar);
       var s = toolbar.querySelector('#videosow-search');
