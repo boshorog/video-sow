@@ -249,14 +249,14 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      <div className={`flex items-center gap-2 text-xs rounded-md px-3 py-2 border ${themeScanned ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
-        {themeScanned ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : <Scan className="w-3.5 h-3.5 shrink-0" />}
-        <span className="flex-1">
-          {themeScanned
-            ? 'Theme structure scanned — archive layout will render in the correct spot.'
-            : 'Theme not scanned yet — it will run automatically before your first import.'}
-        </span>
-      </div>
+      {!themeScanned && (
+        <div className="flex items-center gap-2 text-xs rounded-md px-3 py-2 border bg-amber-50 border-amber-200 text-amber-800">
+          <Scan className="w-3.5 h-3.5 shrink-0" />
+          <span className="flex-1">
+            Theme not scanned yet — it will run automatically before your first import.
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {(() => {

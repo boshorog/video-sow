@@ -3,7 +3,7 @@
  * around it a few times so the user can spot it after navigating tabs.
  */
 export function highlightAnchor(name: string, opts: { pulses?: number; delay?: number } = {}) {
-  const { pulses = 3, delay = 0 } = opts;
+  const { pulses = 2, delay = 0 } = opts;
 
   const find = () => document.querySelector<HTMLElement>(`[data-vs-anchor="${name}"]`);
 
