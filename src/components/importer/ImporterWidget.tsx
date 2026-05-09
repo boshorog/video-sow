@@ -387,7 +387,8 @@ const SermonImporterWidget = ({
                   : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
               </div>
               {config.playlistId ? (
-                <div className="text-center">
+                <div className="text-center flex-1 flex flex-col justify-center">
+                  <div />
                   <p className="font-bold text-slate-900 text-base truncate" title={playlistName || config.playlistId}>
                     {playlistName || "Connected playlist"}
                   </p>
