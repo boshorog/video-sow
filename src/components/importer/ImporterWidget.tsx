@@ -270,13 +270,32 @@ const SermonImporterWidget = ({
       stageTone = "syncing"; StageIcon = Search; stageSpin = false;
       stageLabelText = "Scanning playlist";
       stageNote = "Reading playlist contents from YouTube…";
+    } else if (restingInfo) {
+      stageTone = "paused"; StageIcon = Coffee; stageSpin = false;
+      stageLabelText = restingInfo.reason || "Coffee break";
+      stageNote = `Resting ${restingInfo.remaining}s of ${restingInfo.total}s — ${progress!.done} / ${progress!.total} imported.`;
+    } else if (cancelPending) {
+      stageTone = "paused"; StageIcon = Loader2; stageSpin = true;
+      stageLabelText = "Stopping";
+      stageNote = `Stopping after current video — ${progress!.done} / ${progress!.total}`;
     } else {
       stageTone = "syncing"; StageIcon = Loader2; stageSpin = true;
-      stageLabelText = cancelPending ? "Stopping" : "Backfilling";
-      stageNote = cancelPending
-        ? `Stopping after current video — ${progress!.done} / ${progress!.total}`
-        : `Importing video ${progress!.done} of ${progress!.total}`;
+      stageLabelText = "Backfilling";
+      const sub = stageLabel(stageInfo?.stage);
+      const base = `Importing video ${progress!.done + 1} of ${progress!.total}`;
+      stageNote = sub ? `${base} — ${sub}` : base;
+      if (stallInfo) {
+        stageNote = `${stageNote} · taking unusually long (${stallInfo.seconds}s)`;
+        stageTone = "error"; StageIcon = AlertTriangle; stageSpin = false;
+        stageLabelText = "Slow step";
+      }
     }
+  } else if (isRepairLive) {
+    stageTone = "syncing"; StageIcon = RefreshCw; stageSpin = true;
+    stageLabelText = "Repairing metadata";
+    stageNote = repairProgress && repairProgress.total > 0
+      ? `Refetching YouTube metadata — ${repairProgress.processed} / ${repairProgress.total}${repairProgress.updated ? ` · ${repairProgress.updated} updated` : ""}`
+      : "Refetching YouTube metadata…";
   } else if (!isConfigured) {
     stageTone = "idle"; StageIcon = PlayCircle;
     stageLabelText = "Not connected";
@@ -460,11 +479,16 @@ const SermonImporterWidget = ({
                 <StageIcon className={cn("w-3 h-3", stageSpin && "animate-spin")} /> {stageLabelText}
               </span>
               <span className="tabular-nums text-[11px] text-slate-700 font-semibold">
-                {importedNow}{denominator > 0 ? ` / ${denominator}` : ""} · {stagePct}%
+                {isRepairLive && repairProgress
+                  ? `${repairProgress.processed} / ${repairProgress.total} · ${repairPct}%`
+                  : `${importedNow}${denominator > 0 ? ` / ${denominator}` : ""} · ${stagePct}%`}
               </span>
             </div>
             <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div className={cn("h-full transition-all", tone.bar)} style={{ width: `${stagePct}%` }} />
+              <div
+                className={cn("h-full transition-all", tone.bar)}
+                style={{ width: `${isRepairLive ? repairPct : stagePct}%` }}
+              />
             </div>
             <p className="text-[10px] text-muted-foreground mt-1">{stageNote}</p>
           </div>
@@ -541,7 +565,18 @@ const SermonImporterWidget = ({
                 {isSyncing ? "Syncing…" : isFirstRun ? "Run full backfill" : "Sync now"}
               </button>
             ) : null}
+            {config.slug && (
+              <a
+                href={`/${config.slug}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-primary hover:text-primary/80 hover:underline"
+              >
+                View archive <ArrowUpRight className="w-3 h-3" />
+              </a>
+            )}
           </div>
+
         </div>
       </div>
 
@@ -555,116 +590,8 @@ const SermonImporterWidget = ({
         />
       )}
 
-      <div className="px-5 py-4 border-t border-slate-100 space-y-3 bg-slate-50/30">
-
-      {isLive ? (
-        <div className="space-y-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              {progress!.phase === "scanning" ? (
-                <>
-                  <Search className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  <span className="font-medium text-foreground">Scanning playlist…</span>
-                </>
-              ) : restingInfo ? (
-                <>
-                  <Coffee className="w-3.5 h-3.5 text-amber-600" />
-                  <span className="font-medium text-foreground">
-                    {restingInfo.reason || "Coffee break"}… ({restingInfo.remaining}s) — {progress!.done} / {progress!.total}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-                  <span className="font-medium text-foreground">
-                    {cancelPending
-                      ? `Stopping… (waiting for current video) — ${progress!.done} / ${progress!.total}`
-                      : `Importing: ${progress!.done} / ${progress!.total}${stageLabel(stageInfo?.stage) ? " — " + stageLabel(stageInfo?.stage) : ""}`}
-                  </span>
-                </>
-              )}
-            </div>
-            {progress!.phase === "importing" && (
-              <span className="text-[11px] font-mono text-muted-foreground">{pct}%</span>
-            )}
-            {onCancelSync && (
-              <button
-                type="button"
-                onClick={onCancelSync}
-                title="Cancel sync"
-                className="ml-1 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-          {progress!.phase === "importing" && (
-            <>
-              <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-300 ease-out"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              {progress!.currentTitle && (
-                <p className="text-[11px] text-muted-foreground truncate">
-                  Last imported: <span className="text-foreground">{progress!.currentTitle}</span>
-                </p>
-              )}
-              {progress!.already > 0 && (
-                <p className="text-[11px] text-muted-foreground">
-                  {progress!.already} already imported — skipped.
-                </p>
-              )}
-            </>
-          )}
-          {stallInfo && (
-            <div className="mt-2 flex items-start gap-2 p-2 rounded-md border border-amber-300 bg-amber-50 text-[11px] text-amber-800">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <div className="space-y-0.5">
-                <p className="font-semibold">
-                  Current step is taking unusually long ({stallInfo.seconds}s). Possible causes:
-                </p>
-                <ul className="list-disc list-inside space-y-0.5">
-                  {stallInfo.hints.map((h, i) => <li key={i}>{h}</li>)}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : isRepairLive ? (
-        <div className="space-y-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
-              <span className="font-medium text-foreground">
-                Repairing YouTube metadata{repairProgress && repairProgress.total > 0 ? `: ${repairProgress.processed} / ${repairProgress.total}` : "…"}
-              </span>
-            </div>
-            {repairProgress && repairProgress.total > 0 && (
-              <span className="text-[11px] font-mono text-muted-foreground">{repairPct}%</span>
-            )}
-          </div>
-          {repairProgress && repairProgress.total > 0 && (
-            <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-              <div className="h-full bg-primary transition-all duration-300 ease-out" style={{ width: `${repairPct}%` }} />
-            </div>
-          )}
-          {repairProgress && repairProgress.updated > 0 && (
-            <p className="text-[11px] text-muted-foreground">{repairProgress.updated} posts updated.</p>
-          )}
-        </div>
-      ) : (
-        <div className="flex items-center gap-2 text-xs">
-        <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-        <span className="text-muted-foreground">Last sync:</span>
-        <span className="font-medium text-foreground">{fmtTime(activeSyncAt)}</span>
-        {activeSyncMsg && <span className="text-muted-foreground">— {activeSyncMsg}</span>}
-        </div>
-      )}
-
       {(renderedItems.length > 0 || isLive) && (
-        <div className="space-y-2">
+        <div className="px-5 py-4 border-t border-slate-100 space-y-2 bg-slate-50/30">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {renderedItems.map((it) => (
@@ -711,7 +638,7 @@ const SermonImporterWidget = ({
           </div>
         </div>
       )}
-      </div>
+
     </div>
   );
 };

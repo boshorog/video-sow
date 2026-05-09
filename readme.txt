@@ -74,6 +74,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.23 =
+* Importer: restored the "View archive" link beneath the Sync / Backfill button in the action panel.
+* Importer: removed the duplicate progress block below the card — coffee breaks, slow-step warnings and sub-stages (scanning / fetching transcript / AI / creating post) now drive the single stage pill, progress bar and note inside the console.
+* Importer: repair-metadata progress also reuses the unified progress bar.
+
 = 1.2.22 =
 * Importer: redesigned main "Importer Console" card — soft slate header, YouTube → WP Archive pipeline, real-time stage pill (Idle / Backfilling / Paused / Error / Up to date), progress bar, and 4-up stat rail (Imported / Interval / Auto-sync / Last sync).
 * Importer: WP Archive tile uses the official WordPress logo and exposes the edit-archive shortcut.
