@@ -333,7 +333,7 @@ const SermonImporterWidget = ({
               type="button"
               onClick={() => { if (!config.playlistId) onPlaylistClick?.(); }}
               className={cn(
-                "rounded-lg border p-3 text-left transition-colors",
+                "rounded-lg border p-3 text-left transition-colors flex flex-col",
                 config.playlistId
                   ? "border-emerald-200 bg-emerald-50/40"
                   : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
