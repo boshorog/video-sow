@@ -397,7 +397,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             );
           }
           return (
-            <div className="space-y-1.5">
+            <div data-vs-anchor="playlist" className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Playlists</Label>
               <div className="space-y-2">
                 {list.map((pid, i) => {
