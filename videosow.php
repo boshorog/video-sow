@@ -4639,6 +4639,11 @@ function videosow_scan_active_theme() {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(),
+        'content_classes'    => '',
+        'breadcrumb_selector'=> '',
+        'css_assets_scanned' => 0,
+        'theme_css_rules'    => array(),
+        'theme_spacing'      => array(),
     );
 
     $best = null; $attempts = array();
@@ -4720,6 +4725,19 @@ function videosow_scan_active_theme() {
 
     if ( $container instanceof DOMElement ) $map['loop_container'] = videosow_dom_selector_for( $container );
 
+    $content = videosow_dom_first_match( $xp, array(
+        '//*[@id="primary"]', '//*[@id="content"]', '//*[contains(concat(" ",normalize-space(@class)," ")," site-content ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," content-area ")]', '//main', '//*[@role="main"]',
+    ) );
+    if ( $content ) $map['content_classes'] = trim( (string) $content->getAttribute( 'class' ) );
+
+    $breadcrumb = videosow_dom_first_match( $xp, array(
+        '//*[contains(concat(" ",normalize-space(@class)," ")," breadcrumbs ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," breadcrumb ")]',
+        '//*[@id="breadcrumbs"]', '//*[contains(@class,"rank-math-breadcrumb")]', '//*[contains(@class,"yoast-breadcrumb")]',
+    ) );
+    if ( $breadcrumb ) $map['breadcrumb_selector'] = videosow_dom_selector_for( $breadcrumb );
+
     $pag = videosow_dom_first_match( $xp, array(
         '//nav[contains(@class,"pagination")]', '//*[contains(@class,"page-navigation")]', '//*[@class="nav-links"]',
     ) );
@@ -4749,6 +4767,17 @@ function videosow_scan_active_theme() {
     $map['link_classes']    = videosow_extract_card_part_class( $first, $xp, 'link' );
 
     $map['theme_css_vars']  = videosow_extract_css_vars( $xp );
+
+    $tokens = array();
+    foreach ( array( $map['card_classes'], $map['title_classes'], $map['thumb_classes'], $map['excerpt_classes'], $map['meta_classes'], $map['content_classes'] ) as $cls ) {
+        foreach ( preg_split( '/\s+/', (string) $cls ) as $tok ) {
+            if ( $tok && preg_match( '/^[a-zA-Z][\w\-]*$/', $tok ) && strlen( $tok ) > 2 ) $tokens[] = $tok;
+        }
+    }
+    $css_iq = videosow_collect_theme_css_intelligence( $xp, $best['url'], array_values( array_unique( $tokens ) ) );
+    $map['css_assets_scanned'] = $css_iq['assets'];
+    $map['theme_css_rules']    = $css_iq['rules'];
+    $map['theme_spacing']      = $css_iq['spacing'];
 
     $body = $xp->query( '//body' );
     if ( $body && $body->length ) {
