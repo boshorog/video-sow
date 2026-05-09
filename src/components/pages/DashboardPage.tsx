@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
+import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
 
 const useThemeScan = () => {
   const { map, scanned } = useThemeMap();
