@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
+import ImporterHeaderShowcase from '@/components/importer/ImporterHeaderShowcase';
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
 import { cn } from '@/lib/utils';
@@ -176,17 +177,6 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
             Run a backfill or incremental sync, then browse everything Video Sow has imported so far.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={imp.sync} disabled={!canSync} className="gap-2" size="sm">
-            {imp.isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            {imp.isSyncing ? 'Syncing…' : isFirstRun ? 'Run full backfill' : 'Sync now'}
-          </Button>
-          {imp.isSyncing && (
-            <Button variant="outline" size="sm" onClick={imp.cancelSync} className="gap-1.5">
-              <X className="w-4 h-4" /> Cancel
-            </Button>
-          )}
-        </div>
       </div>
 
 
@@ -203,6 +193,10 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         onCancelSync={imp.cancelSync}
         onConfigChange={imp.setConfig}
         onSave={imp.save}
+        onSync={imp.sync}
+        canSync={canSync}
+        isSyncing={imp.isSyncing}
+        isFirstRun={isFirstRun}
         isPro={license.isPro}
         playlistName={playlistInfo.name}
         playlistCount={playlistInfo.count}
@@ -216,6 +210,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       />
       </div>
 
+
+      <ImporterHeaderShowcase />
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">

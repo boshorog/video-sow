@@ -178,6 +178,10 @@ const SermonImporterWidget = ({
   onConfigChange,
   onSave,
   onPlaylistClick,
+  onSync,
+  canSync,
+  isSyncing,
+  isFirstRun,
   isPro = false,
   playlistName,
   playlistCount,
@@ -195,6 +199,10 @@ const SermonImporterWidget = ({
   onConfigChange?: (c: SermonImporterConfig) => void;
   onSave?: () => void;
   onPlaylistClick?: () => void;
+  onSync?: () => void;
+  canSync?: boolean;
+  isSyncing?: boolean;
+  isFirstRun?: boolean;
   isPro?: boolean;
   playlistName?: string;
   playlistCount?: number;
@@ -511,6 +519,16 @@ const SermonImporterWidget = ({
                 className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-rose-600 py-2 rounded-md hover:bg-rose-700"
               >
                 <X className="w-4 h-4" /> Cancel sync
+              </button>
+            ) : onSync ? (
+              <button
+                type="button"
+                onClick={onSync}
+                disabled={!canSync}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-primary py-2 rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {isSyncing ? "Syncing…" : isFirstRun ? "Run full backfill" : "Sync now"}
               </button>
             ) : null}
           </div>
