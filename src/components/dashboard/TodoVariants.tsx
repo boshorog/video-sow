@@ -27,6 +27,7 @@ export type ShowcaseStep = {
 
 export const buildShowcaseSteps = (opts: {
   themeOk: boolean;
+  configured: boolean;
   hasApiKey: boolean;
   hasPlaylist: boolean;
   firstSyncDone: boolean;
@@ -40,7 +41,7 @@ export const buildShowcaseSteps = (opts: {
     done: opts.themeOk, cta: opts.themeOk ? 'Re-scan' : 'Scan now' },
   { key: 'configure', icon: Layout, title: 'Configure the output', short: 'Output',
     desc: 'Choose where articles will live on your site and customize the archive page appearance.',
-    done: false, cta: 'Configure output' },
+    done: opts.configured, cta: opts.configured ? 'Adjust output' : 'Configure output' },
   { key: 'apikey', icon: SettingsIcon, title: 'Add your YouTube API key', short: 'API key',
     desc: 'Required to read playlist contents and video metadata from YouTube.',
     done: opts.hasApiKey, cta: opts.hasApiKey ? 'Update' : 'Open Settings' },
