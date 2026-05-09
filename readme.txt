@@ -75,6 +75,13 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.13 =
+* Dashboard "TO DO" card refined: uppercase title, neutral grey connector line at all times, softer red-to-white gradient, Pro steps now display the orange crown icon (no Pro badge), and the standalone "Unlock Pro" tile was removed.
+* Free users clicking a Pro step (Cleanup rules & AI tasks, transcript fetch) are now sent straight to the Pro page.
+* Settings highlight pulse is now wider so narrow rows (API key, playlist, transcripts) get the same generous halo as full cards.
+* Recent activity card on the Dashboard is hidden until at least one video has been imported.
+* Recent activity and the Archive table now show the actual import time (when Video Sow created the post) instead of the YouTube publish date. The Archive table gains a separate "Video date" / "Import date" column pair.
+
+= 1.2.12 =
 * Dashboard "To do" card redesigned: single vertical timeline with large round icons, soft gradient background and a perfectly centered connector line with equal top/bottom gaps.
 * Each step button now jumps to the relevant Settings/Tasks/Import section and pulses a highlight ring so it's instantly visible (theme scanner, API key, playlist, auto-sync, AI prompts, transcripts, first import).
 
