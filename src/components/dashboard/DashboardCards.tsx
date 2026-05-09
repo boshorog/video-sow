@@ -145,6 +145,16 @@ const Trend = ({ up = true, value }: { up?: boolean; value: string }) => (
 /* Card components                                                     */
 /* ------------------------------------------------------------------ */
 
+type RecentRow = {
+  id: number;
+  title: string;
+  when: string;
+  status: 'Published' | 'Drafted';
+  editLink?: string;
+  permalink?: string;
+  videoId?: string;
+};
+
 type Ctx = {
   imported: number | string;
   published: number | string;
@@ -152,6 +162,7 @@ type Ctx = {
   lastSyncHuman: string;
   lastSyncMsg: string;
   loaded: boolean;
+  recent?: RecentRow[];
 };
 
 const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
@@ -271,6 +282,44 @@ const CardBackfill = ({ locked, onUnlock, hero }: LockCardProps) => (
   </Tile>
 );
 
+const CardRecent = ({ ctx, hero }: CtxCardProps) => {
+  const rows = (ctx.recent || []).slice(0, 10);
+  return (
+    <Tile eyebrow="Activity" title="Recent imports" icon={Activity} hero={hero}>
+      {rows.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No imports yet.</p>
+      ) : (
+        <ul className="h-full overflow-y-auto pr-1 -mr-1 divide-y divide-primary/10">
+          {rows.map((row) => {
+            const link = row.editLink || row.permalink;
+            const Tag: any = link ? 'a' : 'div';
+            return (
+              <li key={row.id} className="flex items-center gap-2 py-1.5 text-[12px]">
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full shrink-0',
+                    row.status === 'Published' ? 'bg-emerald-500' : 'bg-amber-500',
+                  )}
+                  title={row.status}
+                />
+                <Tag
+                  {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
+                  title={row.title}
+                >
+                  {row.title}
+                </Tag>
+                <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{row.when}</span>
+                {link && <ExternalLink className="w-3 h-3 text-muted-foreground/60 shrink-0" />}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Tile>
+  );
+};
+
 /* ------------------------------------------------------------------ */
 /* Renderer — Hero + companions                                        */
 /* ------------------------------------------------------------------ */
@@ -280,6 +329,7 @@ const renderCard = (key: DashboardCardKey, isPro: boolean, ctx: Ctx, onUnlock: (
   if (!meta) return null;
   const locked = !!meta.pro && !isPro;
   switch (key) {
+    case 'recent':     return <CardRecent     ctx={ctx} hero={hero} />;
     case 'imported':   return <CardImported   ctx={ctx} hero={hero} />;
     case 'published':  return <CardPublished  ctx={ctx} hero={hero} />;
     case 'drafts':     return <CardDrafts     ctx={ctx} hero={hero} />;
