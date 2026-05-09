@@ -588,6 +588,12 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
         )}
 
+        <DashboardCardsSection
+          prefs={reconcileDashboardCards(config.dashboardCards)}
+          isPro={isPro}
+          onChange={(next) => update("dashboardCards", next)}
+        />
+
       </div>
        </div>
 
@@ -608,12 +614,6 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
          </div>
        </aside>
       </div>
-
-      <DashboardCardsSection
-        prefs={reconcileDashboardCards(config.dashboardCards)}
-        isPro={isPro}
-        onChange={(next) => update("dashboardCards", next)}
-      />
 
       <TroubleshootingSection
         config={config}
