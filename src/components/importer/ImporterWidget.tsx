@@ -1,4 +1,4 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
