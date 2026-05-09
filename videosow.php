@@ -4370,7 +4370,7 @@ function videosow_dom_selector_for( $node ) {
 }
 
 /* Try a list of CSS-ish queries via XPath; return the first matching element. */
-function videosow_dom_first_match( DOMXPath $xp, array $queries, DOMNode $context = null ) {
+function videosow_dom_first_match( DOMXPath $xp, array $queries, ?DOMNode $context = null ) {
     foreach ( $queries as $q ) {
         $list = $xp->query( $q, $context );
         if ( $list && $list->length > 0 ) return $list->item( 0 );
