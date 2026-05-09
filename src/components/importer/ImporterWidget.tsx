@@ -514,7 +514,7 @@ const SermonImporterWidget = ({
             <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Auto-sync</p>
-                <Activity className="w-3 h-3 text-muted-foreground" />
+                <RefreshCw className="w-3 h-3 text-muted-foreground" />
               </div>
               <p className="text-base font-bold text-slate-900 leading-tight mt-0.5">
                 {config.enabled ? "On" : "Off"}
