@@ -126,6 +126,24 @@ class VideoSow_Plugin {
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
         add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ), 99, 1 );
         add_action( 'admin_print_styles', array( $this, 'hide_other_plugin_notices' ) );
+        add_action( 'admin_head', array( $this, 'fix_menu_icon_colors' ) );
+    }
+
+    /**
+     * Force the Video Sow toplevel menu icon to follow WP's standard
+     * inactive/active coloring (grey when idle, white when current/hover).
+     * WordPress's svg-painter does not always recolor custom data-URI SVGs
+     * reliably, which can leave the icon dark when the menu is current.
+     */
+    public function fix_menu_icon_colors() {
+        echo '<style>
+        #adminmenu #toplevel_page_video-sow .wp-menu-image img { filter: brightness(0) invert(1); opacity: .6; }
+        #adminmenu #toplevel_page_video-sow:hover .wp-menu-image img,
+        #adminmenu #toplevel_page_video-sow.wp-menu-open .wp-menu-image img,
+        #adminmenu #toplevel_page_video-sow.wp-has-current-submenu .wp-menu-image img,
+        #adminmenu #toplevel_page_video-sow.current .wp-menu-image img,
+        #adminmenu #toplevel_page_video-sow.opensub .wp-menu-image img { filter: brightness(0) invert(1); opacity: 1; }
+        </style>';
     }
 
     public function add_admin_menu() {
