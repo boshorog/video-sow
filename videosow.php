@@ -2280,6 +2280,13 @@ function videosow_ajax_save_sermon_importer_config() {
         'aiTemplates'        => isset( $incoming['aiTemplates'] ) && is_array( $incoming['aiTemplates'] ) ? videosow_sanitize_ai_templates( $incoming['aiTemplates'] ) : ( isset( $current['aiTemplates'] ) ? $current['aiTemplates'] : array() ),
         'aiRestrictTags'     => isset( $incoming['aiRestrictTags'] ) ? (bool) $incoming['aiRestrictTags'] : ( isset( $current['aiRestrictTags'] ) ? (bool) $current['aiRestrictTags'] : true ),
         'aiUseAiExcerpt'     => isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
+        'dashboardCards'     => isset( $incoming['dashboardCards'] ) && is_array( $incoming['dashboardCards'] ) ? array_values( array_filter( array_map( function( $c ) {
+            if ( ! is_array( $c ) || empty( $c['key'] ) ) return null;
+            return array(
+                'key'     => sanitize_text_field( (string) $c['key'] ),
+                'enabled' => ! empty( $c['enabled'] ),
+            );
+        }, $incoming['dashboardCards'] ) ) ) : ( isset( $current['dashboardCards'] ) ? $current['dashboardCards'] : array() ),
     ) );
     update_option( 'videosow_importer_config', $merged );
     // Refresh CPT slug + cron — re-register CPT so the NEW slug is used by flush_rewrite_rules.
