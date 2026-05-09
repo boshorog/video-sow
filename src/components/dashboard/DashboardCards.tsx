@@ -153,52 +153,56 @@ type Ctx = {
   loaded: boolean;
 };
 
-const ValueTile = ({ value, sub, trend, up = true }: { value: any; sub?: string; trend?: string; up?: boolean }) => (
+const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
   <>
     <div className="flex items-end justify-between gap-3">
-      <p className="text-3xl font-bold text-slate-900 tabular-nums leading-none">{String(value)}</p>
-      <Spark up={up} className="w-16 h-8" />
+      <p className={cn('font-bold text-slate-900 tabular-nums leading-none', hero ? 'text-6xl' : 'text-3xl')}>{String(value)}</p>
+      <Spark up={up} className={hero ? 'w-28 h-12' : 'w-16 h-8'} />
     </div>
     <div className="flex items-center justify-between mt-2 gap-2">
-      {sub ? <p className="text-[11px] text-muted-foreground truncate">{sub}</p> : <span />}
+      {sub ? <p className={cn('text-muted-foreground truncate', hero ? 'text-xs' : 'text-[11px]')}>{sub}</p> : <span />}
       {trend && <Trend up={up} value={trend} />}
     </div>
   </>
 );
 
-const CardImported = ({ ctx }: { ctx: Ctx }) => (
-  <Tile eyebrow="Library" title="Imported videos" icon={Youtube}>
-    <ValueTile value={ctx.loaded ? ctx.imported : '—'} sub="All-time, all playlists" trend="+12%" up />
+type CardProps = { hero?: boolean };
+type CtxCardProps = CardProps & { ctx: Ctx };
+type LockCardProps = CardProps & { locked: boolean; onUnlock: () => void };
+
+const CardImported = ({ ctx, hero }: CtxCardProps) => (
+  <Tile eyebrow="Library" title="Imported videos" icon={Youtube} hero={hero}>
+    <ValueTile hero={hero} value={ctx.loaded ? ctx.imported : '—'} sub="All-time, all playlists" trend="+12%" up />
   </Tile>
 );
 
-const CardPublished = ({ ctx }: { ctx: Ctx }) => (
-  <Tile eyebrow="Output" title="Articles published" icon={FileText}>
-    <ValueTile value={ctx.loaded ? ctx.published : '—'} sub={ctx.loaded ? `${ctx.draft} still in draft` : ''} trend="+8%" up />
+const CardPublished = ({ ctx, hero }: CtxCardProps) => (
+  <Tile eyebrow="Output" title="Articles published" icon={FileText} hero={hero}>
+    <ValueTile hero={hero} value={ctx.loaded ? ctx.published : '—'} sub={ctx.loaded ? `${ctx.draft} still in draft` : ''} trend="+8%" up />
   </Tile>
 );
 
-const CardDrafts = ({ ctx }: { ctx: Ctx }) => (
-  <Tile eyebrow="Queue" title="Drafts pending" icon={Sparkles}>
-    <ValueTile value={ctx.loaded ? ctx.draft : '—'} sub="Review & publish" trend="−3%" up={false} />
+const CardDrafts = ({ ctx, hero }: CtxCardProps) => (
+  <Tile eyebrow="Queue" title="Drafts pending" icon={Sparkles} hero={hero}>
+    <ValueTile hero={hero} value={ctx.loaded ? ctx.draft : '—'} sub="Review & publish" trend="−3%" up={false} />
   </Tile>
 );
 
-const CardLastSync = ({ ctx }: { ctx: Ctx }) => (
-  <Tile eyebrow="Last sync" title={ctx.lastSyncHuman || '—'} icon={Clock}>
+const CardLastSync = ({ ctx, hero }: CtxCardProps) => (
+  <Tile eyebrow="Last sync" title={ctx.lastSyncHuman || '—'} icon={Clock} hero={hero}>
     <div className="flex items-end justify-between gap-3">
-      <p className="text-sm text-slate-700 truncate">{ctx.lastSyncMsg || 'No errors'}</p>
-      <Spark up className="w-16 h-8" />
+      <p className={cn('text-slate-700 truncate', hero ? 'text-base' : 'text-sm')}>{ctx.lastSyncMsg || 'No errors'}</p>
+      <Spark up className={hero ? 'w-28 h-12' : 'w-16 h-8'} />
     </div>
   </Tile>
 );
 
-const CardAutosync = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => void }) => (
-  <Tile eyebrow="Auto-sync" title="Next sync in" icon={RefreshCw} locked={locked} onUnlock={onUnlock}>
+const CardAutosync = ({ locked, onUnlock, hero }: LockCardProps) => (
+  <Tile eyebrow="Auto-sync" title="Next sync in" icon={RefreshCw} locked={locked} onUnlock={onUnlock} hero={hero}>
     <div className="flex items-baseline gap-2 tabular-nums">
-      <span className="text-3xl font-bold text-slate-900">02</span>
+      <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>02</span>
       <span className="text-xs text-muted-foreground">h</span>
-      <span className="text-3xl font-bold text-slate-900">14</span>
+      <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>14</span>
       <span className="text-xs text-muted-foreground">m</span>
     </div>
     <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
@@ -208,11 +212,11 @@ const CardAutosync = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => v
   </Tile>
 );
 
-const CardSyncHealth = () => (
-  <Tile eyebrow="Sync health" title="All systems go" icon={Gauge}>
+const CardSyncHealth = ({ hero }: CardProps) => (
+  <Tile eyebrow="Sync health" title="All systems go" icon={Gauge} hero={hero}>
     <div className="flex items-center gap-2">
-      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-      <p className="text-2xl font-bold text-slate-900 tabular-nums">98<span className="text-sm text-muted-foreground">/100</span></p>
+      <CheckCircle2 className={hero ? 'w-7 h-7 text-emerald-500' : 'w-5 h-5 text-emerald-500'} />
+      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-4xl' : 'text-2xl')}>98<span className="text-sm text-muted-foreground">/100</span></p>
     </div>
     <ul className="mt-3 space-y-1 text-[11px]">
       <li className="flex justify-between"><span className="text-muted-foreground">API quota</span><span className="text-emerald-600 font-semibold">87% free</span></li>
@@ -222,8 +226,8 @@ const CardSyncHealth = () => (
   </Tile>
 );
 
-const CardTaxonomy = () => (
-  <Tile eyebrow="Taxonomy" title="Top tags this month" icon={Hash}>
+const CardTaxonomy = ({ hero }: CardProps) => (
+  <Tile eyebrow="Taxonomy" title="Top tags this month" icon={Hash} hero={hero}>
     <div className="flex flex-wrap gap-1.5">
       {[['react', 18], ['nextjs', 14], ['tutorial', 12], ['ai', 11], ['saas', 9], ['startup', 7]].map(([t, n], i) => (
         <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-[11px] text-slate-700">
@@ -235,10 +239,10 @@ const CardTaxonomy = () => (
   </Tile>
 );
 
-const CardAiUsage = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => void }) => (
-  <Tile eyebrow="AI usage" title="Tokens this month" icon={Wand2} locked={locked} onUnlock={onUnlock}>
+const CardAiUsage = ({ locked, onUnlock, hero }: LockCardProps) => (
+  <Tile eyebrow="AI usage" title="Tokens this month" icon={Wand2} locked={locked} onUnlock={onUnlock} hero={hero}>
     <div className="flex items-end justify-between">
-      <p className="text-3xl font-bold text-slate-900 tabular-nums">128k</p>
+      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>128k</p>
       <Trend up value="+24%" />
     </div>
     <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
@@ -250,10 +254,10 @@ const CardAiUsage = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => vo
   </Tile>
 );
 
-const CardBackfill = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => void }) => (
-  <Tile eyebrow="Backfill" title="Importing playlist" icon={PlayCircle} locked={locked} onUnlock={onUnlock}>
+const CardBackfill = ({ locked, onUnlock, hero }: LockCardProps) => (
+  <Tile eyebrow="Backfill" title="Importing playlist" icon={PlayCircle} locked={locked} onUnlock={onUnlock} hero={hero}>
     <div className="flex items-baseline gap-2">
-      <p className="text-3xl font-bold text-slate-900 tabular-nums">142</p>
+      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>142</p>
       <p className="text-sm text-muted-foreground">/ 248</p>
     </div>
     <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
@@ -267,8 +271,26 @@ const CardBackfill = ({ locked, onUnlock }: { locked: boolean; onUnlock: () => v
 );
 
 /* ------------------------------------------------------------------ */
-/* Renderer                                                            */
+/* Renderer — Hero + companions                                        */
 /* ------------------------------------------------------------------ */
+
+const renderCard = (key: DashboardCardKey, isPro: boolean, ctx: Ctx, onUnlock: () => void, hero: boolean) => {
+  const meta = DASHBOARD_CARD_REGISTRY.find((m) => m.key === key);
+  if (!meta) return null;
+  const locked = !!meta.pro && !isPro;
+  switch (key) {
+    case 'imported':   return <CardImported   ctx={ctx} hero={hero} />;
+    case 'published':  return <CardPublished  ctx={ctx} hero={hero} />;
+    case 'drafts':     return <CardDrafts     ctx={ctx} hero={hero} />;
+    case 'lastSync':   return <CardLastSync   ctx={ctx} hero={hero} />;
+    case 'autosync':   return <CardAutosync   locked={locked} onUnlock={onUnlock} hero={hero} />;
+    case 'syncHealth': return <CardSyncHealth hero={hero} />;
+    case 'taxonomy':   return <CardTaxonomy   hero={hero} />;
+    case 'aiUsage':    return <CardAiUsage    locked={locked} onUnlock={onUnlock} hero={hero} />;
+    case 'backfill':   return <CardBackfill   locked={locked} onUnlock={onUnlock} hero={hero} />;
+    default: return null;
+  }
+};
 
 const DashboardCards = ({
   prefs, ctx, isPro, onUnlock,
@@ -281,25 +303,16 @@ const DashboardCards = ({
   const enabled = prefs.filter((p) => p.enabled);
   if (enabled.length === 0) return null;
 
+  const [hero, ...rest] = enabled;
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {enabled.map(({ key }) => {
-        const meta = DASHBOARD_CARD_REGISTRY.find((m) => m.key === key);
-        if (!meta) return null;
-        const locked = !!meta.pro && !isPro;
-        switch (key) {
-          case 'imported':   return <CardImported   key={key} ctx={ctx} />;
-          case 'published':  return <CardPublished  key={key} ctx={ctx} />;
-          case 'drafts':     return <CardDrafts     key={key} ctx={ctx} />;
-          case 'lastSync':   return <CardLastSync   key={key} ctx={ctx} />;
-          case 'autosync':   return <CardAutosync   key={key} locked={locked} onUnlock={onUnlock} />;
-          case 'syncHealth': return <CardSyncHealth key={key} />;
-          case 'taxonomy':   return <CardTaxonomy   key={key} />;
-          case 'aiUsage':    return <CardAiUsage    key={key} locked={locked} onUnlock={onUnlock} />;
-          case 'backfill':   return <CardBackfill   key={key} locked={locked} onUnlock={onUnlock} />;
-          default: return null;
-        }
-      })}
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-fr">
+      <div className="lg:col-span-2 lg:row-span-2">
+        {renderCard(hero.key, isPro, ctx, onUnlock, true)}
+      </div>
+      {rest.map(({ key }) => (
+        <div key={key}>{renderCard(key, isPro, ctx, onUnlock, false)}</div>
+      ))}
     </div>
   );
 };
