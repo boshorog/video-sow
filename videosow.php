@@ -1117,9 +1117,15 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video .videosow-grid .entry-title a{line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + .entry-summary,'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + *{margin-top:1rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1rem 1.25rem .45rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:0 1.25rem !important;margin:0 0 .6rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem 1.15rem !important;margin-top:0 !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1.1rem 1.25rem .45rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:1.1rem 1.25rem 0 !important;margin:0 0 .55rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta + .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta + .entry-title{padding-top:0 !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem .35rem !important;margin-top:0 !important;}'
+        // Read more affordance after the excerpt on every card layout.
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more{display:inline-flex;align-items:center;gap:.35em;margin:.6rem 1.25rem 1.15rem 1.25rem;font-size:.85rem;font-weight:600;color:#111;text-decoration:none;border-bottom:1px solid currentColor;padding:0 0 1px 0;line-height:1.4;transition:opacity .15s ease, transform .15s ease;}'
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more:hover{opacity:.7;transform:translateX(2px);}'
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more svg{width:.85em;height:.85em;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] .videosow-read-more{margin:.75rem 1.4rem 1.3rem 1.4rem;}'
         // Divider between rows
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="1"],'
