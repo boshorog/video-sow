@@ -833,6 +833,18 @@ function videosow_sermon_archive_title_js() {
 }
 add_action( 'wp_footer', 'videosow_sermon_archive_title_js', 99 );
 
+/* Force the full, untruncated post title on single videosow_video pages.
+ * Some themes (Elementor Post Title widget, Masco) crop the H1 title to a
+ * fixed character/word count. We pass the real title to the front-end and let
+ * a small script overwrite the rendered H1 text with it. */
+function videosow_single_video_full_title_js() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    $full = html_entity_decode( get_the_title( get_queried_object_id() ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $full_js = wp_json_encode( $full );
+    echo '<script id="videosow-single-title-js">(function(){function run(){var sels=["h1.entry-title",".entry-header h1",".elementor-heading-title","h1.post-title","article h1"];var seen={};for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var el=els[j];if(seen[el.dataset.kpFixed]||el.dataset.kpFixed==="1")continue;el.textContent=' . $full_js . ';el.dataset.kpFixed="1";el.style.display="block";el.style.overflow="visible";el.style.textOverflow="clip";el.style.whiteSpace="normal";el.style.maxHeight="none";el.style.webkitLineClamp="unset";}}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}setTimeout(run,300);setTimeout(run,1200);})();</script>';
+}
+add_action( 'wp_footer', 'videosow_single_video_full_title_js', 99 );
+
 /* ── Weekly YouTube views refresh ─────────────── */
 function videosow_refresh_sermon_views() {
     $cfg = videosow_get_sermon_importer_config();
