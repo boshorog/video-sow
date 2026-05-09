@@ -74,6 +74,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.9 =
+* New Dashboard "To do" card: visual setup roadmap with check-off steps, progress bar, and per-step buttons (Scan theme → API key → Playlist → AI prompts → First import → Pro).
+* Theme scanner now auto-runs before the first backfill / sync if it hasn't been done yet — no more empty layouts on themes that were never scanned.
+* Import card shows a status banner indicating whether the theme structure has been scanned.
+
 = 1.2.8 =
 * Wide list layout now renders the thumbnail on the LEFT and the meta/title/excerpt stacked on the RIGHT (was stacking everything vertically).
 * Toolbar tightened: shorter, slimmer search input; reduced bar padding; removed the empty top space above the toolbar/grid.
