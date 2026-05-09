@@ -126,7 +126,7 @@ const TodoVariants = ({ steps, onAction }: Props) => {
                 <StepIcon s={s} />
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className={cn('text-base font-semibold', s.done ? 'text-emerald-800' : 'text-slate-800')}>
+                <span className={cn('text-base font-semibold text-slate-800')}>
                   {i + 1}. {s.title}
                 </span>
                 {s.pro && !s.done && (
