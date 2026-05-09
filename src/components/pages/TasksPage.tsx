@@ -58,7 +58,7 @@ const TasksPage = () => {
       </Card>
 
       {/* AI tasks */}
-      <Card className="border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
+      <Card data-vs-anchor="ai" className="border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
         <CardHeader className="border-b border-violet-200/60 bg-violet-100/40 dark:bg-violet-950/30 dark:border-violet-900/40">
           <CardTitle className="flex items-center gap-2 text-lg">
             <span className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
