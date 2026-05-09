@@ -303,14 +303,9 @@ const DashboardCards = ({
   const enabled = prefs.filter((p) => p.enabled);
   if (enabled.length === 0) return null;
 
-  const [hero, ...rest] = enabled;
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-fr">
-      <div className="lg:col-span-2 lg:row-span-2">
-        {renderCard(hero.key, isPro, ctx, onUnlock, true)}
-      </div>
-      {rest.map(({ key }) => (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {enabled.map(({ key }) => (
         <div key={key}>{renderCard(key, isPro, ctx, onUnlock, false)}</div>
       ))}
     </div>
