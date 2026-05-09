@@ -679,9 +679,6 @@ const DashboardCardsSection = ({
         {prefs.map((p, idx) => {
           const meta = DASHBOARD_CARD_REGISTRY.find((m) => m.key === p.key);
           if (!meta) return null;
-          // First enabled card = main/hero tile.
-          const firstEnabledIdx = prefs.findIndex((x) => x.enabled);
-          const isMain = p.enabled && idx === firstEnabledIdx;
           return (
             <li
               key={p.key}
@@ -699,20 +696,12 @@ const DashboardCardsSection = ({
                 const from = parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
                 if (!isNaN(from)) reorder(from, idx);
               }}
-              className={cn(
-                'flex items-center gap-3 px-3 py-2.5 transition-colors',
-                isMain ? 'bg-primary/[0.04]' : 'hover:bg-secondary/30',
-              )}
+              className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-secondary/30"
             >
               <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab active:cursor-grabbing shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-medium text-foreground truncate">{meta.title}</span>
-                  {isMain && (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-0.5">
-                      Main card
-                    </span>
-                  )}
                   {meta.pro && (
                     <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-500/40 rounded px-1 py-0.5">
                       <Crown className="w-2.5 h-2.5" /> Pro
