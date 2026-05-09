@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.11
+Stable tag: 1.2.12
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.11 =
+= 1.2.12 =
 * Archive toolbar polished: pill-shaped search input ("Search articles..."), no-wrap "Sort:" label, tighter alignment.
 * Removed remaining blank space above archive toolbar/grid (collapses theme page-header/spacer wrappers).
 * Article cards now include a "Read more" link with arrow icon after the excerpt on every layout.
