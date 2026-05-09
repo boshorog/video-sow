@@ -25,6 +25,7 @@ export type DashboardCardMeta = {
  * The user can reorder & toggle each one in Settings → Dashboard cards.
  */
 export const DASHBOARD_CARD_REGISTRY: DashboardCardMeta[] = [
+  { key: 'recent',     title: 'Recent activity',     subtitle: 'Last 10 imported videos' },
   { key: 'imported',   title: 'Imported videos',     subtitle: 'All-time, across all playlists' },
   { key: 'published',  title: 'Articles published',  subtitle: 'Live on your site' },
   { key: 'drafts',     title: 'Drafts pending',      subtitle: 'Review & publish in WordPress' },
@@ -36,7 +37,7 @@ export const DASHBOARD_CARD_REGISTRY: DashboardCardMeta[] = [
   { key: 'backfill',   title: 'Backfill',            subtitle: 'Currently importing playlist' },
 ];
 
-const DEFAULT_ENABLED: DashboardCardKey[] = ['imported', 'published', 'drafts', 'lastSync'];
+const DEFAULT_ENABLED: DashboardCardKey[] = ['recent', 'imported', 'published', 'drafts'];
 
 export type DashboardCardPref = { key: DashboardCardKey; enabled: boolean };
 
