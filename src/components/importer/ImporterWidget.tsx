@@ -1,4 +1,4 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
@@ -323,13 +323,6 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      {!themeScanned && (
-        <div className="flex items-center gap-2 text-xs px-5 py-2 border-b bg-amber-50 border-amber-200 text-amber-800">
-          <Scan className="w-3.5 h-3.5 shrink-0" />
-          <span className="flex-1">Theme not scanned yet — it will run automatically before your first import.</span>
-        </div>
-      )}
-
       <div className="grid lg:grid-cols-[1.9fr_1fr]">
         {/* ---- Status side (left, larger) -------------------------- */}
         <div className="p-5 space-y-4">
@@ -340,7 +333,7 @@ const SermonImporterWidget = ({
               type="button"
               onClick={() => { if (!config.playlistId) onPlaylistClick?.(); }}
               className={cn(
-                "rounded-lg border p-3 text-left transition-colors",
+                "rounded-lg border p-3 text-left transition-colors flex flex-col",
                 config.playlistId
                   ? "border-emerald-200 bg-emerald-50/40"
                   : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
@@ -520,11 +513,6 @@ const SermonImporterWidget = ({
                 <X className="w-4 h-4" /> Cancel sync
               </button>
             ) : null}
-            {!isLive && (
-              <p className="text-[11px] text-muted-foreground">
-                Use “{activeTotal === 0 ? "Run full backfill" : "Sync now"}” at the top of the page.
-              </p>
-            )}
           </div>
         </div>
       </div>
