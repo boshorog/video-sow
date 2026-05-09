@@ -86,7 +86,7 @@ const Tile = ({
 }) => (
   <div
     className={cn(
-      'relative h-[220px] flex flex-col rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors overflow-hidden',
+      'relative h-[180px] flex flex-col rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors overflow-hidden',
       'hover:border-primary/40',
       hero ? 'p-6 lg:p-7' : 'p-5',
       locked && 'opacity-80',
@@ -97,10 +97,10 @@ const Tile = ({
     </div>
     <Eyebrow>{eyebrow}</Eyebrow>
     <h4 className={cn(
-      'font-bold text-slate-800 leading-tight',
+      'font-bold text-slate-800 leading-tight pr-6',
       hero ? 'text-lg' : 'text-[15px]',
     )}>{title}</h4>
-    <div className={cn('flex-1 min-h-0', hero ? 'mt-5' : 'mt-3')}>{children}</div>
+    <div className={cn('flex-1 min-h-0 flex flex-col', hero ? 'mt-5' : 'mt-3')}>{children}</div>
     {locked && (
       <button
         onClick={onUnlock}
