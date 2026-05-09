@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
 import { useLicense } from "@/hooks/useLicense";
+import { cn } from "@/lib/utils";
 import {
   DASHBOARD_CARD_REGISTRY,
   reconcileDashboardCards,
