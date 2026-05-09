@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.10
+Stable tag: 1.2.11
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.10 =
+= 1.2.11 =
 * Theme scanner now digs into linked theme CSS assets and inline styles, storing richer style rules, spacing hints, content wrappers, and breadcrumb selectors.
 * Archive layout cleanup removes leftover theme spacers above the toolbar/grid and normalizes card ordering so thumbnails start at the top consistently.
 * Custom archive cards now add safer title/image/excerpt spacing and stronger single-title/breadcrumb fixes for themes and SEO breadcrumb plugins.
