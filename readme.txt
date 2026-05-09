@@ -74,6 +74,12 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.8 =
+* Wide list layout now renders the thumbnail on the LEFT and the meta/title/excerpt stacked on the RIGHT (was stacking everything vertically).
+* Toolbar tightened: shorter, slimmer search input; reduced bar padding; removed the empty top space above the toolbar/grid.
+* Single article page: forces the FULL post title in the H1 (overrides theme/Elementor title length crops).
+* Breadcrumb: configured archive title is now exposed via `post_type_archive_title` so themes & breadcrumb plugins (Yoast, RankMath, NavXT) show "Home › Funny" instead of just "Home".
+
 = 1.2.7 =
 * Theme scanner is now much deeper: probes multiple URLs (video archive, blog page, home, category) and picks the richest result.
 * New generic card-pattern detector recognises post loops on themes that render cards as `<div>`s rather than `<article>` (e.g. Masco, Elementor, custom block themes).
