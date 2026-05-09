@@ -846,43 +846,6 @@ const TroubleshootingSection = ({
           )}
         </div>
 
-        {/* Test API key */}
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
-          <div className="flex items-start gap-2">
-            <KeyRound className="w-4 h-4 text-foreground mt-0.5" />
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Verify YouTube API Key</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Sends a small request to the YouTube Data API to confirm the key is valid, active and the configured playlist is accessible.
-              </p>
-            </div>
-          </div>
-          {apiResult && (
-            <div
-              className={`text-[11px] p-2 rounded-md border ${
-                apiResult.ok
-                  ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-700"
-                  : "border-destructive/30 bg-destructive/5 text-destructive"
-              }`}
-            >
-              <div className="flex items-start gap-1.5">
-                {apiResult.ok ? <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" /> : <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />}
-                <span>{apiResult.message}</span>
-              </div>
-            </div>
-          )}
-          <Button
-            onClick={testApiKey}
-            disabled={!config.apiKey || apiTesting}
-            size="sm"
-            variant="outline"
-            className="h-8 gap-1.5 text-xs w-full"
-          >
-            {apiTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
-            {apiTesting ? "Testing…" : "Verify key"}
-          </Button>
-        </div>
-
         {/* Clear import log */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <div className="flex items-start gap-2">
@@ -904,94 +867,6 @@ const TroubleshootingSection = ({
             <Trash2 className="w-3 h-3" />
             {config.log && config.log.length > 0 ? `Clear history (${config.log.length})` : "History empty"}
           </Button>
-        </div>
-
-        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
-          <ThemeScanTile />
-        </div>
-
-        {/* Test playlist */}
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5 md:col-span-2">
-          <div className="flex items-start gap-2">
-            <ListVideo className="w-4 h-4 text-foreground mt-0.5" />
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Test playlist YouTube</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Paste a playlist ID or full URL (ex. <span className="font-mono">PLxxxx…</span> sau <span className="font-mono">youtube.com/playlist?list=…</span>) and check if it is accessible with the configured API key.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              value={playlistTestInput}
-              onChange={(e) => setPlaylistTestInput(e.target.value)}
-              placeholder={config.playlistId ? `Default: ${config.playlistId}` : "PLxxxxxxxx sau https://youtube.com/playlist?list=…"}
-              className="h-8 text-xs flex-1"
-            />
-            <Button
-              onClick={runPlaylistTest}
-              disabled={playlistTestRunning || !config.apiKey || (!playlistTestInput.trim() && !config.playlistId)}
-              size="sm"
-              className="h-8 text-xs gap-1.5"
-            >
-              {playlistTestRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <ListVideo className="w-3 h-3" />}
-              {playlistTestRunning ? "Checking…" : "Test"}
-            </Button>
-          </div>
-          {!config.apiKey && (
-            <div className="text-[11px] text-muted-foreground italic">Set a YouTube API key first.</div>
-          )}
-          {playlistTestResult && !playlistTestResult.ok && (
-            <div className="text-[11px] p-2 rounded-md border border-destructive/30 bg-destructive/5 text-destructive">
-              <div className="flex items-start gap-1.5">
-                <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
-                <span>{playlistTestResult.error}</span>
-              </div>
-            </div>
-          )}
-          {playlistTestResult && playlistTestResult.ok && playlistTestResult.data && (
-            <div className="p-3 rounded-md bg-secondary/30 border border-border space-y-2 text-[11px]">
-              <div className="flex items-start gap-3">
-                {playlistTestResult.data.thumbnail && (
-                  <img src={playlistTestResult.data.thumbnail} alt="" className="w-20 h-auto rounded shrink-0" />
-                )}
-                <div className="flex-1 space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span className="font-semibold text-foreground">Valid playlist</span>
-                  </div>
-                  <div className="text-foreground font-medium">{playlistTestResult.data.title}</div>
-                  <div className="text-muted-foreground">
-                    Channel: <span className="text-foreground">{playlistTestResult.data.channel}</span>
-                  </div>
-                  <div className="text-muted-foreground">
-                    Videos: <span className="text-foreground">{playlistTestResult.data.item_count}</span>
-                    {playlistTestResult.data.published_at && (
-                      <> — created: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("en-US")}</span></>
-                    )}
-                  </div>
-                  <div className="font-mono text-muted-foreground">ID: {playlistTestResult.data.playlist_id}</div>
-                </div>
-              </div>
-              {playlistTestResult.data.description && (
-                <div className="text-muted-foreground italic border-t border-border pt-1.5">
-                  "{playlistTestResult.data.description}…"
-                </div>
-              )}
-              {playlistTestResult.data.samples.length > 0 && (
-                <div className="border-t border-border pt-1.5 space-y-0.5">
-                  <div className="font-semibold text-foreground">First videos:</div>
-                  {playlistTestResult.data.samples.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{i + 1}.</span>
-                      <span className="text-foreground truncate flex-1">{s.title}</span>
-                      <span className="font-mono text-muted-foreground shrink-0">{s.video_id}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>
