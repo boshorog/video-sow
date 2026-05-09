@@ -274,15 +274,24 @@ All colors MUST be HSL.
 .pdfg-scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
-/* Dashboard "To do" → settings highlight pulse */
+/* Dashboard "To do" → settings highlight pulse.
+   Uses a pseudo-element so the highlight ring extends beyond the target's
+   own bounds (especially horizontally). This makes narrow form rows like the
+   API key field look just as well-padded as full-width cards. */
 @keyframes vs-flash-pulse {
   0%   { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 0 0 0 hsl(var(--primary) / 0); }
-  40%  { box-shadow: 0 0 0 6px hsl(var(--primary) / 0.18), 0 0 24px 6px hsl(var(--primary) / 0.35); }
+  40%  { box-shadow: 0 0 0 6px hsl(var(--primary) / 0.18), 0 0 28px 8px hsl(var(--primary) / 0.35); }
   100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0), 0 0 0 0 hsl(var(--primary) / 0); }
 }
 .vs-flash {
   position: relative;
-  border-radius: 0.6rem;
-  animation: vs-flash-pulse 1.2s ease-out var(--vs-flash-iterations, 3);
   scroll-margin-top: 96px;
+}
+.vs-flash::after {
+  content: "";
+  position: absolute;
+  inset: -8px -16px;
+  border-radius: 0.75rem;
+  pointer-events: none;
+  animation: vs-flash-pulse 1.2s ease-out var(--vs-flash-iterations, 3);
 }

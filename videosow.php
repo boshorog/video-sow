@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.12
+ * Version: 1.2.13
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.12' );
+define( 'VIDEOSOW_VERSION', '1.2.13' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -3347,6 +3347,10 @@ function videosow_import_one_video( $cfg, $video_id ) {
     update_post_meta( $post_id, '_videosow_yt_published', $published );
     update_post_meta( $post_id, '_videosow_yt_views', $stats_views );
     update_post_meta( $post_id, '_videosow_yt_views_updated', time() );
+    // Track when WE imported the video (distinct from when YouTube published it,
+    // which becomes the post_date). Use add_post_meta with unique=true so a
+    // re-sync of an existing post never overwrites the original import time.
+    add_post_meta( $post_id, '_videosow_imported_at', time(), true );
 
     // Always store transcript status + raw text as post meta (diagnostic + reuse).
     if ( ! empty( $cfg['fetchTranscript'] ) ) {
@@ -4256,17 +4260,23 @@ function videosow_ajax_list_archive() {
     $q = new WP_Query( $args );
     $rows = array();
     foreach ( $q->posts as $p ) {
-        $vid = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
+        $vid   = (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true );
         $views = (int) get_post_meta( $p->ID, '_videosow_yt_views', true );
+        $imp   = (int) get_post_meta( $p->ID, '_videosow_imported_at', true );
+        // Fallback for posts created before we tracked import time:
+        // use post_modified (closer to actual import time than post_date,
+        // which is forced to YouTube's publishedAt).
+        if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
         $rows[] = array(
-            'id'        => $p->ID,
-            'title'     => get_the_title( $p ),
-            'videoId'   => $vid,
-            'date'      => get_the_date( 'Y-m-d', $p ),
-            'status'    => $p->post_status === 'publish' ? 'Published' : 'Draft',
-            'views'     => $views,
-            'editLink'  => get_edit_post_link( $p->ID, '' ),
-            'permalink' => get_permalink( $p ),
+            'id'         => $p->ID,
+            'title'      => get_the_title( $p ),
+            'videoId'    => $vid,
+            'date'       => get_the_date( 'Y-m-d', $p ),    // YouTube publish date
+            'importedAt' => $imp ? gmdate( 'Y-m-d', $imp ) : '',
+            'status'     => $p->post_status === 'publish' ? 'Published' : 'Draft',
+            'views'      => $views,
+            'editLink'   => get_edit_post_link( $p->ID, '' ),
+            'permalink'  => get_permalink( $p ),
         );
     }
     wp_send_json_success( array( 'rows' => $rows ) );
@@ -4303,10 +4313,15 @@ function videosow_ajax_dashboard_stats() {
     ) );
     $recent = array();
     foreach ( $q->posts as $p ) {
+        // "when" should reflect when WE imported the video — not its YouTube
+        // publish date (which is what post_date stores). Fall back to
+        // post_modified for posts created before we tracked import time.
+        $imp = (int) get_post_meta( $p->ID, '_videosow_imported_at', true );
+        if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
         $recent[] = array(
             'id'        => $p->ID,
             'title'     => get_the_title( $p ),
-            'when'      => human_time_diff( get_post_time( 'U', true, $p ), current_time( 'timestamp', true ) ) . ' ago',
+            'when'      => $imp ? human_time_diff( $imp, current_time( 'timestamp', true ) ) . ' ago' : '—',
             'status'    => $p->post_status === 'publish' ? 'Published' : 'Drafted',
             'editLink'  => get_edit_post_link( $p->ID, '' ),
             'permalink' => get_permalink( $p ),
@@ -4371,7 +4386,7 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(), // [{url, found}]
-        // v1.2.12 — deeper CSS/theme intelligence.
+        // v1.2.13 — deeper CSS/theme intelligence.
         'content_classes'    => '',
         'breadcrumb_selector'=> '',
         'css_assets_scanned' => 0,

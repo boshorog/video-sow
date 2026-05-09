@@ -41,7 +41,7 @@ export const useImporter = () => {
   const [stageInfo, setStageInfo] = useState<{ stage: string; detail: string } | null>(null);
   const [cancelPending, setCancelPending] = useState(false);
   const [archive, setArchive] = useState<Array<{
-    id: number; title: string; videoId: string; date: string;
+    id: number; title: string; videoId: string; date: string; importedAt?: string;
     status: 'Published' | 'Draft'; views: number;
     editLink?: string; permalink?: string;
   }>>([]);

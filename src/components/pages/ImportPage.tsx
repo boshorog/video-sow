@@ -33,6 +33,7 @@ type ArchiveRow = {
   title: string;
   videoId: string;
   date: string;
+  importedAt?: string;
   status: 'Published' | 'Draft';
   views: number;
   editLink?: string;
@@ -40,17 +41,17 @@ type ArchiveRow = {
 };
 
 const SAMPLE_ARCHIVE: ArchiveRow[] = [
-  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-05-07', status: 'Draft',     views: 1200 },
-  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-05-07', status: 'Draft',     views: 843 },
-  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2026-05-06', status: 'Published', views: 4600 },
-  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2026-05-05', status: 'Published', views: 2100 },
-  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2026-05-04', status: 'Published', views: 7800 },
+  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-04-12', importedAt: '2026-05-07', status: 'Draft',     views: 1200 },
+  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-03-30', importedAt: '2026-05-07', status: 'Draft',     views: 843 },
+  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2025-11-18', importedAt: '2026-05-06', status: 'Published', views: 4600 },
+  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2025-09-02', importedAt: '2026-05-05', status: 'Published', views: 2100 },
+  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2025-07-21', importedAt: '2026-05-04', status: 'Published', views: 7800 },
 ];
 
 const formatViews = (n: number) =>
   n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
 
-type SortKey = 'title' | 'date' | 'status' | 'views';
+type SortKey = 'title' | 'date' | 'importedAt' | 'status' | 'views';
 type SortDir = 'asc' | 'desc';
 
 const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
@@ -61,7 +62,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const activeFirstSyncDone = activeStats?.firstSyncDone ?? imp.config.firstSyncDone;
   const isFirstRun = !activeFirstSyncDone;
   const [filter, setFilter] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortKey, setSortKey] = useState<SortKey>('importedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
 
@@ -115,6 +116,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         title: r.title,
         videoId: r.videoId,
         date: r.date,
+        importedAt: r.importedAt,
         status: r.status,
         views: r.views,
         editLink: r.editLink,
@@ -249,16 +251,19 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                 <TableHead>
                   <SortHeader label="Title" keyName="title" align="left" />
                 </TableHead>
-                <TableHead className="w-32 text-center">
-                  <SortHeader label="Imported" keyName="date" align="center" />
+                <TableHead className="w-24 text-center">
+                  <SortHeader label="Video date" keyName="date" align="center" />
                 </TableHead>
                 <TableHead className="w-24 text-center">
-                  <SortHeader label="Status" keyName="status" align="center" />
+                  <SortHeader label="Import date" keyName="importedAt" align="center" />
                 </TableHead>
                 <TableHead className="w-20 text-center">
+                  <SortHeader label="Status" keyName="status" align="center" />
+                </TableHead>
+                <TableHead className="w-16 text-center">
                   <SortHeader label="Views" keyName="views" align="center" />
                 </TableHead>
-                <TableHead className="w-28 text-center">Actions</TableHead>
+                <TableHead className="w-24 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -283,6 +288,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                     </div>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground text-center">{r.date}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground text-center">{r.importedAt || '—'}</TableCell>
                   <TableCell className="text-center">
                     <span
                       className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
