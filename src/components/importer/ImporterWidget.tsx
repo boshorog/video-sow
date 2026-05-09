@@ -1,8 +1,10 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
 import { defaultDashboardCards, type DashboardCardPref } from "@/components/dashboard/DashboardCards";
+import wpLogo from "@/assets/wordpress-logo.svg";
+import { cn } from "@/lib/utils";
 
 export interface SermonLogEntry {
   time: number;
@@ -232,69 +234,146 @@ const SermonImporterWidget = ({
     }
   };
 
+  // ---- Importer-console stage derivation (from real state) -------------
+  const playlists = (config.playlistIds && config.playlistIds.length > 0)
+    ? config.playlistIds.filter(Boolean)
+    : (config.playlistId ? [config.playlistId] : []);
+  const hasMulti = isPro && playlists.length > 1;
+
+  type StageTone = "idle" | "syncing" | "paused" | "error" | "done";
+  let stageTone: StageTone = "idle";
+  let stageLabelText = "Ready";
+  let stageNote = "Connect a playlist and run your first backfill.";
+  let StageIcon: typeof PlayCircle = PlayCircle;
+  let stageSpin = false;
+
+  const totalKnown = typeof playlistCount === "number" ? playlistCount : 0;
+  const importedNow = isLive ? progress!.done : activeTotal;
+  const denominator = isLive && progress!.total > 0
+    ? progress!.total
+    : (totalKnown || Math.max(activeTotal, 1));
+  const stagePct = denominator > 0
+    ? Math.min(100, Math.round((importedNow / denominator) * 100))
+    : 0;
+
+  if (isLive) {
+    if (progress!.phase === "scanning") {
+      stageTone = "syncing"; StageIcon = Search; stageSpin = false;
+      stageLabelText = "Scanning playlist";
+      stageNote = "Reading playlist contents from YouTube…";
+    } else {
+      stageTone = "syncing"; StageIcon = Loader2; stageSpin = true;
+      stageLabelText = cancelPending ? "Stopping" : "Backfilling";
+      stageNote = cancelPending
+        ? `Stopping after current video — ${progress!.done} / ${progress!.total}`
+        : `Importing video ${progress!.done} of ${progress!.total}`;
+    }
+  } else if (!isConfigured) {
+    stageTone = "idle"; StageIcon = PlayCircle;
+    stageLabelText = "Not connected";
+    stageNote = "Add an API key and pick a playlist to begin.";
+  } else if (!config.enabled) {
+    stageTone = "paused"; StageIcon = PauseCircle;
+    stageLabelText = "Paused";
+    stageNote = "Auto-sync is off — click “Sync now” for a manual run.";
+  } else if (activeSyncStatus === "error") {
+    stageTone = "error"; StageIcon = AlertTriangle;
+    stageLabelText = "Last sync failed";
+    stageNote = activeSyncMsg || "See log for details.";
+  } else if (activeTotal > 0 && totalKnown > 0 && activeTotal >= totalKnown) {
+    stageTone = "done"; StageIcon = CheckCircle2;
+    stageLabelText = "Up to date";
+    stageNote = `All ${totalKnown} videos imported · last sync ${fmtTime(activeSyncAt)}.`;
+  } else if (activeTotal > 0) {
+    stageTone = "done"; StageIcon = CheckCircle2;
+    stageLabelText = "Ready";
+    stageNote = `${activeTotal} imported${totalKnown ? ` of ${totalKnown}` : ""} · last sync ${fmtTime(activeSyncAt)}.`;
+  } else {
+    stageTone = "idle"; StageIcon = PlayCircle;
+    stageLabelText = "Ready to backfill";
+    stageNote = "No videos imported yet — first run will be a full backfill.";
+  }
+
+  const toneClasses = {
+    idle:    { pill: "bg-slate-100 text-slate-600",     bar: "bg-slate-300" },
+    syncing: { pill: "bg-primary/10 text-primary",       bar: "bg-gradient-to-r from-primary to-red-400" },
+    paused:  { pill: "bg-amber-50 text-amber-700",       bar: "bg-amber-400" },
+    error:   { pill: "bg-rose-50 text-rose-700",         bar: "bg-rose-500" },
+    done:    { pill: "bg-emerald-50 text-emerald-700",   bar: "bg-emerald-500" },
+  } as const;
+  const tone = toneClasses[stageTone];
+
   return (
-    <div className="rounded-lg border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-6 space-y-4 shadow-md">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-            <Youtube className="w-5 h-5 text-red-600" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Video Importer</h3>
-            <p className="text-xs text-muted-foreground">YouTube → Articles</p>
-          </div>
-        </div>
-        <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${config.enabled && isConfigured ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
-          {config.enabled && isConfigured ? "ACTIVE" : "OFF"}
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      {/* ---- Soft slate header ------------------------------------- */}
+      <div className="px-5 py-2.5 flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600">
+        <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white/15">
+          <Zap className="w-3.5 h-3.5 text-amber-200" />
+        </span>
+        <h3 className="text-[13px] font-bold uppercase tracking-[0.2em] text-white">Importer console</h3>
+        <span className={cn(
+          "ml-auto inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.15em]",
+          config.enabled && isConfigured ? "text-emerald-300" : "text-slate-300"
+        )}>
+          <span className={cn(
+            "w-1.5 h-1.5 rounded-full",
+            config.enabled && isConfigured ? "bg-emerald-400 animate-pulse" : "bg-slate-400"
+          )} />
+          {config.enabled && isConfigured ? "Active" : "Off"}
         </span>
       </div>
 
       {!themeScanned && (
-        <div className="flex items-center gap-2 text-xs rounded-md px-3 py-2 border bg-amber-50 border-amber-200 text-amber-800">
+        <div className="flex items-center gap-2 text-xs px-5 py-2 border-b bg-amber-50 border-amber-200 text-amber-800">
           <Scan className="w-3.5 h-3.5 shrink-0" />
-          <span className="flex-1">
-            Theme not scanned yet — it will run automatically before your first import.
-          </span>
+          <span className="flex-1">Theme not scanned yet — it will run automatically before your first import.</span>
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {(() => {
-          const playlists = (config.playlistIds && config.playlistIds.length > 0)
-            ? config.playlistIds.filter(Boolean)
-            : (config.playlistId ? [config.playlistId] : []);
-          const hasMulti = isPro && playlists.length > 1;
-          return (
+      <div className="grid lg:grid-cols-[1.9fr_1fr]">
+        {/* ---- Status side (left, larger) -------------------------- */}
+        <div className="p-5 space-y-4">
+          {/* Pipeline: Source → Sync → WP archive */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
+            {/* Source playlist tile */}
             <button
               type="button"
-              onClick={() => {
-                if (!config.playlistId) onPlaylistClick?.();
-              }}
-              className={`p-3 rounded-lg text-left transition-colors ${
+              onClick={() => { if (!config.playlistId) onPlaylistClick?.(); }}
+              className={cn(
+                "rounded-lg border p-3 text-left transition-colors",
                 config.playlistId
-                  ? 'bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 cursor-pointer'
-                  : 'bg-amber-50 hover:bg-amber-100 border border-amber-200 cursor-pointer'
-              }`}
+                  ? "border-emerald-200 bg-emerald-50/40"
+                  : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
+              )}
             >
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1">
-                <ListMusic className="w-3 h-3" /> Playlist
-                {hasMulti && (
-                  <span className="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
-                )}
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground inline-flex items-center gap-1">
+                  <Youtube className="w-3 h-3 text-red-600" /> Source playlist
+                  {hasMulti && (
+                    <span className="ml-1 text-[9px] font-semibold px-1.5 py-0 rounded bg-primary/10 text-primary">PRO</span>
+                  )}
+                </span>
+                {config.playlistId
+                  ? <Wifi className="w-3.5 h-3.5 text-emerald-600" />
+                  : <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
               </div>
               {config.playlistId ? (
-                <>
+                <div className="text-center">
+                  <p className="font-bold text-slate-900 text-base truncate" title={playlistName || config.playlistId}>
+                    {playlistName || "Connected playlist"}
+                  </p>
                   {channelName && (
-                    <div className="text-[10px] uppercase tracking-wider text-emerald-700/80 truncate" title={channelName}>
-                      {channelName}
+                    <div className="mt-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                      <span className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-rose-600 text-white font-bold inline-flex items-center justify-center text-[8px]">
+                        {channelName.charAt(0)}
+                      </span>
+                      <span className="truncate">{channelName}</span>
                     </div>
                   )}
-                  <div className="text-sm font-semibold text-emerald-900 truncate" title={playlistName || config.playlistId}>
-                    {playlistName || 'Connected playlist'}
-                  </div>
-                  <div className="text-[10px] text-emerald-700 truncate">
-                    {typeof playlistCount === 'number' ? `${playlistCount} videos` : config.playlistId}
-                  </div>
+                  <p className="text-[10px] text-emerald-700 font-semibold mt-1">
+                    <CheckCircle2 className="w-2.5 h-2.5 inline -mt-0.5 mr-0.5" />
+                    {typeof playlistCount === "number" ? `${playlistCount} videos · connected` : "Connected"}
+                  </p>
                   {hasMulti && onConfigChange && (
                     <select
                       value={config.playlistId}
@@ -303,10 +382,10 @@ const SermonImporterWidget = ({
                         e.stopPropagation();
                         const next = { ...config, playlistId: e.target.value };
                         onConfigChange(next);
-                        if (typeof window !== 'undefined' && window.parent !== window) {
+                        if (typeof window !== "undefined" && window.parent !== window) {
                           window.parent.postMessage(
-                            { type: 'videosow_save_sermon_importer_config', config: next },
-                            '*'
+                            { type: "videosow_save_sermon_importer_config", config: next },
+                            "*"
                           );
                         }
                       }}
@@ -317,36 +396,136 @@ const SermonImporterWidget = ({
                       ))}
                     </select>
                   )}
-                </>
+                </div>
               ) : (
-                <div className="text-sm font-semibold text-amber-700 flex items-center gap-1">
-                  Not connected
+                <div className="text-center py-1">
+                  <p className="font-bold text-amber-800 text-sm">Not connected</p>
+                  <p className="text-[10px] text-amber-700 mt-0.5">Click to add a playlist</p>
                 </div>
               )}
             </button>
-          );
-        })()}
-        <div className="p-3 rounded-lg bg-white border border-border">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Total imported</div>
-          <div className="text-xl font-bold text-foreground">{activeTotal}</div>
+
+            {/* Sync arrow (from V1) */}
+            <div className="self-center flex flex-col items-center gap-0.5 text-muted-foreground px-1">
+              <ArrowRight className="w-4 h-4" />
+              <span className="text-[9px] uppercase tracking-wider font-semibold">Sync</span>
+            </div>
+
+            {/* WP archive tile */}
+            <div data-vs-anchor="slug" className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground inline-flex items-center gap-1">
+                  <img src={wpLogo} alt="" className="w-3 h-3" /> WP archive
+                </span>
+                {onConfigChange && (
+                  <button
+                    type="button"
+                    onClick={() => setArchiveOpen(true)}
+                    title="Edit archive"
+                    className="p-0.5 rounded hover:bg-blue-100 text-blue-700"
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="font-bold font-mono text-slate-900 text-base truncate">/{config.slug}/</p>
+                <div className="mt-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                  <img src={wpLogo} alt="" className="w-3.5 h-3.5" />
+                  <span>WordPress site</span>
+                </div>
+                <p className="text-[10px] text-blue-700 font-semibold mt-1">Public archive page</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress block */}
+          <div>
+            <div className="flex items-center justify-between mb-1 gap-2 flex-wrap">
+              <span className={cn(
+                "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] px-2 py-0.5 rounded-full",
+                tone.pill
+              )}>
+                <StageIcon className={cn("w-3 h-3", stageSpin && "animate-spin")} /> {stageLabelText}
+              </span>
+              <span className="tabular-nums text-[11px] text-slate-700 font-semibold">
+                {importedNow}{denominator > 0 ? ` / ${denominator}` : ""} · {stagePct}%
+              </span>
+            </div>
+            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+              <div className={cn("h-full transition-all", tone.bar)} style={{ width: `${stagePct}%` }} />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">{stageNote}</p>
+          </div>
+
+          {/* Mini stat row */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Imported</p>
+                <ListMusic className="w-3 h-3 text-muted-foreground" />
+              </div>
+              <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{activeTotal}</p>
+              {totalKnown > 0 && <p className="text-[10px] text-muted-foreground">of {totalKnown}</p>}
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Interval</p>
+                <TimerReset className="w-3 h-3 text-muted-foreground" />
+              </div>
+              <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{config.syncIntervalH}h</p>
+              <p className="text-[10px] text-muted-foreground">Cron tick</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Auto-sync</p>
+                <Activity className="w-3 h-3 text-muted-foreground" />
+              </div>
+              <p className="text-base font-bold text-slate-900 leading-tight mt-0.5">
+                {config.enabled ? "On" : "Off"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Background</p>
+            </div>
+            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Last sync</p>
+                <CalendarClock className="w-3 h-3 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-bold text-slate-900 leading-tight mt-0.5 truncate" title={fmtTime(activeSyncAt)}>
+                {activeSyncAt ? fmtTime(activeSyncAt) : "Never"}
+              </p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {activeSyncStatus === "success" ? "Successful" : activeSyncStatus === "error" ? "Failed" : "—"}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="p-3 rounded-lg bg-white border border-border">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Interval</div>
-          <div className="text-xl font-bold text-foreground">{config.syncIntervalH}h</div>
-        </div>
-        <div data-vs-anchor="slug" className="p-3 rounded-lg bg-white border border-border relative group">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Slug</div>
-          <div className="text-xl font-bold font-mono text-foreground truncate pr-6">/{config.slug}/</div>
-          {onConfigChange && (
-            <button
-              type="button"
-              onClick={() => setArchiveOpen(true)}
-              title="Archive page settings"
-              className="absolute top-2 right-2 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-          )}
+
+        {/* ---- Action panel (right, narrower) --------------------- */}
+        <div className="p-4 flex flex-col justify-between gap-3 bg-gradient-to-br from-primary/8 via-primary/3 to-transparent border-l border-primary/10">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Status</p>
+            <p className="text-xl font-bold text-slate-900 mt-0.5">{stageLabelText}</p>
+            <p className="text-[11px] text-muted-foreground">
+              Last: {activeSyncAt ? fmtTime(activeSyncAt) : "Never"}
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            {isLive && onCancelSync ? (
+              <button
+                type="button"
+                onClick={onCancelSync}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-rose-600 py-2 rounded-md hover:bg-rose-700"
+              >
+                <X className="w-4 h-4" /> Cancel sync
+              </button>
+            ) : null}
+            {!isLive && (
+              <p className="text-[11px] text-muted-foreground">
+                Use “{activeTotal === 0 ? "Run full backfill" : "Sync now"}” at the top of the page.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -359,6 +538,8 @@ const SermonImporterWidget = ({
           onSave={onSave}
         />
       )}
+
+      <div className="px-5 py-4 border-t border-slate-100 space-y-3 bg-slate-50/30">
 
       {isLive ? (
         <div className="space-y-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
@@ -514,6 +695,7 @@ const SermonImporterWidget = ({
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

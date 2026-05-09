@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.21
+Stable tag: 1.2.22
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,11 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.22 =
+* Importer: redesigned main "Importer Console" card — soft slate header, YouTube → WP Archive pipeline, real-time stage pill (Idle / Backfilling / Paused / Error / Up to date), progress bar, and 4-up stat rail (Imported / Interval / Auto-sync / Last sync).
+* Importer: WP Archive tile uses the official WordPress logo and exposes the edit-archive shortcut.
+* Importer: source-playlist tile shows playlist title, channel chip, video count and live connection state.
 
 = 1.2.21 =
 * Dashboard: KPI cards are shorter (180px) — figure & sparkline anchor to the bottom together with the trend row, so smaller tiles no longer leave blank space.

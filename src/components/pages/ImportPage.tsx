@@ -25,9 +25,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
-import ImporterCardShowcase from '@/components/importer/ImporterCardShowcase';
-import ImporterCardShowcaseV2 from '@/components/importer/ImporterCardShowcaseV2';
-import ImporterCardShowcaseV3 from '@/components/importer/ImporterCardShowcaseV3';
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
 import { cn } from '@/lib/utils';
@@ -192,9 +189,6 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         </div>
       </div>
 
-      <ImporterCardShowcaseV3 />
-      <ImporterCardShowcaseV2 />
-      <ImporterCardShowcase />
 
       <div data-vs-anchor="firstimport">
       <ImporterWidget
