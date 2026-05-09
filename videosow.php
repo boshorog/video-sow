@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.17
+ * Version: 1.2.18
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.17' );
+define( 'VIDEOSOW_VERSION', '1.2.18' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -460,6 +460,7 @@ function videosow_get_sermon_importer_defaults() {
         'totalImported'  => 0,
         'log'            => array(),
         'firstSyncDone'  => false,
+        'dashboardCards' => array(),
     );
 }
 
@@ -2279,6 +2280,13 @@ function videosow_ajax_save_sermon_importer_config() {
         'aiTemplates'        => isset( $incoming['aiTemplates'] ) && is_array( $incoming['aiTemplates'] ) ? videosow_sanitize_ai_templates( $incoming['aiTemplates'] ) : ( isset( $current['aiTemplates'] ) ? $current['aiTemplates'] : array() ),
         'aiRestrictTags'     => isset( $incoming['aiRestrictTags'] ) ? (bool) $incoming['aiRestrictTags'] : ( isset( $current['aiRestrictTags'] ) ? (bool) $current['aiRestrictTags'] : true ),
         'aiUseAiExcerpt'     => isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
+        'dashboardCards'     => isset( $incoming['dashboardCards'] ) && is_array( $incoming['dashboardCards'] ) ? array_values( array_filter( array_map( function( $c ) {
+            if ( ! is_array( $c ) || empty( $c['key'] ) ) return null;
+            return array(
+                'key'     => sanitize_text_field( (string) $c['key'] ),
+                'enabled' => ! empty( $c['enabled'] ),
+            );
+        }, $incoming['dashboardCards'] ) ) ) : ( isset( $current['dashboardCards'] ) ? $current['dashboardCards'] : array() ),
     ) );
     update_option( 'videosow_importer_config', $merged );
     // Refresh CPT slug + cron — re-register CPT so the NEW slug is used by flush_rewrite_rules.
@@ -4386,7 +4394,7 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(), // [{url, found}]
-        // v1.2.17 — deeper CSS/theme intelligence.
+        // v1.2.18 — deeper CSS/theme intelligence.
         'content_classes'    => '',
         'breadcrumb_selector'=> '',
         'css_assets_scanned' => 0,

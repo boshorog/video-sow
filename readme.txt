@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.17
+Stable tag: 1.2.18
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,11 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.18 =
+* Dashboard: KPI row now uses a "Hero + companions" layout — first enabled card spans 2x2 as the main tile.
+* Settings → Dashboard cards: drag-and-drop reordering (matches Playlists), constrained to the main settings column, first slot labelled "Main card".
+* Fix: dashboard card preferences now persist across saves (PHP whitelist updated).
 
 = 1.2.17 =
 * Dashboard: KPI row redesigned with a unified "soft tinted" card style (faint red fill, hover highlight, small primary icon, sparkline + trend indicator).
