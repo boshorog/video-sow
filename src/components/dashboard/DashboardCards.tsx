@@ -86,7 +86,7 @@ const Tile = ({
 }) => (
   <div
     className={cn(
-      'relative h-[220px] flex flex-col rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors overflow-hidden',
+      'relative h-[180px] flex flex-col rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors overflow-hidden',
       'hover:border-primary/40',
       hero ? 'p-6 lg:p-7' : 'p-5',
       locked && 'opacity-80',
@@ -97,10 +97,10 @@ const Tile = ({
     </div>
     <Eyebrow>{eyebrow}</Eyebrow>
     <h4 className={cn(
-      'font-bold text-slate-800 leading-tight',
+      'font-bold text-slate-800 leading-tight pr-6',
       hero ? 'text-lg' : 'text-[15px]',
     )}>{title}</h4>
-    <div className={cn('flex-1 min-h-0', hero ? 'mt-5' : 'mt-3')}>{children}</div>
+    <div className={cn('flex-1 min-h-0 flex flex-col', hero ? 'mt-5' : 'mt-3')}>{children}</div>
     {locked && (
       <button
         onClick={onUnlock}
@@ -166,7 +166,7 @@ type Ctx = {
 };
 
 const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
-  <>
+  <div className="mt-auto">
     <div className="flex items-end justify-between gap-3">
       <p className={cn('font-bold text-slate-900 tabular-nums leading-none', hero ? 'text-6xl' : 'text-3xl')}>{String(value)}</p>
       <Spark up={up} className={hero ? 'w-28 h-12' : 'w-16 h-8'} />
@@ -175,7 +175,7 @@ const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any;
       {sub ? <p className={cn('text-muted-foreground truncate', hero ? 'text-xs' : 'text-[11px]')}>{sub}</p> : <span />}
       {trend && <Trend up={up} value={trend} />}
     </div>
-  </>
+  </div>
 );
 
 type CardProps = { hero?: boolean };
@@ -202,7 +202,7 @@ const CardDrafts = ({ ctx, hero }: CtxCardProps) => (
 
 const CardLastSync = ({ ctx, hero }: CtxCardProps) => (
   <Tile eyebrow="Last sync" title={ctx.lastSyncHuman || '—'} icon={Clock} hero={hero}>
-    <div className="flex items-end justify-between gap-3">
+    <div className="mt-auto flex items-end justify-between gap-3">
       <p className={cn('text-slate-700 truncate', hero ? 'text-base' : 'text-sm')}>{ctx.lastSyncMsg || 'No errors'}</p>
       <Spark up className={hero ? 'w-28 h-12' : 'w-16 h-8'} />
     </div>
@@ -211,36 +211,39 @@ const CardLastSync = ({ ctx, hero }: CtxCardProps) => (
 
 const CardAutosync = ({ locked, onUnlock, hero }: LockCardProps) => (
   <Tile eyebrow="Auto-sync" title="Next sync in" icon={RefreshCw} locked={locked} onUnlock={onUnlock} hero={hero}>
-    <div className="flex items-baseline gap-2 tabular-nums">
-      <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>02</span>
-      <span className="text-xs text-muted-foreground">h</span>
-      <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>14</span>
-      <span className="text-xs text-muted-foreground">m</span>
+    <div className="mt-auto">
+      <div className="flex items-baseline gap-2 tabular-nums">
+        <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>02</span>
+        <span className="text-xs text-muted-foreground">h</span>
+        <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>14</span>
+        <span className="text-xs text-muted-foreground">m</span>
+      </div>
+      <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+        <div className="h-full bg-primary" style={{ width: '62%' }} />
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Every 6h · runs in background</p>
     </div>
-    <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-      <div className="h-full bg-primary" style={{ width: '62%' }} />
-    </div>
-    <p className="text-[11px] text-muted-foreground mt-2">Every 6h · runs in background</p>
   </Tile>
 );
 
 const CardSyncHealth = ({ hero }: CardProps) => (
   <Tile eyebrow="Sync health" title="All systems go" icon={Gauge} hero={hero}>
-    <div className="flex items-center gap-2">
-      <CheckCircle2 className={hero ? 'w-7 h-7 text-emerald-500' : 'w-5 h-5 text-emerald-500'} />
-      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-4xl' : 'text-2xl')}>98<span className="text-sm text-muted-foreground">/100</span></p>
+    <div className="mt-auto">
+      <div className="flex items-center gap-2">
+        <CheckCircle2 className={hero ? 'w-7 h-7 text-emerald-500' : 'w-5 h-5 text-emerald-500'} />
+        <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-4xl' : 'text-2xl')}>98<span className="text-sm text-muted-foreground">/100</span></p>
+      </div>
+      <ul className="mt-2 space-y-0.5 text-[11px]">
+        <li className="flex justify-between"><span className="text-muted-foreground">API quota</span><span className="text-emerald-600 font-semibold">87% free</span></li>
+        <li className="flex justify-between"><span className="text-muted-foreground">Last 7 syncs</span><span className="text-emerald-600 font-semibold">7 / 7 ok</span></li>
+      </ul>
     </div>
-    <ul className="mt-3 space-y-1 text-[11px]">
-      <li className="flex justify-between"><span className="text-muted-foreground">API quota</span><span className="text-emerald-600 font-semibold">87% free</span></li>
-      <li className="flex justify-between"><span className="text-muted-foreground">Last 7 syncs</span><span className="text-emerald-600 font-semibold">7 / 7 ok</span></li>
-      <li className="flex justify-between"><span className="text-muted-foreground">Errors today</span><span className="text-slate-700 font-semibold">0</span></li>
-    </ul>
   </Tile>
 );
 
 const CardTaxonomy = ({ hero }: CardProps) => (
   <Tile eyebrow="Taxonomy" title="Top tags this month" icon={Hash} hero={hero}>
-    <div className="flex flex-wrap gap-1.5">
+    <div className="mt-auto flex flex-wrap gap-1.5">
       {[['react', 18], ['nextjs', 14], ['tutorial', 12], ['ai', 11], ['saas', 9], ['startup', 7]].map(([t, n], i) => (
         <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-[11px] text-slate-700">
           <span className="font-semibold">#{t}</span>
@@ -253,31 +256,35 @@ const CardTaxonomy = ({ hero }: CardProps) => (
 
 const CardAiUsage = ({ locked, onUnlock, hero }: LockCardProps) => (
   <Tile eyebrow="AI usage" title="Tokens this month" icon={Wand2} locked={locked} onUnlock={onUnlock} hero={hero}>
-    <div className="flex items-end justify-between">
-      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>128k</p>
-      <Trend up value="+24%" />
-    </div>
-    <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-      <div className="h-full bg-amber-500" style={{ width: '64%' }} />
-    </div>
-    <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
-      <span>≈ $1.84 spent</span><span>200k budget</span>
+    <div className="mt-auto">
+      <div className="flex items-end justify-between">
+        <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>128k</p>
+        <Trend up value="+24%" />
+      </div>
+      <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+        <div className="h-full bg-amber-500" style={{ width: '64%' }} />
+      </div>
+      <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
+        <span>≈ $1.84 spent</span><span>200k budget</span>
+      </div>
     </div>
   </Tile>
 );
 
 const CardBackfill = ({ locked, onUnlock, hero }: LockCardProps) => (
   <Tile eyebrow="Backfill" title="Importing playlist" icon={PlayCircle} locked={locked} onUnlock={onUnlock} hero={hero}>
-    <div className="flex items-baseline gap-2">
-      <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>142</p>
-      <p className="text-sm text-muted-foreground">/ 248</p>
-    </div>
-    <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-      <div className="h-full bg-primary transition-all" style={{ width: '57%' }} />
-    </div>
-    <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
-      <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> ~4m left</span>
-      <span>57% complete</span>
+    <div className="mt-auto">
+      <div className="flex items-baseline gap-2">
+        <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>142</p>
+        <p className="text-sm text-muted-foreground">/ 248</p>
+      </div>
+      <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+        <div className="h-full bg-primary transition-all" style={{ width: '57%' }} />
+      </div>
+      <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
+        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> ~4m left</span>
+        <span>57% complete</span>
+      </div>
     </div>
   </Tile>
 );

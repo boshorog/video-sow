@@ -61,6 +61,13 @@ const Index = () => {
     return new URLSearchParams(window.location.search).get('tab') || 'dashboard';
   });
 
+  const navigateTab = (tab: string) => {
+    setActiveTab(tab);
+    // Scroll to top of the embed/page so deep tabs (e.g. Pro) don't open mid-scroll.
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { window.scrollTo(0, 0); }
+    try { window.parent?.postMessage({ type: 'videosow:scrollTop' }, '*'); } catch {}
+  };
+
   useEffect(() => {
     if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
   }, [activeTab, license.isPro, license.checked]);
@@ -92,7 +99,7 @@ const Index = () => {
 
         {license.isPro && <ProWelcome className="mx-6 mb-6" />}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={navigateTab} className="w-full">
           <div className="px-6">
             <TabsList className="flex border-b border-slate-200 bg-transparent p-0 h-auto">
               <TabsTrigger value="dashboard" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
@@ -126,11 +133,11 @@ const Index = () => {
 
           <div className={`p-6 pt-8 ${isDemo ? 'min-h-[800px]' : ''}`}>
             <TabsContent value="dashboard" className="mt-0">
-              <DashboardPage onNavigate={setActiveTab} />
+              <DashboardPage onNavigate={navigateTab} />
             </TabsContent>
 
             <TabsContent value="import" className="mt-0">
-              <ImportPage onNavigate={setActiveTab} />
+              <ImportPage onNavigate={navigateTab} />
             </TabsContent>
 
             {license.isPro && (
