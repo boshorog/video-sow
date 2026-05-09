@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { POST_MESSAGE_HEIGHT } from "@/config/pluginIdentity";
@@ -72,6 +73,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <SonnerToaster position="bottom-right" richColors closeButton />
         <Index />
       </TooltipProvider>
     </QueryClientProvider>
