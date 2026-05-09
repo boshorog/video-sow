@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
+import DashboardCardShowcaseV2 from '@/components/dashboard/DashboardCardShowcaseV2';
 import { highlightAnchor } from '@/lib/highlightAnchor';
 import { Activity, TrendingUp } from 'lucide-react';
 
@@ -283,6 +284,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         ))}
       </div>
 
+      <DashboardCardShowcaseV2 />
 
       {/* To do — setup roadmap */}
       <TodoVariants
