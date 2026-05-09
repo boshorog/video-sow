@@ -158,6 +158,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </p>
       </div>
 
+      <DashboardCardShowcase />
+
       {/* KPI tiles */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
