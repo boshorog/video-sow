@@ -4,6 +4,7 @@ import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
 import { defaultDashboardCards, type DashboardCardPref } from "@/components/dashboard/DashboardCards";
 import wpLogo from "@/assets/wordpress-logo.svg";
+import vsLogo from "@/assets/videosow-logo.svg";
 import { cn } from "@/lib/utils";
 
 export interface SermonLogEntry {
