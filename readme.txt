@@ -75,6 +75,10 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.16 =
+* Dashboard: redesigned KPI row as a hero "Imported videos" tile with three companion tiles, each showing a mini sparkline and trend indicator.
+* Dashboard TO DO: Pro-only steps (AI tasks, transcripts) no longer show as completed in the Free version.
+
+= 1.2.15 =
 * Settings: API key input now shows live validation checkmark (same UX as Playlist ID).
 * Diagnostic tools: removed "Verify YouTube API Key" and "Test playlist YouTube" tiles (validation moved inline). "Scan theme" tile is now first.
 * Dashboard TO DO: deeper indent, more spacing under progress bar, completed step titles no longer turn green.
