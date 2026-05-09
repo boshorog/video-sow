@@ -4314,7 +4314,7 @@ function videosow_ajax_dashboard_stats() {
     $q = new WP_Query( array(
         'post_type'      => 'videosow_video',
         'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
-        'posts_per_page' => 6,
+        'posts_per_page' => 10,
         'orderby'        => 'date',
         'order'          => 'DESC',
         'no_found_rows'  => true,
@@ -4322,15 +4322,20 @@ function videosow_ajax_dashboard_stats() {
     $recent = array();
     foreach ( $q->posts as $p ) {
         // "when" should reflect when WE imported the video — not its YouTube
-        // publish date (which is what post_date stores). Fall back to
-        // post_modified for posts created before we tracked import time.
+        // publish date (which is what post_date stores). Drafts have their
+        // post_date/post_modified force-set to the YT publish date, so for
+        // legacy drafts without our import-time meta we show "—" rather than
+        // the misleading YouTube date.
         $imp = (int) get_post_meta( $p->ID, '_videosow_imported_at', true );
-        if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
+        $is_publish = ( $p->post_status === 'publish' );
+        if ( ! $imp && $is_publish ) {
+            $imp = (int) get_post_modified_time( 'U', true, $p );
+        }
         $recent[] = array(
             'id'        => $p->ID,
             'title'     => get_the_title( $p ),
             'when'      => $imp ? human_time_diff( $imp, current_time( 'timestamp', true ) ) . ' ago' : '—',
-            'status'    => $p->post_status === 'publish' ? 'Published' : 'Drafted',
+            'status'    => $is_publish ? 'Published' : 'Drafted',
             'editLink'  => get_edit_post_link( $p->ID, '' ),
             'permalink' => get_permalink( $p ),
             'videoId'   => (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true ),
