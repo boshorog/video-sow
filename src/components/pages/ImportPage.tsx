@@ -206,6 +206,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         channelName={playlistInfo.channel}
         onPlaylistClick={() => onNavigate?.('settings')}
       />
+      </div>
+
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
