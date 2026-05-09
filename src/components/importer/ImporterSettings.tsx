@@ -379,7 +379,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           };
           if (!isPro) {
             return (
-              <div className="space-y-1.5">
+              <div data-vs-anchor="playlist" className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
                 <div className="relative">
                   <Input
