@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.21
+Stable tag: 1.2.22
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.21 =
+= 1.2.22 =
 * Dashboard: KPI cards are shorter (180px) — figure & sparkline anchor to the bottom together with the trend row, so smaller tiles no longer leave blank space.
 * Fix: PHP plugin header version was still 1.2.19 — now in sync with the JS bundle.
 * Fix: Navigating to the Pro tab from the Setup Roadmap now scrolls to the top of the page.
