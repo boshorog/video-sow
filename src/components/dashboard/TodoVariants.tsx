@@ -91,16 +91,22 @@ const TodoVariants = ({ steps, onAction }: Props) => {
 
   return (
     <section className="rounded-xl border bg-gradient-to-br from-primary/5 via-transparent to-background p-5 md:p-6">
-      <div className="flex items-baseline justify-between mb-1 flex-wrap gap-2">
-        <h3 className="text-base font-semibold uppercase tracking-wider text-slate-800">TO DO</h3>
-        <p className="text-xs text-muted-foreground">
-          {completed} of {total} done
-        </p>
+      <div className="flex items-end justify-between gap-4 mb-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-0.5">Setup roadmap</p>
+          <h3 className="text-xl font-bold text-slate-800">Get Video Sow ready</h3>
+          <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+            Follow these steps to set up Video Sow and start importing your YouTube playlist into clean WordPress articles.
+          </p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-3xl font-bold text-primary leading-none">
+            {completed}<span className="text-muted-foreground/70 text-xl">/{total}</span>
+          </p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">done</p>
+        </div>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">
-        Follow these steps to set up Video Sow and start importing your YouTube playlist into clean WordPress articles.
-      </p>
-      <div className="h-1.5 w-full rounded-full bg-primary/15 overflow-hidden mb-5">
+      <div className="h-2 w-full rounded-full bg-primary/15 overflow-hidden mb-5">
         <div className="h-full bg-primary transition-all" style={{ width: `${percent}%` }} />
       </div>
 
