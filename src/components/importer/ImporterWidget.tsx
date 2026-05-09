@@ -212,12 +212,15 @@ const SermonImporterWidget = ({
   const [archiveOpen, setArchiveOpen] = useState(false);
   const { scanned: themeScanned } = useThemeMap();
   const isConfigured = !!config.apiKey && !!config.playlistId;
-  // Per-playlist stats: prefer scoped record, fall back to top-level (legacy).
+  // Per-playlist stats: once scoped storage exists, never fall back to legacy
+  // top-level fields (they belong to whichever playlist was last imported and
+  // would otherwise leak across playlist switches).
+  const hasScopedStats = !!config.playlistStats && Object.keys(config.playlistStats).length > 0;
   const stats = (config.playlistId && config.playlistStats?.[config.playlistId]) || {};
-  const activeTotal = stats.totalImported ?? config.totalImported;
-  const activeSyncAt = stats.lastSyncAt ?? config.lastSyncAt;
-  const activeSyncStatus = stats.lastSyncStatus ?? config.lastSyncStatus;
-  const activeSyncMsg = stats.lastSyncMsg ?? config.lastSyncMsg;
+  const activeTotal = hasScopedStats ? (stats.totalImported ?? 0) : (stats.totalImported ?? config.totalImported);
+  const activeSyncAt = hasScopedStats ? (stats.lastSyncAt ?? 0) : (stats.lastSyncAt ?? config.lastSyncAt);
+  const activeSyncStatus = hasScopedStats ? (stats.lastSyncStatus ?? "") : (stats.lastSyncStatus ?? config.lastSyncStatus);
+  const activeSyncMsg = hasScopedStats ? (stats.lastSyncMsg ?? "") : (stats.lastSyncMsg ?? config.lastSyncMsg);
   const StatusIcon = activeSyncStatus === "success" ? CheckCircle2 : activeSyncStatus === "error" ? AlertCircle : Clock;
   const statusColor = activeSyncStatus === "success" ? "text-emerald-600" : activeSyncStatus === "error" ? "text-destructive" : "text-muted-foreground";
 
@@ -556,7 +559,7 @@ const SermonImporterWidget = ({
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   {showNext
-                    ? `Every ${config.syncIntervalH}h · last ${fmtTime(activeSyncAt)}`
+                    ? `Every ${config.syncIntervalH}h`
                     : `Last: ${activeSyncAt ? fmtTime(activeSyncAt) : "Never"}`}
                 </p>
               </div>

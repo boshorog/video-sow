@@ -74,6 +74,12 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.25 =
+* Fix: Importer status & stat cards now reset when switching between playlists (no longer show stale "Up to date" from previous playlist).
+* Tweak: "Next sync" panel no longer repeats the last-sync timestamp.
+* Fix: Sidebar menu icon CSS now strictly scoped to Video Sow — never affects other plugins' icons.
+* Tweak: Recent imports list scrollbar moved closer to card edge with extra spacing from content.
+
 = 1.2.24 =
 * Importer console: action panel shows next sync countdown when auto-sync is on; Source playlist "Not connected" centered.
 * Dashboard: Auto-sync card now wired to real config (next sync countdown). Drafts pending uses Inbox icon. Recent imports list tightened — closer to title / bottom, scrollbar near edge, link icons removed.

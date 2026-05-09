@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.24
+ * Version: 1.2.25
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.24' );
+define( 'VIDEOSOW_VERSION', '1.2.25' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -137,12 +137,19 @@ class VideoSow_Plugin {
      */
     public function fix_menu_icon_colors() {
         echo '<style>
-        #adminmenu #toplevel_page_video-sow .wp-menu-image img { filter: brightness(0) invert(1); opacity: .6; }
-        #adminmenu #toplevel_page_video-sow:hover .wp-menu-image img,
-        #adminmenu #toplevel_page_video-sow.wp-menu-open .wp-menu-image img,
-        #adminmenu #toplevel_page_video-sow.wp-has-current-submenu .wp-menu-image img,
-        #adminmenu #toplevel_page_video-sow.current .wp-menu-image img,
-        #adminmenu #toplevel_page_video-sow.opensub .wp-menu-image img { filter: brightness(0) invert(1); opacity: 1; }
+        /* Scope strictly to our toplevel item — never style other plugin icons. */
+        #adminmenu li#toplevel_page_video-sow > a .wp-menu-image img {
+            filter: brightness(0) invert(1) !important;
+            opacity: .6 !important;
+        }
+        #adminmenu li#toplevel_page_video-sow:hover > a .wp-menu-image img,
+        #adminmenu li#toplevel_page_video-sow.wp-menu-open > a .wp-menu-image img,
+        #adminmenu li#toplevel_page_video-sow.wp-has-current-submenu > a .wp-menu-image img,
+        #adminmenu li#toplevel_page_video-sow.current > a .wp-menu-image img,
+        #adminmenu li#toplevel_page_video-sow.opensub > a .wp-menu-image img {
+            filter: brightness(0) invert(1) !important;
+            opacity: 1 !important;
+        }
         </style>';
     }
 
