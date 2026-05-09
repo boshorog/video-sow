@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.8
+Stable tag: 1.2.9
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,11 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.9 =
+* New Dashboard "To do" card: visual setup roadmap with check-off steps, progress bar, and per-step buttons (Scan theme → API key → Playlist → AI prompts → First import → Pro).
+* Theme scanner now auto-runs before the first backfill / sync if it hasn't been done yet — no more empty layouts on themes that were never scanned.
+* Import card shows a status banner indicating whether the theme structure has been scanned.
 
 = 1.2.8 =
 * Wide list layout now renders the thumbnail on the LEFT and the meta/title/excerpt stacked on the RIGHT (was stacking everything vertically).

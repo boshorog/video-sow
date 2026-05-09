@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.8
+ * Version: 1.2.9
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.8' );
+define( 'VIDEOSOW_VERSION', '1.2.9' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -2749,6 +2749,14 @@ function videosow_ajax_scan_sermon_playlist() {
     check_ajax_referer( 'videosow_nonce', 'nonce' );
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
     delete_transient( 'videosow_sync_cancelled' );
+
+    // Auto-run the theme structure scan if it's missing or low-confidence,
+    // so the public archive layout is correct on the very first import.
+    $existing_map = function_exists( 'videosow_get_theme_map' ) ? videosow_get_theme_map() : array();
+    $needs_scan = empty( $existing_map ) || empty( $existing_map['confidence'] ) || $existing_map['confidence'] === 'low';
+    if ( $needs_scan && function_exists( 'videosow_scan_active_theme' ) ) {
+        @videosow_scan_active_theme();
+    }
     $cfg = videosow_get_sermon_importer_config();
     if ( empty( $cfg['apiKey'] ) || empty( $cfg['playlistId'] ) ) {
         wp_send_json_error( 'Missing API Key or Playlist ID' );

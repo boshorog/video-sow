@@ -1,6 +1,7 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
+import { useThemeMap } from "@/hooks/useThemeMap";
 
 export interface SermonLogEntry {
   time: number;
@@ -194,6 +195,7 @@ const SermonImporterWidget = ({
   channelName?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const { scanned: themeScanned } = useThemeMap();
   const isConfigured = !!config.apiKey && !!config.playlistId;
   // Per-playlist stats: prefer scoped record, fall back to top-level (legacy).
   const stats = (config.playlistId && config.playlistStats?.[config.playlistId]) || {};
@@ -240,6 +242,15 @@ const SermonImporterWidget = ({
         </div>
         <span className={`text-[11px] font-semibold px-2 py-1 rounded-full ${config.enabled && isConfigured ? "bg-emerald-50 text-emerald-700" : "bg-muted text-muted-foreground"}`}>
           {config.enabled && isConfigured ? "ACTIVE" : "OFF"}
+        </span>
+      </div>
+
+      <div className={`flex items-center gap-2 text-xs rounded-md px-3 py-2 border ${themeScanned ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-amber-50 border-amber-200 text-amber-800'}`}>
+        {themeScanned ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> : <Scan className="w-3.5 h-3.5 shrink-0" />}
+        <span className="flex-1">
+          {themeScanned
+            ? 'Theme structure scanned — archive layout will render in the correct spot.'
+            : 'Theme not scanned yet — it will run automatically before your first import.'}
         </span>
       </div>
 
