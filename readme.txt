@@ -75,6 +75,14 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.11 =
+* Archive toolbar polished: pill-shaped search input ("Search articles..."), no-wrap "Sort:" label, tighter alignment.
+* Removed remaining blank space above archive toolbar/grid (collapses theme page-header/spacer wrappers).
+* Article cards now include a "Read more" link with arrow icon after the excerpt on every layout.
+* Wide list layout: vertically centered title/excerpt stack and full-height thumbnail (no more blank gaps above/below the cover).
+* 2 / 3 column layouts: added breathing room between the cover image and the title.
+* Breadcrumb separators on the archive page now match the spacing used elsewhere in the theme.
+
+= 1.2.10 =
 * Theme scanner now digs into linked theme CSS assets and inline styles, storing richer style rules, spacing hints, content wrappers, and breadcrumb selectors.
 * Archive layout cleanup removes leftover theme spacers above the toolbar/grid and normalizes card ordering so thumbnails start at the top consistently.
 * Custom archive cards now add safer title/image/excerpt spacing and stronger single-title/breadcrumb fixes for themes and SEO breadcrumb plugins.
