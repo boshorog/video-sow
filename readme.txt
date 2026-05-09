@@ -75,6 +75,10 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.12 =
+* Dashboard "To do" card redesigned: single vertical timeline with large round icons, soft gradient background and a perfectly centered connector line with equal top/bottom gaps.
+* Each step button now jumps to the relevant Settings/Tasks/Import section and pulses a highlight ring so it's instantly visible (theme scanner, API key, playlist, auto-sync, AI prompts, transcripts, first import).
+
+= 1.2.11 =
 * Archive toolbar polished: pill-shaped search input ("Search articles..."), no-wrap "Sort:" label, tighter alignment.
 * Removed remaining blank space above archive toolbar/grid (collapses theme page-header/spacer wrappers).
 * Article cards now include a "Read more" link with arrow icon after the excerpt on every layout.
