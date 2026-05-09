@@ -1,6 +1,6 @@
 import {
   Youtube, FileText, Sparkles, Clock, TrendingUp, TrendingDown,
-  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown,
+  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown, Activity, ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 /* ------------------------------------------------------------------ */
 
 export type DashboardCardKey =
-  | 'imported' | 'published' | 'drafts' | 'lastSync'
+  | 'imported' | 'published' | 'drafts' | 'lastSync' | 'recent'
   | 'autosync' | 'syncHealth' | 'taxonomy' | 'aiUsage' | 'backfill';
 
 export type DashboardCardMeta = {
