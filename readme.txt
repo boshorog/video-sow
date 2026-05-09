@@ -75,6 +75,15 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.20 =
+* Dashboard: KPI cards now use a fixed height so taller and shorter tiles align cleanly across the row.
+* Dashboard: Recent activity moved into a configurable card (last 10 imports, internal scroll); standalone bottom section removed.
+* Setup roadmap: new "Configure the output" step (#2) — links to Import and halo-highlights the Slug card.
+* Setup roadmap: anchor highlight pulses twice instead of three times across the board.
+* Importer: removed the persistent "Theme structure scanned" notice — only the "not scanned yet" hint shows when relevant.
+* Import → Archive: every column header is now sortable (Title, Video date, Import date, Status, Views) with always-visible arrows; Title column allowance reduced and other columns spaced evenly.
+* Fix: Drafts in Recent activity no longer display the YouTube publish date — legacy drafts without a tracked import time show "—".
+
+= 1.2.19 =
 * Dashboard: KPI row reverted to a uniform 4-column grid — extra enabled cards wrap onto a new row.
 * Settings → Dashboard cards: simplified reorder (no Main card concept); Reset to defaults gains a refresh icon.
 * Fix: Auto-sync and Backfill cards are no longer marked as Pro — both available in the Free version.
