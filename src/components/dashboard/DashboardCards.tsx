@@ -85,7 +85,7 @@ const Tile = ({
 }) => (
   <div
     className={cn(
-      'relative rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors',
+      'relative h-full rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors',
       'hover:border-primary/40',
       hero ? 'p-6 lg:p-7' : 'p-5',
       locked && 'opacity-80',
