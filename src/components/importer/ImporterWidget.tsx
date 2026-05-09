@@ -334,7 +334,7 @@ const SermonImporterWidget = ({
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Interval</div>
           <div className="text-xl font-bold text-foreground">{config.syncIntervalH}h</div>
         </div>
-        <div className="p-3 rounded-lg bg-white border border-border relative group">
+        <div data-vs-anchor="slug" className="p-3 rounded-lg bg-white border border-border relative group">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Slug</div>
           <div className="text-xl font-bold font-mono text-foreground truncate pr-6">/{config.slug}/</div>
           {onConfigChange && (
