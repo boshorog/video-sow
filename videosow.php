@@ -696,6 +696,15 @@ add_action( 'wp_head', 'videosow_sermon_archive_meta_description', 1 );
 function videosow_sermon_archive_css() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
     echo '<style id="videosow-archive-css">'
+        // Kill the leading blank space themes leave above the loop (empty
+        // wrapper paragraphs / hero spacers) once our toolbar/grid takes over.
+        . '.post-type-archive-videosow_video #videosow-toolbar,'
+        . '.post-type-archive-videosow_video #videosow-grid{margin-top:0 !important;}'
+        . '.post-type-archive-videosow_video #videosow-toolbar:first-child,'
+        . '.post-type-archive-videosow_video #videosow-grid:first-child{padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
+        . '.post-type-archive-videosow_video .blog-content > p:empty,'
+        . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
         . '.post-type-archive-videosow_video .entry-meta,'
         . '.post-type-archive-videosow_video .post-meta,'
         . '.post-type-archive-videosow_video .byline,'
