@@ -2749,6 +2749,14 @@ function videosow_ajax_scan_sermon_playlist() {
     check_ajax_referer( 'videosow_nonce', 'nonce' );
     if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
     delete_transient( 'videosow_sync_cancelled' );
+
+    // Auto-run the theme structure scan if it's missing or low-confidence,
+    // so the public archive layout is correct on the very first import.
+    $existing_map = function_exists( 'videosow_get_theme_map' ) ? videosow_get_theme_map() : array();
+    $needs_scan = empty( $existing_map ) || empty( $existing_map['confidence'] ) || $existing_map['confidence'] === 'low';
+    if ( $needs_scan && function_exists( 'videosow_scan_active_theme' ) ) {
+        @videosow_scan_active_theme();
+    }
     $cfg = videosow_get_sermon_importer_config();
     if ( empty( $cfg['apiKey'] ) || empty( $cfg['playlistId'] ) ) {
         wp_send_json_error( 'Missing API Key or Playlist ID' );
