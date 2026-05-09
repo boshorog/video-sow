@@ -195,6 +195,10 @@ const SermonImporterWidget = ({
   onConfigChange?: (c: SermonImporterConfig) => void;
   onSave?: () => void;
   onPlaylistClick?: () => void;
+  onSync?: () => void;
+  canSync?: boolean;
+  isSyncing?: boolean;
+  isFirstRun?: boolean;
   isPro?: boolean;
   playlistName?: string;
   playlistCount?: number;
