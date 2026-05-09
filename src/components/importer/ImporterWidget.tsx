@@ -559,7 +559,7 @@ const SermonImporterWidget = ({
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   {showNext
-                    ? `Every ${config.syncIntervalH}h · last ${fmtTime(activeSyncAt)}`
+                    ? `Every ${config.syncIntervalH}h`
                     : `Last: ${activeSyncAt ? fmtTime(activeSyncAt) : "Never"}`}
                 </p>
               </div>
