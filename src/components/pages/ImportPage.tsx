@@ -207,7 +207,12 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         playlistName={playlistInfo.name}
         playlistCount={playlistInfo.count}
         channelName={playlistInfo.channel}
-        onPlaylistClick={() => onNavigate?.('settings')}
+        onPlaylistClick={() => {
+          onNavigate?.('settings');
+          import('@/lib/highlightAnchor').then(({ highlightAnchor }) => {
+            highlightAnchor('playlist', { delay: 350 });
+          });
+        }}
       />
       </div>
 
