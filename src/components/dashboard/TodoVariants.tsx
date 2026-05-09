@@ -9,6 +9,7 @@ import {
   Wand2,
   FileText,
   Crown,
+  Layout,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,9 @@ export const buildShowcaseSteps = (opts: {
   { key: 'scan', icon: Scan, title: 'Scan your theme', short: 'Theme scan',
     desc: 'Detect where your theme renders the post loop so the public archive sits exactly where it should.',
     done: opts.themeOk, cta: opts.themeOk ? 'Re-scan' : 'Scan now' },
+  { key: 'configure', icon: Layout, title: 'Configure the output', short: 'Output',
+    desc: 'Choose where articles will live on your site and customize the archive page appearance.',
+    done: false, cta: 'Configure output' },
   { key: 'apikey', icon: SettingsIcon, title: 'Add your YouTube API key', short: 'API key',
     desc: 'Required to read playlist contents and video metadata from YouTube.',
     done: opts.hasApiKey, cta: opts.hasApiKey ? 'Update' : 'Open Settings' },
