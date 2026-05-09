@@ -590,12 +590,8 @@ const SermonImporterWidget = ({
         />
       )}
 
-      <div className="px-5 py-4 border-t border-slate-100 space-y-3 bg-slate-50/30">
-
-      {/* Status/progress lives in the header card now; only Recent imports remains here. */}
-
       {(renderedItems.length > 0 || isLive) && (
-        <div className="space-y-2">
+        <div className="px-5 py-4 border-t border-slate-100 space-y-2 bg-slate-50/30">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {renderedItems.map((it) => (
@@ -642,7 +638,7 @@ const SermonImporterWidget = ({
           </div>
         </div>
       )}
-      </div>
+
     </div>
   );
 };
