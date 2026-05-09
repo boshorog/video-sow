@@ -75,6 +75,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 == Changelog ==
 
 = 1.2.22 =
+* Importer: redesigned main "Importer Console" card — soft slate header, YouTube → WP Archive pipeline, real-time stage pill (Idle / Backfilling / Paused / Error / Up to date), progress bar, and 4-up stat rail (Imported / Interval / Auto-sync / Last sync).
+* Importer: WP Archive tile uses the official WordPress logo and exposes the edit-archive shortcut.
+* Importer: source-playlist tile shows playlist title, channel chip, video count and live connection state.
+
+= 1.2.21 =
 * Dashboard: KPI cards are shorter (180px) — figure & sparkline anchor to the bottom together with the trend row, so smaller tiles no longer leave blank space.
 * Fix: PHP plugin header version was still 1.2.19 — now in sync with the JS bundle.
 * Fix: Navigating to the Pro tab from the Setup Roadmap now scrolls to the top of the page.
