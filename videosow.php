@@ -741,6 +741,24 @@ function videosow_sermon_archive_css() {
         . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
         . '.post-type-archive-videosow_video .blog-content > p:empty,'
         . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
+        // Aggressively collapse any spacer/wrapper that sits ABOVE our toolbar
+        // inside the main content column so the toolbar starts at the very top.
+        . '.post-type-archive-videosow_video .site-main > *:not(#videosow-toolbar):not(#videosow-grid):not(#videosow-load-more-wrap):not(article):not(.videosow-card),'
+        . '.post-type-archive-videosow_video main > *:not(#videosow-toolbar):not(#videosow-grid):not(#videosow-load-more-wrap):not(article):not(.videosow-card){margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .page-header,'
+        . '.post-type-archive-videosow_video .archive-header,'
+        . '.post-type-archive-videosow_video .entry-header{margin-top:0 !important;padding-top:0 !important;margin-bottom:0 !important;padding-bottom:0 !important;}'
+        // Breadcrumb spacing — many themes pack our injected current crumb
+        // tightly. Force consistent gaps around separators and items.
+        . '.post-type-archive-videosow_video .breadcrumbs,'
+        . '.post-type-archive-videosow_video .breadcrumb,'
+        . '.post-type-archive-videosow_video #breadcrumbs,'
+        . '.post-type-archive-videosow_video nav[aria-label*="readcrumb"]{line-height:1.7 !important;}'
+        . '.post-type-archive-videosow_video .breadcrumbs > *,'
+        . '.post-type-archive-videosow_video .breadcrumb > *,'
+        . '.post-type-archive-videosow_video #breadcrumbs > *{margin-left:.15em;margin-right:.15em;}'
+        . '.videosow-breadcrumb-sep{display:inline-block;margin:0 .55em !important;opacity:.55;}'
+        . '.videosow-breadcrumb-current{display:inline-block;margin-left:.15em;}'
         . '.post-type-archive-videosow_video #videosow-toolbar,'
         . '.post-type-archive-videosow_video #videosow-grid{position:relative !important;top:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-loop-compact{padding-top:0 !important;margin-top:0 !important;}'
