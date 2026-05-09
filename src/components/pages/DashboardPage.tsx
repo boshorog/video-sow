@@ -169,6 +169,9 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           lastSyncMsg,
           loaded,
           recent,
+          autosyncEnabled: !!cfg.enabled,
+          syncIntervalH: cfg.syncIntervalH,
+          lastSyncAt: stats?.lastSyncAt || cfg.lastSyncAt,
         }}
         isPro={license.isPro}
         onUnlock={() => onNavigate?.('pro')}
