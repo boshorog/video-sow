@@ -262,18 +262,14 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         }}
       />
 
-      {/* Recent activity */}
+      {/* Recent activity — only shown once at least one import exists. */}
+      {recent.length > 0 && (
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Recent activity</CardTitle>
           <CardDescription>The last few videos picked up by Video Sow.</CardDescription>
         </CardHeader>
         <CardContent>
-          {recent.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">
-              {loaded ? 'No imports yet — run your first sync from the Import tab.' : 'Loading…'}
-            </p>
-          ) : (
             <ul className="divide-y divide-border">
               {recent.map((row) => {
                 const link = row.editLink || row.permalink;
@@ -301,9 +297,9 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
                 );
               })}
             </ul>
-          )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 };
