@@ -180,6 +180,35 @@ const PlaylistValidator = ({ apiKey, playlistId }: { apiKey: string; playlistId:
   return <AlertCircle className="w-4 h-4 text-destructive" aria-label="Playlist not found" />;
 };
 
+/**
+ * Validates a YouTube Data API key by issuing a lightweight playlist call.
+ * Renders a green check on success or a red ! on failure.
+ */
+const ApiKeyValidator = ({ apiKey, playlistId }: { apiKey: string; playlistId?: string }) => {
+  const [state, setState] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+  useEffect(() => {
+    if (!apiKey) { setState('idle'); return; }
+    setState('checking');
+    let cancelled = false;
+    const t = window.setTimeout(() => {
+      const id = (playlistId && playlistId.trim()) || 'PLBCF2DAC6FFB574DE';
+      fetch(`https://www.googleapis.com/youtube/v3/playlists?part=id&id=${encodeURIComponent(id)}&key=${encodeURIComponent(apiKey)}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (cancelled) return;
+          if (j?.error) setState('error');
+          else setState('ok');
+        })
+        .catch(() => { if (!cancelled) setState('error'); });
+    }, 500);
+    return () => { cancelled = true; window.clearTimeout(t); };
+  }, [apiKey, playlistId]);
+  if (state === 'idle') return null;
+  if (state === 'checking') return <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" aria-label="Validating API key" />;
+  if (state === 'ok') return <CheckCircle2 className="w-4 h-4 text-emerald-600" aria-label="API key validated" />;
+  return <AlertCircle className="w-4 h-4 text-destructive" aria-label="API key invalid" />;
+};
+
 const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, onCancelSync, isSyncing, onRepair, isRepairing, repairProgress }: Props) => {
   const { isPro } = useLicense();
   const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
