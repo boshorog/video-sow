@@ -106,11 +106,11 @@ const TodoVariants = ({ steps, onAction }: Props) => {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1">done</p>
         </div>
       </div>
-      <div className="h-2 w-full rounded-full bg-primary/15 overflow-hidden mb-5">
+      <div className="h-2 w-full rounded-full bg-primary/15 overflow-hidden mb-8">
         <div className="h-full bg-primary transition-all" style={{ width: `${percent}%` }} />
       </div>
 
-      <ol className="relative pl-2 md:pl-8">
+      <ol className="relative pl-4 md:pl-16">
         {steps.map((s, i) => {
           const last = i === steps.length - 1;
           return (
