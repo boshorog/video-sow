@@ -74,6 +74,11 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.15 =
+* Settings: API key input now shows live validation checkmark (same UX as Playlist ID).
+* Diagnostic tools: removed "Verify YouTube API Key" and "Test playlist YouTube" tiles (validation moved inline). "Scan theme" tile is now first.
+* Dashboard TO DO: deeper indent, more spacing under progress bar, completed step titles no longer turn green.
+
 = 1.2.14 =
 * Dashboard: combined TO DO header (Setup roadmap title + hero numerator).
 
