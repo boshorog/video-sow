@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.7
+ * Version: 1.2.8
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.7' );
+define( 'VIDEOSOW_VERSION', '1.2.8' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -634,6 +634,25 @@ function videosow_sermon_archive_title( $title ) {
 }
 add_filter( 'get_the_archive_title', 'videosow_sermon_archive_title' );
 
+/* Same configured title for post_type_archive_title — themes (e.g. Masco) and
+ * many breadcrumb plugins (Yoast, RankMath, Breadcrumb NavXT) read this filter
+ * instead of get_the_archive_title, so the breadcrumb can show "Funny" rather
+ * than just "Home". */
+function videosow_sermon_post_type_archive_title( $name, $post_type = '' ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) ) return $name;
+    $cfg = videosow_get_sermon_importer_config();
+    if ( ! empty( $cfg['archiveTitle'] ) ) return $cfg['archiveTitle'];
+    return $name;
+}
+add_filter( 'post_type_archive_title', 'videosow_sermon_post_type_archive_title', 10, 2 );
+add_filter( 'single_post_title', function( $title, $post = null ) {
+    // Don't truncate single videosow_video titles — return full post title.
+    if ( $post && get_post_type( $post ) === 'videosow_video' ) {
+        return get_the_title( $post );
+    }
+    return $title;
+}, 10, 2 );
+
 /* SEO meta title + description for the sermon archive */
 function videosow_sermon_archive_document_title( $parts ) {
     if ( is_post_type_archive( 'videosow_video' ) ) {
@@ -677,6 +696,15 @@ add_action( 'wp_head', 'videosow_sermon_archive_meta_description', 1 );
 function videosow_sermon_archive_css() {
     if ( ! is_post_type_archive( 'videosow_video' ) ) return;
     echo '<style id="videosow-archive-css">'
+        // Kill the leading blank space themes leave above the loop (empty
+        // wrapper paragraphs / hero spacers) once our toolbar/grid takes over.
+        . '.post-type-archive-videosow_video #videosow-toolbar,'
+        . '.post-type-archive-videosow_video #videosow-grid{margin-top:0 !important;}'
+        . '.post-type-archive-videosow_video #videosow-toolbar:first-child,'
+        . '.post-type-archive-videosow_video #videosow-grid:first-child{padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
+        . '.post-type-archive-videosow_video .blog-content > p:empty,'
+        . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
         . '.post-type-archive-videosow_video .entry-meta,'
         . '.post-type-archive-videosow_video .post-meta,'
         . '.post-type-archive-videosow_video .byline,'
@@ -814,6 +842,18 @@ function videosow_sermon_archive_title_js() {
 }
 add_action( 'wp_footer', 'videosow_sermon_archive_title_js', 99 );
 
+/* Force the full, untruncated post title on single videosow_video pages.
+ * Some themes (Elementor Post Title widget, Masco) crop the H1 title to a
+ * fixed character/word count. We pass the real title to the front-end and let
+ * a small script overwrite the rendered H1 text with it. */
+function videosow_single_video_full_title_js() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    $full = html_entity_decode( get_the_title( get_queried_object_id() ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    $full_js = wp_json_encode( $full );
+    echo '<script id="videosow-single-title-js">(function(){function run(){var sels=["h1.entry-title",".entry-header h1",".elementor-heading-title","h1.post-title","article h1"];var seen={};for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var el=els[j];if(seen[el.dataset.kpFixed]||el.dataset.kpFixed==="1")continue;el.textContent=' . $full_js . ';el.dataset.kpFixed="1";el.style.display="block";el.style.overflow="visible";el.style.textOverflow="clip";el.style.whiteSpace="normal";el.style.maxHeight="none";el.style.webkitLineClamp="unset";}}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}setTimeout(run,300);setTimeout(run,1200);})();</script>';
+}
+add_action( 'wp_footer', 'videosow_single_video_full_title_js', 99 );
+
 /* ── Weekly YouTube views refresh ─────────────── */
 function videosow_refresh_sermon_views() {
     $cfg = videosow_get_sermon_importer_config();
@@ -901,12 +941,12 @@ function videosow_sermon_archive_toolbar() {
 
     // CSS
     echo '<style id="videosow-toolbar-css">'
-        . '.post-type-archive-videosow_video .videosow-toolbar{font-family:inherit !important;margin:-.85rem 0 2.25rem !important;padding-top:.75rem !important;--kp-tag-lines-desktop:' . $lines_desktop . ';--kp-tag-lines-mobile:' . $lines_mobile . ';overflow:visible !important;}'
+        . '.post-type-archive-videosow_video .videosow-toolbar{font-family:inherit !important;margin:0 0 1.5rem !important;padding:0 !important;--kp-tag-lines-desktop:' . $lines_desktop . ';--kp-tag-lines-mobile:' . $lines_mobile . ';overflow:visible !important;}'
         . '.videosow-toolbar *{box-sizing:border-box;}'
-        . '.videosow-toolbar .kp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;background:#ffffff;padding:.85rem 1rem;border:1px solid rgba(0,0,0,.08);border-radius:14px;}'
+        . '.videosow-toolbar .kp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;background:#ffffff;padding:.5rem .65rem;border:1px solid rgba(0,0,0,.08);border-radius:12px;}'
         . '.post-type-archive-videosow_video .videosow-toolbar{overflow:visible;}'
-        . '.videosow-toolbar .kp-search{flex:1 1 280px;min-width:0;}'
-        . '.videosow-toolbar .kp-search input{width:100%;padding:.55rem .85rem;font-size:.95rem;background:rgba(0,0,0,.04);border:0;border-radius:10px;color:#111;outline:none;font-family:inherit !important;}'
+        . '.videosow-toolbar .kp-search{flex:1 1 240px;min-width:0;max-width:560px;}'
+        . '.videosow-toolbar .kp-search input{width:100%;height:2.25rem;line-height:1.2;padding:.35rem .75rem;font-size:.875rem;background:rgba(0,0,0,.04);border:0;border-radius:8px;color:#111;outline:none;font-family:inherit !important;box-shadow:none !important;}'
         . '.videosow-toolbar .kp-search input::placeholder{color:rgba(0,0,0,.45);}'
         . '.videosow-toolbar .kp-sort{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}'
         . '.videosow-toolbar .kp-sort label{font-size:.85rem;color:rgba(0,0,0,.55);font-weight:500;font-family:inherit !important;}'
@@ -961,17 +1001,23 @@ function videosow_sermon_archive_toolbar() {
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title a{color:#111 !important;text-decoration:none !important;}'
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding-bottom:1.1rem !important;color:rgba(0,0,0,.65) !important;font-size:.9rem !important;line-height:1.55 !important;}';
             } elseif ( $layout === 'list' ) {
-                $custom = '.videosow-grid[data-vs-layout="list"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:grid !important;grid-template-columns:minmax(220px,32%) 1fr !important;gap:0 !important;padding:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;transition:box-shadow .25s ease;}'
-                    . '.videosow-grid[data-vs-layout="list"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:contents !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .post-thumbnail,.videosow-grid[data-vs-layout="list"] figure{margin:0 !important;aspect-ratio:16/9 !important;display:block !important;overflow:hidden !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .post-thumbnail img,.videosow-grid[data-vs-layout="list"] figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .entry-meta,.videosow-grid[data-vs-layout="list"] .entry-title,.videosow-grid[data-vs-layout="list"] .entry-summary{padding:0 1.4rem !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .entry-meta{padding-top:1.2rem !important;font-size:.8rem !important;color:rgba(0,0,0,.55) !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .entry-title{font-size:1.4rem !important;font-weight:700 !important;line-height:1.25 !important;margin:.5rem 0 .65rem 0 !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .entry-title a{color:#111 !important;text-decoration:none !important;}'
-                    . '.videosow-grid[data-vs-layout="list"] .entry-summary{padding-bottom:1.3rem !important;color:rgba(0,0,0,.65) !important;font-size:.95rem !important;line-height:1.55 !important;}'
-                    . '@media (max-width:768px){.videosow-grid[data-vs-layout="list"] > .videosow-card{grid-template-columns:1fr !important;}}';
+                // Wide list: thumbnail on the LEFT, meta/title/excerpt stacked on the RIGHT.
+                // We use higher specificity (body.post-type-archive-videosow_video) so the
+                // grid display wins over the generic ".videosow-card{display:block}" reset
+                // that appears further down in this stylesheet.
+                $custom = 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:flex !important;flex-direction:row !important;padding:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;transition:box-shadow .25s ease;min-height:200px;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:grid !important;grid-template-columns:minmax(240px,34%) 1fr !important;grid-template-rows:auto auto 1fr !important;column-gap:0 !important;row-gap:0 !important;flex:1 1 auto !important;min-width:0 !important;width:100% !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .post-thumbnail,'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > a.post-thumbnail,'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > figure,'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > a:has(> figure){grid-column:1 !important;grid-row:1 / -1 !important;align-self:stretch !important;margin:0 !important;aspect-ratio:auto !important;display:block !important;overflow:hidden !important;height:100% !important;min-height:200px;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card .post-thumbnail img,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;display:block !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-meta{grid-column:2 !important;grid-row:1 !important;padding:1.2rem 1.4rem 0 1.4rem !important;font-size:.8rem !important;color:rgba(0,0,0,.55) !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title{grid-column:2 !important;grid-row:2 !important;padding:.5rem 1.4rem .65rem 1.4rem !important;font-size:1.4rem !important;font-weight:700 !important;line-height:1.25 !important;margin:0 !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title a{color:#111 !important;text-decoration:none !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-summary{grid-column:2 !important;grid-row:3 !important;padding:0 1.4rem 1.3rem 1.4rem !important;color:rgba(0,0,0,.65) !important;font-size:.95rem !important;line-height:1.55 !important;}'
+                    . '@media (max-width:768px){body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card{flex-direction:column !important;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:block !important;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .post-thumbnail,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > figure{aspect-ratio:16/9 !important;min-height:0;height:auto;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-summary{padding-left:1.2rem !important;padding-right:1.2rem !important;}}';
             }
             return $base . $custom;
         })()

@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,12 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.8 =
+* Wide list layout now renders the thumbnail on the LEFT and the meta/title/excerpt stacked on the RIGHT (was stacking everything vertically).
+* Toolbar tightened: shorter, slimmer search input; reduced bar padding; removed the empty top space above the toolbar/grid.
+* Single article page: forces the FULL post title in the H1 (overrides theme/Elementor title length crops).
+* Breadcrumb: configured archive title is now exposed via `post_type_archive_title` so themes & breadcrumb plugins (Yoast, RankMath, NavXT) show "Home › Funny" instead of just "Home".
 
 = 1.2.7 =
 * Theme scanner is now much deeper: probes multiple URLs (video archive, blog page, home, category) and picks the richest result.
