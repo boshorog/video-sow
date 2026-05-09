@@ -522,7 +522,7 @@ const SermonImporterWidget = ({
             ) : null}
             {!isLive && (
               <p className="text-[11px] text-muted-foreground">
-                Use “{isFirstRunHint(activeTotal) ? "Run full backfill" : "Sync now"}” at the top of the page.
+                Use “{activeTotal === 0 ? "Run full backfill" : "Sync now"}” at the top of the page.
               </p>
             )}
           </div>
