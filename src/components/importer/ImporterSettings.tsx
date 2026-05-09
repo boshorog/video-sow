@@ -180,6 +180,35 @@ const PlaylistValidator = ({ apiKey, playlistId }: { apiKey: string; playlistId:
   return <AlertCircle className="w-4 h-4 text-destructive" aria-label="Playlist not found" />;
 };
 
+/**
+ * Validates a YouTube Data API key by issuing a lightweight playlist call.
+ * Renders a green check on success or a red ! on failure.
+ */
+const ApiKeyValidator = ({ apiKey, playlistId }: { apiKey: string; playlistId?: string }) => {
+  const [state, setState] = useState<'idle' | 'checking' | 'ok' | 'error'>('idle');
+  useEffect(() => {
+    if (!apiKey) { setState('idle'); return; }
+    setState('checking');
+    let cancelled = false;
+    const t = window.setTimeout(() => {
+      const id = (playlistId && playlistId.trim()) || 'PLBCF2DAC6FFB574DE';
+      fetch(`https://www.googleapis.com/youtube/v3/playlists?part=id&id=${encodeURIComponent(id)}&key=${encodeURIComponent(apiKey)}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (cancelled) return;
+          if (j?.error) setState('error');
+          else setState('ok');
+        })
+        .catch(() => { if (!cancelled) setState('error'); });
+    }, 500);
+    return () => { cancelled = true; window.clearTimeout(t); };
+  }, [apiKey, playlistId]);
+  if (state === 'idle') return null;
+  if (state === 'checking') return <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" aria-label="Validating API key" />;
+  if (state === 'ok') return <CheckCircle2 className="w-4 h-4 text-emerald-600" aria-label="API key validated" />;
+  return <AlertCircle className="w-4 h-4 text-destructive" aria-label="API key invalid" />;
+};
+
 const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, onCancelSync, isSyncing, onRepair, isRepairing, repairProgress }: Props) => {
   const { isPro } = useLicense();
   const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
@@ -341,13 +370,18 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
       <div className="space-y-4">
         <div data-vs-anchor="apikey" className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
-          <Input
-            type="password"
-            value={config.apiKey}
-            onChange={(e) => update("apiKey", e.target.value)}
-            placeholder="AIza..."
-            className="h-9 text-sm font-mono"
-          />
+          <div className="relative">
+            <Input
+              type="password"
+              value={config.apiKey}
+              onChange={(e) => update("apiKey", e.target.value)}
+              placeholder="AIza..."
+              className="h-9 text-sm font-mono pr-9"
+            />
+            <div className="absolute inset-y-0 right-2.5 flex items-center">
+              <ApiKeyValidator apiKey={config.apiKey} playlistId={config.playlistId} />
+            </div>
+          </div>
           <p className="text-[11px] text-muted-foreground">
             Get a key from{' '}
             <a
@@ -620,78 +654,6 @@ const TroubleshootingSection = ({
   diagResult: DiagResult | null;
   runDiag: () => void;
 }) => {
-  const [apiTesting, setApiTesting] = useState(false);
-  const [apiResult, setApiResult] = useState<null | { ok: boolean; message: string }>(null);
-
-  // Playlist test state
-  const [playlistTestInput, setPlaylistTestInput] = useState("");
-  const [playlistTestRunning, setPlaylistTestRunning] = useState(false);
-  const [playlistTestResult, setPlaylistTestResult] = useState<null | {
-    ok: boolean;
-    error?: string;
-    data?: {
-      playlist_id: string;
-      title: string;
-      description: string;
-      channel: string;
-      channel_id: string;
-      published_at: string;
-      item_count: number;
-      thumbnail: string;
-      samples: { title: string; video_id: string; published: string }[];
-    };
-  }>(null);
-
-  useEffect(() => {
-    const handler = (e: MessageEvent) => {
-      if (!e.data || e.data.type !== "videosow_test_playlist_result") return;
-      setPlaylistTestRunning(false);
-      if (e.data.success && e.data.data) {
-        setPlaylistTestResult({ ok: true, data: e.data.data });
-      } else {
-        setPlaylistTestResult({ ok: false, error: e.data.data || "Unknown error." });
-      }
-    };
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, []);
-
-  const runPlaylistTest = () => {
-    const v = playlistTestInput.trim() || (config.playlistId || "").trim();
-    if (!v) return;
-    setPlaylistTestRunning(true);
-    setPlaylistTestResult(null);
-    window.parent.postMessage({ type: "videosow_test_playlist", playlist: v }, "*");
-  };
-
-  const testApiKey = async () => {
-    if (!config.apiKey) return;
-    setApiTesting(true);
-    setApiResult(null);
-    try {
-      const url = `https://www.googleapis.com/youtube/v3/playlists?part=id&id=${encodeURIComponent(
-        config.playlistId || "PLBCF2DAC6FFB574DE",
-      )}&key=${encodeURIComponent(config.apiKey)}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      if (res.ok && !json.error) {
-        setApiResult({
-          ok: true,
-          message: config.playlistId
-            ? `Key works. Playlist found: ${json.items?.length || 0} result(s).`
-            : "Key works (tested with a generic playlist).",
-        });
-      } else {
-        const msg = json?.error?.message || `HTTP ${res.status}`;
-        setApiResult({ ok: false, message: msg });
-      }
-    } catch (e: any) {
-      setApiResult({ ok: false, message: e?.message || "Network error" });
-    } finally {
-      setApiTesting(false);
-    }
-  };
-
   const clearLog = () => {
     if (!confirm("Clear the import history shown in the widget? Imported posts remain untouched in WordPress.")) return;
     window.parent.postMessage({ type: "videosow_clear_sermon_log" }, "*");
@@ -714,6 +676,10 @@ const TroubleshootingSection = ({
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+          <ThemeScanTile />
+        </div>
+
         {/* Repair metadata */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <div className="flex items-start gap-2">
@@ -808,43 +774,6 @@ const TroubleshootingSection = ({
           )}
         </div>
 
-        {/* Test API key */}
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
-          <div className="flex items-start gap-2">
-            <KeyRound className="w-4 h-4 text-foreground mt-0.5" />
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Verify YouTube API Key</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Sends a small request to the YouTube Data API to confirm the key is valid, active and the configured playlist is accessible.
-              </p>
-            </div>
-          </div>
-          {apiResult && (
-            <div
-              className={`text-[11px] p-2 rounded-md border ${
-                apiResult.ok
-                  ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-700"
-                  : "border-destructive/30 bg-destructive/5 text-destructive"
-              }`}
-            >
-              <div className="flex items-start gap-1.5">
-                {apiResult.ok ? <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" /> : <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />}
-                <span>{apiResult.message}</span>
-              </div>
-            </div>
-          )}
-          <Button
-            onClick={testApiKey}
-            disabled={!config.apiKey || apiTesting}
-            size="sm"
-            variant="outline"
-            className="h-8 gap-1.5 text-xs w-full"
-          >
-            {apiTesting ? <Loader2 className="w-3 h-3 animate-spin" /> : <KeyRound className="w-3 h-3" />}
-            {apiTesting ? "Testing…" : "Verify key"}
-          </Button>
-        </div>
-
         {/* Clear import log */}
         <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <div className="flex items-start gap-2">
@@ -866,94 +795,6 @@ const TroubleshootingSection = ({
             <Trash2 className="w-3 h-3" />
             {config.log && config.log.length > 0 ? `Clear history (${config.log.length})` : "History empty"}
           </Button>
-        </div>
-
-        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
-          <ThemeScanTile />
-        </div>
-
-        {/* Test playlist */}
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5 md:col-span-2">
-          <div className="flex items-start gap-2">
-            <ListVideo className="w-4 h-4 text-foreground mt-0.5" />
-            <div className="flex-1">
-              <div className="text-sm font-semibold text-foreground">Test playlist YouTube</div>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Paste a playlist ID or full URL (ex. <span className="font-mono">PLxxxx…</span> sau <span className="font-mono">youtube.com/playlist?list=…</span>) and check if it is accessible with the configured API key.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              value={playlistTestInput}
-              onChange={(e) => setPlaylistTestInput(e.target.value)}
-              placeholder={config.playlistId ? `Default: ${config.playlistId}` : "PLxxxxxxxx sau https://youtube.com/playlist?list=…"}
-              className="h-8 text-xs flex-1"
-            />
-            <Button
-              onClick={runPlaylistTest}
-              disabled={playlistTestRunning || !config.apiKey || (!playlistTestInput.trim() && !config.playlistId)}
-              size="sm"
-              className="h-8 text-xs gap-1.5"
-            >
-              {playlistTestRunning ? <Loader2 className="w-3 h-3 animate-spin" /> : <ListVideo className="w-3 h-3" />}
-              {playlistTestRunning ? "Checking…" : "Test"}
-            </Button>
-          </div>
-          {!config.apiKey && (
-            <div className="text-[11px] text-muted-foreground italic">Set a YouTube API key first.</div>
-          )}
-          {playlistTestResult && !playlistTestResult.ok && (
-            <div className="text-[11px] p-2 rounded-md border border-destructive/30 bg-destructive/5 text-destructive">
-              <div className="flex items-start gap-1.5">
-                <AlertCircle className="w-3 h-3 mt-0.5 shrink-0" />
-                <span>{playlistTestResult.error}</span>
-              </div>
-            </div>
-          )}
-          {playlistTestResult && playlistTestResult.ok && playlistTestResult.data && (
-            <div className="p-3 rounded-md bg-secondary/30 border border-border space-y-2 text-[11px]">
-              <div className="flex items-start gap-3">
-                {playlistTestResult.data.thumbnail && (
-                  <img src={playlistTestResult.data.thumbnail} alt="" className="w-20 h-auto rounded shrink-0" />
-                )}
-                <div className="flex-1 space-y-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span className="font-semibold text-foreground">Valid playlist</span>
-                  </div>
-                  <div className="text-foreground font-medium">{playlistTestResult.data.title}</div>
-                  <div className="text-muted-foreground">
-                    Channel: <span className="text-foreground">{playlistTestResult.data.channel}</span>
-                  </div>
-                  <div className="text-muted-foreground">
-                    Videos: <span className="text-foreground">{playlistTestResult.data.item_count}</span>
-                    {playlistTestResult.data.published_at && (
-                      <> — created: <span className="text-foreground">{new Date(playlistTestResult.data.published_at).toLocaleDateString("en-US")}</span></>
-                    )}
-                  </div>
-                  <div className="font-mono text-muted-foreground">ID: {playlistTestResult.data.playlist_id}</div>
-                </div>
-              </div>
-              {playlistTestResult.data.description && (
-                <div className="text-muted-foreground italic border-t border-border pt-1.5">
-                  "{playlistTestResult.data.description}…"
-                </div>
-              )}
-              {playlistTestResult.data.samples.length > 0 && (
-                <div className="border-t border-border pt-1.5 space-y-0.5">
-                  <div className="font-semibold text-foreground">First videos:</div>
-                  {playlistTestResult.data.samples.map((s, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-muted-foreground">{i + 1}.</span>
-                      <span className="text-foreground truncate flex-1">{s.title}</span>
-                      <span className="font-mono text-muted-foreground shrink-0">{s.video_id}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>
