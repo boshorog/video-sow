@@ -3347,6 +3347,10 @@ function videosow_import_one_video( $cfg, $video_id ) {
     update_post_meta( $post_id, '_videosow_yt_published', $published );
     update_post_meta( $post_id, '_videosow_yt_views', $stats_views );
     update_post_meta( $post_id, '_videosow_yt_views_updated', time() );
+    // Track when WE imported the video (distinct from when YouTube published it,
+    // which becomes the post_date). Use add_post_meta with unique=true so a
+    // re-sync of an existing post never overwrites the original import time.
+    add_post_meta( $post_id, '_videosow_imported_at', time(), true );
 
     // Always store transcript status + raw text as post meta (diagnostic + reuse).
     if ( ! empty( $cfg['fetchTranscript'] ) ) {
