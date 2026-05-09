@@ -1857,6 +1857,7 @@ function videosow_sermon_archive_toolbar_js() {
           anchorT = anchorParentT.firstChild;
         }
         anchorParentT.insertBefore(toolbar, anchorT);
+        compactBeforeLoop(toolbar);
         toolbar.style.display = '';
         buildTags(toolbar);
         var sT = toolbar.querySelector('#videosow-search');
@@ -1920,6 +1921,7 @@ function videosow_sermon_archive_toolbar_js() {
       }
     }
     insertHost.insertBefore(grid, insertBefore);
+    compactBeforeLoop(grid);
 
     // Physically REMOVE only the original article wrappers, and ONLY when
     // they live inside the loop container. This guarantees we never strip
