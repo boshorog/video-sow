@@ -191,6 +191,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         </div>
       </div>
 
+      <ImporterCardShowcaseV2 />
       <ImporterCardShowcase />
 
       <div data-vs-anchor="firstimport">
