@@ -323,13 +323,6 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      {!themeScanned && (
-        <div className="flex items-center gap-2 text-xs px-5 py-2 border-b bg-amber-50 border-amber-200 text-amber-800">
-          <Scan className="w-3.5 h-3.5 shrink-0" />
-          <span className="flex-1">Theme not scanned yet — it will run automatically before your first import.</span>
-        </div>
-      )}
-
       <div className="grid lg:grid-cols-[1.9fr_1fr]">
         {/* ---- Status side (left, larger) -------------------------- */}
         <div className="p-5 space-y-4">
