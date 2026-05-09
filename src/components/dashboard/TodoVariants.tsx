@@ -1,6 +1,5 @@
 import {
   CheckCircle2,
-  Lock,
   ArrowRight,
   Scan,
   Settings as SettingsIcon,
@@ -50,22 +49,16 @@ export const buildShowcaseSteps = (opts: {
   { key: 'autosync', icon: RefreshCw, title: 'Schedule auto-sync', short: 'Auto-sync',
     desc: 'Pick how often Video Sow checks for new videos and imports them in the background.',
     done: opts.syncEnabled, cta: opts.syncEnabled ? 'Adjust interval' : 'Enable auto-sync' },
-  { key: 'ai', icon: Wand2, title: 'Cleanup rules & AI prompts', short: 'AI prompts', pro: true,
+  { key: 'ai', icon: Wand2, title: 'Cleanup rules & AI tasks', short: 'AI tasks', pro: true,
     desc: 'Strip boilerplate, rewrite descriptions for SEO, and craft tags before publishing.',
     done: opts.hasAi, cta: opts.hasAi ? 'Tune prompts' : 'Open Tasks' },
   { key: 'transcripts', icon: FileText, title: 'Enable transcript fetch', short: 'Transcripts', pro: true,
     desc: "Fetch each video's transcript and append it to the article — even more text for SEO.",
     done: opts.transcriptOn, cta: opts.transcriptOn ? 'Configure' : 'Enable transcripts' },
-  { key: 'pro', icon: Crown, title: 'Unlock Pro', short: 'Go Pro', pro: true,
-    desc: 'Unlimited playlists, advanced AI prompts, and transcripts — all unlocked.',
-    done: opts.isPro, cta: opts.isPro ? undefined as any : 'See Pro features' },
 ];
 
 const StatusBadge = ({ step }: { step: ShowcaseStep }) => (
   <>
-    {step.pro && !step.done && (
-      <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500 text-white">Pro</span>
-    )}
     {step.done && (
       <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700">Done</span>
     )}
@@ -74,14 +67,21 @@ const StatusBadge = ({ step }: { step: ShowcaseStep }) => (
 
 const StepIcon = ({ s }: { s: ShowcaseStep }) => {
   const Icon = s.icon;
+  // Pro icon = orange crown (matches the Pro menu item).
+  if (s.pro && !s.done) {
+    return (
+      <div className="flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-amber-50 border-amber-300">
+        <Crown className="w-5 h-5 text-amber-500" fill="currentColor" />
+      </div>
+    );
+  }
   return (
     <div className={cn(
       'flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-card',
       s.done ? 'bg-emerald-500 border-emerald-500 text-white'
-      : s.pro ? 'bg-amber-50 border-amber-300 text-amber-700'
       : 'border-primary/40 text-primary',
     )}>
-      {s.done ? <CheckCircle2 className="w-5 h-5" /> : s.pro ? <Lock className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+      {s.done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
     </div>
   );
 };
@@ -97,11 +97,11 @@ const TodoVariants = ({ steps, onAction }: Props) => {
   const percent = Math.round((completed / total) * 100);
 
   return (
-    <section className="rounded-xl border bg-gradient-to-br from-primary/5 via-transparent to-amber-50/40 p-5 md:p-6">
+    <section className="rounded-xl border bg-gradient-to-br from-primary/5 via-transparent to-background p-5 md:p-6">
       <div className="flex items-baseline justify-between mb-1 flex-wrap gap-2">
-        <h3 className="text-base font-semibold text-slate-800">To do — set up Video Sow</h3>
+        <h3 className="text-base font-semibold uppercase tracking-wider text-slate-800">TO DO</h3>
         <p className="text-xs text-muted-foreground">
-          {completed} of {total} done · {percent}%
+          {completed} of {total} done
         </p>
       </div>
       <div className="h-1.5 w-full rounded-full bg-border/60 overflow-hidden mb-5">
@@ -113,14 +113,11 @@ const TodoVariants = ({ steps, onAction }: Props) => {
           const last = i === steps.length - 1;
           return (
             <li key={s.key} className="relative pl-20 pb-6 last:pb-0 min-h-[68px]">
-              {/* Connector: 8px gap on top AND bottom of the icon (icon = 48px tall, centered at x=24px). */}
+              {/* Connector: always grey, regardless of completion. */}
               {!last && (
                 <span
                   aria-hidden
-                  className={cn(
-                    'absolute left-[23px] top-[56px] bottom-2 w-0.5',
-                    s.done ? 'bg-emerald-300' : 'bg-border',
-                  )}
+                  className="absolute left-[23px] top-[56px] bottom-2 w-0.5 bg-border"
                 />
               )}
               <div className="absolute left-0 top-0">
