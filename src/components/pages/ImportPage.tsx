@@ -187,6 +187,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         </div>
       </div>
 
+      <div data-vs-anchor="firstimport">
       <ImporterWidget
         config={imp.config}
         progress={imp.progress}
@@ -205,6 +206,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         channelName={playlistInfo.channel}
         onPlaylistClick={() => onNavigate?.('settings')}
       />
+      </div>
+
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">

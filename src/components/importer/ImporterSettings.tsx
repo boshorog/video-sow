@@ -281,7 +281,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
        <div className="space-y-6 min-w-0">
-      <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
+      <div data-vs-anchor="autosync" className="flex items-center justify-between p-3 rounded-lg border border-border bg-secondary/20">
         <div className="flex-1 pr-3">
           <Label className="text-sm font-medium text-foreground">Automatic sync</Label>
           <p className="text-xs text-muted-foreground mt-0.5">Runs in background on the configured interval.</p>
@@ -339,7 +339,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-1.5">
+        <div data-vs-anchor="apikey" className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
           <Input
             type="password"
@@ -379,7 +379,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           };
           if (!isPro) {
             return (
-              <div className="space-y-1.5">
+              <div data-vs-anchor="playlist" className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Playlist ID or URL</Label>
                 <div className="relative">
                   <Input
@@ -397,7 +397,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
             );
           }
           return (
-            <div className="space-y-1.5">
+            <div data-vs-anchor="playlist" className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Playlists</Label>
               <div className="space-y-2">
                 {list.map((pid, i) => {
@@ -516,7 +516,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
 
         {isPro && (
-        <div className="p-3 rounded-lg border border-border bg-secondary/20">
+        <div data-vs-anchor="transcripts" className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
               <Label className="text-sm font-medium text-foreground flex items-center gap-2">
@@ -868,7 +868,7 @@ const TroubleshootingSection = ({
           </Button>
         </div>
 
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <ThemeScanTile />
         </div>
 

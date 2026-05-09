@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
+import { highlightAnchor } from '@/lib/highlightAnchor';
 
 const useThemeScan = () => {
   const { map, scanned } = useThemeMap();
@@ -218,7 +219,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </Card>
       </div>
 
-      {/* To do — SHOWCASE: pick a variant */}
+      {/* To do — setup roadmap */}
       <TodoVariants
         steps={buildShowcaseSteps({
           themeOk,
@@ -230,6 +231,30 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           transcriptOn: !!cfg.fetchTranscript,
           isPro: license.isPro,
         })}
+        onAction={(key) => {
+          const tabFor: Record<string, string> = {
+            scan: 'settings',
+            apikey: 'settings',
+            playlist: 'settings',
+            firstimport: 'import',
+            autosync: 'settings',
+            ai: 'tasks',
+            transcripts: 'settings',
+            pro: 'pro',
+          };
+          const anchorFor: Record<string, string> = {
+            scan: 'scan',
+            apikey: 'apikey',
+            playlist: 'playlist',
+            firstimport: 'firstimport',
+            autosync: 'autosync',
+            ai: 'ai',
+            transcripts: 'transcripts',
+          };
+          onNavigate?.(tabFor[key] || 'settings');
+          const anchor = anchorFor[key];
+          if (anchor) highlightAnchor(anchor);
+        }}
       />
 
       {/* Recent activity */}
