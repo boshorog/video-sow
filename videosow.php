@@ -460,6 +460,7 @@ function videosow_get_sermon_importer_defaults() {
         'totalImported'  => 0,
         'log'            => array(),
         'firstSyncDone'  => false,
+        'dashboardCards' => array(),
     );
 }
 
