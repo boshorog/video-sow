@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.12
+Stable tag: 1.2.13
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.12 =
+= 1.2.13 =
 * Dashboard "To do" card redesigned: single vertical timeline with large round icons, soft gradient background and a perfectly centered connector line with equal top/bottom gaps.
 * Each step button now jumps to the relevant Settings/Tasks/Import section and pulses a highlight ring so it's instantly visible (theme scanner, API key, playlist, auto-sync, AI prompts, transcripts, first import).
 
