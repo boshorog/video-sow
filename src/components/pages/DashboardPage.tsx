@@ -64,7 +64,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
   const { stats, loaded } = useDashboardStats();
   const imp = useImporter();
   const license = useLicense();
-  const themeScan = useThemeMap();
+  const themeScan = useThemeScan();
 
   const imported = stats?.imported ?? 0;
   const published = stats?.published ?? 0;
