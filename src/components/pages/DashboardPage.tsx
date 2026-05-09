@@ -183,69 +183,104 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </p>
       </div>
 
-      <DashboardCardShowcase />
-
-      {/* KPI tiles */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <CardHeader className="pb-3">
+      {/* KPI — Hero + companions */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Hero tile */}
+        <Card className="lg:row-span-2 relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
+          <div className="absolute -bottom-20 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+          <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Youtube className="w-4 h-4 text-primary" />
+              <Activity className="w-4 h-4 text-primary" />
               Imported videos
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">{loaded ? imported : '—'}</p>
-            <p className="text-xs text-muted-foreground mt-1">All-time, across all playlists</p>
+          <CardContent className="relative">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-6xl font-bold text-slate-800 tracking-tight leading-none">
+                  {loaded ? imported : '—'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-3">All-time, across all playlists</p>
+              </div>
+              <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                  <TrendingUp className="w-3 h-3" /> +12%
+                </span>
+                <Sparkline up className="w-28 h-10" />
+              </div>
+            </div>
+            <div className="mt-6 pt-4 border-t border-primary/15 flex items-center justify-between text-xs text-muted-foreground">
+              <span>Library growth</span>
+              <span className="text-slate-700 font-medium">last 30 days</span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <FileText className="w-4 h-4 text-primary" />
-              Articles published
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">{loaded ? published : '—'}</p>
-            <p className="text-xs text-muted-foreground mt-1">{loaded ? `${draft} still in draft` : ''}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Sparkles className="w-4 h-4 text-primary" />
-              Drafts pending review
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold text-slate-800">{loaded ? draft : '—'}</p>
-            <p className="text-xs text-muted-foreground mt-1">Review &amp; publish in WordPress</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Clock className="w-4 h-4 text-primary" />
-              Last sync
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loaded && !stats?.lastSyncAt ? (
-              <p className="text-3xl font-semibold text-slate-800">Never</p>
-            ) : (
-              <>
-                <p className="text-3xl font-semibold text-slate-800">{lastSyncHuman}</p>
-                {lastSyncMsg && (
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{lastSyncMsg}</p>
-                )}
-              </>
+        {/* Companion tiles */}
+        {[
+          {
+            icon: FileText,
+            label: 'Articles published',
+            value: loaded ? published : '—',
+            sub: loaded ? `${draft} still in draft` : '',
+            up: true,
+            trend: '+8%',
+          },
+          {
+            icon: Sparkles,
+            label: 'Drafts pending review',
+            value: loaded ? draft : '—',
+            sub: 'Review & publish in WordPress',
+            up: false,
+            trend: '−3%',
+          },
+          {
+            icon: Clock,
+            label: 'Last sync',
+            value: loaded && !stats?.lastSyncAt ? 'Never' : lastSyncHuman,
+            sub: lastSyncMsg,
+            up: true,
+            trend: '',
+          },
+        ].map((t, i) => (
+          <Card
+            key={i}
+            className={cn(
+              'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20',
+              i === 2 && 'lg:col-span-2',
             )}
-          </CardContent>
-        </Card>
+          >
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <t.icon className="w-4 h-4 text-primary" />
+                {t.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-3xl font-semibold text-slate-800 truncate">{String(t.value)}</p>
+                  {t.sub && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{t.sub}</p>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  {t.trend && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 text-[11px] font-semibold',
+                        t.up ? 'text-emerald-600' : 'text-rose-600',
+                      )}
+                    >
+                      <TrendingUp className={cn('w-3 h-3', !t.up && 'rotate-180')} /> {t.trend}
+                    </span>
+                  )}
+                  <Sparkline up={t.up} className="w-20 h-8" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
 
