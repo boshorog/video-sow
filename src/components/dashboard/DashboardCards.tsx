@@ -1,6 +1,6 @@
 import {
   Youtube, FileText, Sparkles, Clock, TrendingUp, TrendingDown,
-  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown, Activity, ExternalLink,
+  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown, Activity, ExternalLink, Inbox,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
