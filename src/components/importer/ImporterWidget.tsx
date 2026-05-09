@@ -520,6 +520,16 @@ const SermonImporterWidget = ({
               >
                 <X className="w-4 h-4" /> Cancel sync
               </button>
+            ) : onSync ? (
+              <button
+                type="button"
+                onClick={onSync}
+                disabled={!canSync}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-primary py-2 rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {isSyncing ? "Syncing…" : isFirstRun ? "Run full backfill" : "Sync now"}
+              </button>
             ) : null}
           </div>
         </div>
