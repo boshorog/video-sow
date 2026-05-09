@@ -1151,7 +1151,7 @@ function videosow_sermon_archive_toolbar() {
         }
         $sort_html .= '</select></div>';
     }
-    $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search videos..." autocomplete="off" /></div>' : '';
+    $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search articles..." autocomplete="off" /></div>' : '';
     $tags_html   = $show_tags ? '<div class="kp-tags" id="videosow-tags"></div>' : '';
     $bar_html    = ( $search_html || $sort_html ) ? '<div class="kp-bar">' . $search_html . $sort_html . '</div>' : '';
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
