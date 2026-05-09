@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.17
+Stable tag: 1.2.18
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.17 =
+= 1.2.18 =
 * Dashboard: KPI row redesigned with a unified "soft tinted" card style (faint red fill, hover highlight, small primary icon, sparkline + trend indicator).
 * Dashboard: card visibility and order are now user-configurable in Settings → Dashboard cards.
 * New cards available: Auto-sync countdown (Pro), Sync Health, Taxonomy / Top tags, AI usage (Pro), Backfill / Importing playlist (Pro).
