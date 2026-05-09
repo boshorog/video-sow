@@ -427,7 +427,7 @@ const SermonImporterWidget = ({
                   )}
                 </div>
               ) : (
-                <div className="text-center py-1">
+                <div className="text-center flex-1 flex flex-col justify-center">
                   <p className="font-bold text-amber-800 text-sm">Not connected</p>
                   <p className="text-[10px] text-amber-700 mt-0.5">Click to add a playlist</p>
                 </div>
@@ -514,7 +514,7 @@ const SermonImporterWidget = ({
             <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Auto-sync</p>
-                <Activity className="w-3 h-3 text-muted-foreground" />
+                <RefreshCw className="w-3 h-3 text-muted-foreground" />
               </div>
               <p className="text-base font-bold text-slate-900 leading-tight mt-0.5">
                 {config.enabled ? "On" : "Off"}
@@ -538,13 +538,30 @@ const SermonImporterWidget = ({
 
         {/* ---- Action panel (right, narrower) --------------------- */}
         <div className="p-4 flex flex-col justify-between gap-3 bg-gradient-to-br from-primary/8 via-primary/3 to-transparent border-l border-primary/10">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Status</p>
-            <p className="text-xl font-bold text-slate-900 mt-0.5">{stageLabelText}</p>
-            <p className="text-[11px] text-muted-foreground">
-              Last: {activeSyncAt ? fmtTime(activeSyncAt) : "Never"}
-            </p>
-          </div>
+          {(() => {
+            const showNext = !isLive && config.enabled && isConfigured && activeSyncAt > 0 && config.syncIntervalH > 0;
+            const nextAtSec = activeSyncAt + config.syncIntervalH * 3600;
+            const nowSec = Math.floor(Date.now() / 1000);
+            const remainingSec = Math.max(0, nextAtSec - nowSec);
+            const h = Math.floor(remainingSec / 3600);
+            const m = Math.floor((remainingSec % 3600) / 60);
+            const nextLabel = remainingSec === 0 ? "Due now" : `in ${h}h ${m}m`;
+            return (
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+                  {showNext ? "Next sync" : "Status"}
+                </p>
+                <p className="text-xl font-bold text-slate-900 mt-0.5">
+                  {showNext ? nextLabel : stageLabelText}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  {showNext
+                    ? `Every ${config.syncIntervalH}h · last ${fmtTime(activeSyncAt)}`
+                    : `Last: ${activeSyncAt ? fmtTime(activeSyncAt) : "Never"}`}
+                </p>
+              </div>
+            );
+          })()}
           <div className="space-y-1.5">
             {isLive && onCancelSync ? (
               <button

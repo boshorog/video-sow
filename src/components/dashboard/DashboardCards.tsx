@@ -1,6 +1,6 @@
 import {
   Youtube, FileText, Sparkles, Clock, TrendingUp, TrendingDown,
-  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown, Activity, ExternalLink,
+  RefreshCw, Wand2, CheckCircle2, Hash, Gauge, PlayCircle, Timer, Crown, Activity, ExternalLink, Inbox,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -163,6 +163,9 @@ type Ctx = {
   lastSyncMsg: string;
   loaded: boolean;
   recent?: RecentRow[];
+  autosyncEnabled?: boolean;
+  syncIntervalH?: number;
+  lastSyncAt?: number;
 };
 
 const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
@@ -195,7 +198,7 @@ const CardPublished = ({ ctx, hero }: CtxCardProps) => (
 );
 
 const CardDrafts = ({ ctx, hero }: CtxCardProps) => (
-  <Tile eyebrow="Queue" title="Drafts pending" icon={Sparkles} hero={hero}>
+  <Tile eyebrow="Queue" title="Drafts pending" icon={Inbox} hero={hero}>
     <ValueTile hero={hero} value={ctx.loaded ? ctx.draft : '—'} sub="Review & publish" trend="−3%" up={false} />
   </Tile>
 );
@@ -209,22 +212,42 @@ const CardLastSync = ({ ctx, hero }: CtxCardProps) => (
   </Tile>
 );
 
-const CardAutosync = ({ locked, onUnlock, hero }: LockCardProps) => (
-  <Tile eyebrow="Auto-sync" title="Next sync in" icon={RefreshCw} locked={locked} onUnlock={onUnlock} hero={hero}>
-    <div className="mt-auto">
-      <div className="flex items-baseline gap-2 tabular-nums">
-        <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>02</span>
-        <span className="text-xs text-muted-foreground">h</span>
-        <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>14</span>
-        <span className="text-xs text-muted-foreground">m</span>
+const CardAutosync = ({ ctx, locked, onUnlock, hero }: LockCardProps & { ctx: Ctx }) => {
+  const enabled = !!ctx.autosyncEnabled;
+  const intervalH = ctx.syncIntervalH || 0;
+  const lastAt = ctx.lastSyncAt || 0;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const nextAt = lastAt && intervalH ? lastAt + intervalH * 3600 : 0;
+  const remaining = Math.max(0, nextAt - nowSec);
+  const elapsed = lastAt && intervalH ? Math.min(1, (nowSec - lastAt) / (intervalH * 3600)) : 0;
+  const pct = enabled && lastAt ? Math.round(elapsed * 100) : 0;
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  return (
+    <Tile eyebrow="Auto-sync" title={enabled ? "Next sync in" : "Auto-sync"} icon={RefreshCw} locked={locked} onUnlock={onUnlock} hero={hero}>
+      <div className="mt-auto">
+        {enabled ? (
+          <div className="flex items-baseline gap-2 tabular-nums">
+            <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>{String(h).padStart(2, '0')}</span>
+            <span className="text-xs text-muted-foreground">h</span>
+            <span className={cn('font-bold text-slate-900', hero ? 'text-6xl' : 'text-3xl')}>{String(m).padStart(2, '0')}</span>
+            <span className="text-xs text-muted-foreground">m</span>
+          </div>
+        ) : (
+          <p className={cn('font-bold text-slate-900', hero ? 'text-4xl' : 'text-2xl')}>Off</p>
+        )}
+        <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+          <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-2">
+          {enabled
+            ? `Every ${intervalH}h · runs in background`
+            : 'Turn on in Settings to schedule automatic syncs'}
+        </p>
       </div>
-      <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-        <div className="h-full bg-primary" style={{ width: '62%' }} />
-      </div>
-      <p className="text-[11px] text-muted-foreground mt-2">Every 6h · runs in background</p>
-    </div>
-  </Tile>
-);
+    </Tile>
+  );
+};
 
 const CardSyncHealth = ({ hero }: CardProps) => (
   <Tile eyebrow="Sync health" title="All systems go" icon={Gauge} hero={hero}>
@@ -296,32 +319,33 @@ const CardRecent = ({ ctx, hero }: CtxCardProps) => {
       {rows.length === 0 ? (
         <p className="text-xs text-muted-foreground">No imports yet.</p>
       ) : (
-        <ul className="h-full overflow-y-auto pr-1 -mr-1 divide-y divide-primary/10">
-          {rows.map((row) => {
-            const link = row.editLink || row.permalink;
-            const Tag: any = link ? 'a' : 'div';
-            return (
-              <li key={row.id} className="flex items-center gap-2 py-1.5 text-[12px]">
-                <span
-                  className={cn(
-                    'h-1.5 w-1.5 rounded-full shrink-0',
-                    row.status === 'Published' ? 'bg-emerald-500' : 'bg-amber-500',
-                  )}
-                  title={row.status}
-                />
-                <Tag
-                  {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
-                  title={row.title}
-                >
-                  {row.title}
-                </Tag>
-                <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{row.when}</span>
-                {link && <ExternalLink className="w-3 h-3 text-muted-foreground/60 shrink-0" />}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="-mt-2 -mb-2 -mr-3 flex-1 min-h-0 overflow-y-auto pr-1">
+          <ul className="divide-y divide-primary/10">
+            {rows.map((row) => {
+              const link = row.editLink || row.permalink;
+              const Tag: any = link ? 'a' : 'div';
+              return (
+                <li key={row.id} className="flex items-center gap-2 py-1 text-[12px]">
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full shrink-0',
+                      row.status === 'Published' ? 'bg-emerald-500' : 'bg-amber-500',
+                    )}
+                    title={row.status}
+                  />
+                  <Tag
+                    {...(link ? { href: link, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="flex-1 truncate text-slate-700 hover:text-primary transition-colors"
+                    title={row.title}
+                  >
+                    {row.title}
+                  </Tag>
+                  <span className="text-[10px] text-muted-foreground shrink-0 tabular-nums">{row.when}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
     </Tile>
   );
@@ -341,7 +365,7 @@ const renderCard = (key: DashboardCardKey, isPro: boolean, ctx: Ctx, onUnlock: (
     case 'published':  return <CardPublished  ctx={ctx} hero={hero} />;
     case 'drafts':     return <CardDrafts     ctx={ctx} hero={hero} />;
     case 'lastSync':   return <CardLastSync   ctx={ctx} hero={hero} />;
-    case 'autosync':   return <CardAutosync   locked={locked} onUnlock={onUnlock} hero={hero} />;
+    case 'autosync':   return <CardAutosync   ctx={ctx} locked={locked} onUnlock={onUnlock} hero={hero} />;
     case 'syncHealth': return <CardSyncHealth hero={hero} />;
     case 'taxonomy':   return <CardTaxonomy   hero={hero} />;
     case 'aiUsage':    return <CardAiUsage    locked={locked} onUnlock={onUnlock} hero={hero} />;
