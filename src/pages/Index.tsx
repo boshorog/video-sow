@@ -61,6 +61,13 @@ const Index = () => {
     return new URLSearchParams(window.location.search).get('tab') || 'dashboard';
   });
 
+  const navigateTab = (tab: string) => {
+    setActiveTab(tab);
+    // Scroll to top of the embed/page so deep tabs (e.g. Pro) don't open mid-scroll.
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { window.scrollTo(0, 0); }
+    try { window.parent?.postMessage({ type: 'videosow:scrollTop' }, '*'); } catch {}
+  };
+
   useEffect(() => {
     if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
   }, [activeTab, license.isPro, license.checked]);
