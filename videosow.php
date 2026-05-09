@@ -741,6 +741,11 @@ function videosow_sermon_archive_css() {
         . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
         . '.post-type-archive-videosow_video .blog-content > p:empty,'
         . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
+        . '.post-type-archive-videosow_video #videosow-toolbar,'
+        . '.post-type-archive-videosow_video #videosow-grid{position:relative !important;top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-loop-compact{padding-top:0 !important;margin-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-loop-compact > :first-child{margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-before-loop-empty{display:none !important;margin:0 !important;padding:0 !important;border:0 !important;height:0 !important;min-height:0 !important;}'
         . '.post-type-archive-videosow_video .entry-meta,'
         . '.post-type-archive-videosow_video .post-meta,'
         . '.post-type-archive-videosow_video .byline,'
@@ -848,7 +853,10 @@ function videosow_single_video_aspect_css() {
         // theme line-clamps or fixed heights.
         . '.single-videosow_video .entry-title,'
         . '.single-videosow_video h1.entry-title,'
-        . '.single-videosow_video .entry-header h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;word-break:break-word !important;}'
+        . '.single-videosow_video .entry-header h1,'
+        . '.single-videosow_video .elementor-heading-title,'
+        . '.single-videosow_video h1.post-title,'
+        . '.single-videosow_video article h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;min-height:0 !important;word-break:break-word !important;}'
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
