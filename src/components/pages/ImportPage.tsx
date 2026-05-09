@@ -251,16 +251,19 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                 <TableHead>
                   <SortHeader label="Title" keyName="title" align="left" />
                 </TableHead>
-                <TableHead className="w-32 text-center">
-                  <SortHeader label="Imported" keyName="date" align="center" />
+                <TableHead className="w-24 text-center">
+                  <SortHeader label="Video date" keyName="date" align="center" />
                 </TableHead>
                 <TableHead className="w-24 text-center">
-                  <SortHeader label="Status" keyName="status" align="center" />
+                  <SortHeader label="Import date" keyName="importedAt" align="center" />
                 </TableHead>
                 <TableHead className="w-20 text-center">
+                  <SortHeader label="Status" keyName="status" align="center" />
+                </TableHead>
+                <TableHead className="w-16 text-center">
                   <SortHeader label="Views" keyName="views" align="center" />
                 </TableHead>
-                <TableHead className="w-28 text-center">Actions</TableHead>
+                <TableHead className="w-24 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
