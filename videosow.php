@@ -1067,6 +1067,10 @@ function videosow_sermon_archive_toolbar() {
         })()
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{display:block !important;width:auto !important;max-width:none !important;min-width:0 !important;float:none !important;clear:none !important;margin:0 !important;padding:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;max-width:none !important;float:none !important;clear:none !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > :first-child{margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > .post-thumbnail:first-child,'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > a.post-thumbnail:first-child,'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > figure:first-child{margin-top:0 !important;padding-top:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid img{opacity:1 !important;visibility:visible !important;display:block !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article::before{display:none !important;}'
         // Cover image hover effect (lost when cloning into custom grid)
@@ -1091,12 +1095,12 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video .videosow-grid h1,'
         . '.post-type-archive-videosow_video .videosow-grid h2,'
         . '.post-type-archive-videosow_video .videosow-grid h3,'
-        . '.post-type-archive-videosow_video .videosow-grid .entry-title{margin:0 0 1rem 0 !important;padding:0 !important;line-height:1.2 !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid .entry-title{margin:0 0 1rem 0 !important;line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title a{line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + .entry-summary,'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + *{margin-top:1rem !important;}'
         // Divider between rows
-        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:2.25rem !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="1"],'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="2"]{padding-top:0 !important;border-top:0 !important;}'
         . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="2"]{padding-top:2.25rem !important;border-top:1px solid rgba(0,0,0,.08) !important;}}'
