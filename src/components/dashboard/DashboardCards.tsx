@@ -73,7 +73,7 @@ const TileTitle = ({ children }: any) => (
 );
 
 const Tile = ({
-  eyebrow, title, icon: Icon, children, locked = false, onUnlock,
+  eyebrow, title, icon: Icon, children, locked = false, onUnlock, hero = false,
 }: {
   eyebrow: string;
   title: string;
@@ -81,20 +81,25 @@ const Tile = ({
   children: React.ReactNode;
   locked?: boolean;
   onUnlock?: () => void;
+  hero?: boolean;
 }) => (
   <div
     className={cn(
-      'relative rounded-xl border border-primary/15 bg-primary/[0.02] p-5 transition-colors',
+      'relative rounded-xl border border-primary/15 bg-primary/[0.02] transition-colors',
       'hover:border-primary/40',
+      hero ? 'p-6 lg:p-7' : 'p-5',
       locked && 'opacity-80',
     )}
   >
     <div className="absolute top-3 right-3">
-      <Icon className="w-3.5 h-3.5 text-primary" />
+      <Icon className={cn(hero ? 'w-4 h-4' : 'w-3.5 h-3.5', 'text-primary')} />
     </div>
     <Eyebrow>{eyebrow}</Eyebrow>
-    <TileTitle>{title}</TileTitle>
-    <div className="mt-3">{children}</div>
+    <h4 className={cn(
+      'font-bold text-slate-800 leading-tight',
+      hero ? 'text-lg' : 'text-[15px]',
+    )}>{title}</h4>
+    <div className={cn(hero ? 'mt-5' : 'mt-3')}>{children}</div>
     {locked && (
       <button
         onClick={onUnlock}
