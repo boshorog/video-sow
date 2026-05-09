@@ -667,12 +667,12 @@ const DashboardCardsSection = ({
           <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
           <h4 className="text-sm font-bold text-foreground">Dashboard cards</h4>
         </div>
-        <Button variant="ghost" size="sm" onClick={resetDefaults} className="h-7 text-xs">
-          Reset to defaults
+        <Button variant="ghost" size="sm" onClick={resetDefaults} className="h-7 text-xs gap-1.5">
+          <RefreshCw className="w-3 h-3" /> Reset to defaults
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Drag to reorder, toggle to show/hide. The <strong className="text-foreground">first enabled card</strong> becomes the large <em>Main card</em> on the Dashboard.
+        Drag to reorder, toggle to show/hide. Cards appear on the Dashboard in the order listed below.
       </p>
 
       <ul className="rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
