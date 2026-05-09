@@ -163,6 +163,9 @@ type Ctx = {
   lastSyncMsg: string;
   loaded: boolean;
   recent?: RecentRow[];
+  autosyncEnabled?: boolean;
+  syncIntervalH?: number;
+  lastSyncAt?: number;
 };
 
 const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
