@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
+import ImporterHeaderShowcase from '@/components/importer/ImporterHeaderShowcase';
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
 import { cn } from '@/lib/utils';
