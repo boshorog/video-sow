@@ -364,7 +364,7 @@ const renderCard = (key: DashboardCardKey, isPro: boolean, ctx: Ctx, onUnlock: (
     case 'published':  return <CardPublished  ctx={ctx} hero={hero} />;
     case 'drafts':     return <CardDrafts     ctx={ctx} hero={hero} />;
     case 'lastSync':   return <CardLastSync   ctx={ctx} hero={hero} />;
-    case 'autosync':   return <CardAutosync   locked={locked} onUnlock={onUnlock} hero={hero} />;
+    case 'autosync':   return <CardAutosync   ctx={ctx} locked={locked} onUnlock={onUnlock} hero={hero} />;
     case 'syncHealth': return <CardSyncHealth hero={hero} />;
     case 'taxonomy':   return <CardTaxonomy   hero={hero} />;
     case 'aiUsage':    return <CardAiUsage    locked={locked} onUnlock={onUnlock} hero={hero} />;
