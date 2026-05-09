@@ -868,7 +868,7 @@ const TroubleshootingSection = ({
           </Button>
         </div>
 
-        <div className="p-4 rounded-lg border border-border bg-card space-y-2.5">
+        <div data-vs-anchor="scan" className="p-4 rounded-lg border border-border bg-card space-y-2.5">
           <ThemeScanTile />
         </div>
 
