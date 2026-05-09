@@ -251,10 +251,10 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                 <TableHead>
                   <SortHeader label="Title" keyName="title" align="left" />
                 </TableHead>
-                <TableHead className="w-24 text-center">
+                <TableHead className="w-28 text-center whitespace-nowrap">
                   <SortHeader label="Video date" keyName="date" align="center" />
                 </TableHead>
-                <TableHead className="w-24 text-center">
+                <TableHead className="w-28 text-center whitespace-nowrap">
                   <SortHeader label="Import date" keyName="importedAt" align="center" />
                 </TableHead>
                 <TableHead className="w-20 text-center">
@@ -287,8 +287,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground text-center">{r.date}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground text-center">{r.importedAt || '—'}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground text-center whitespace-nowrap">{r.date}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground text-center whitespace-nowrap">{r.importedAt || '—'}</TableCell>
                   <TableCell className="text-center">
                     <span
                       className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${

@@ -67,18 +67,11 @@ const StatusBadge = ({ step }: { step: ShowcaseStep }) => (
 
 const StepIcon = ({ s }: { s: ShowcaseStep }) => {
   const Icon = s.icon;
-  // Pro icon = orange crown (matches the Pro menu item).
-  if (s.pro && !s.done) {
-    return (
-      <div className="flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-amber-50 border-amber-300">
-        <Crown className="w-5 h-5 text-amber-500" fill="currentColor" />
-      </div>
-    );
-  }
   return (
     <div className={cn(
       'flex items-center justify-center rounded-full border-2 shrink-0 h-12 w-12 bg-card',
       s.done ? 'bg-emerald-500 border-emerald-500 text-white'
+      : s.pro ? 'bg-amber-50 border-amber-300 text-amber-600'
       : 'border-primary/40 text-primary',
     )}>
       {s.done ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
@@ -104,7 +97,10 @@ const TodoVariants = ({ steps, onAction }: Props) => {
           {completed} of {total} done
         </p>
       </div>
-      <div className="h-1.5 w-full rounded-full bg-border/60 overflow-hidden mb-5">
+      <p className="text-xs text-muted-foreground mb-3">
+        Follow these steps to set up Video Sow and start importing your YouTube playlist into clean WordPress articles.
+      </p>
+      <div className="h-1.5 w-full rounded-full bg-primary/15 overflow-hidden mb-5">
         <div className="h-full bg-primary transition-all" style={{ width: `${percent}%` }} />
       </div>
 
@@ -127,6 +123,9 @@ const TodoVariants = ({ steps, onAction }: Props) => {
                 <span className={cn('text-base font-semibold', s.done ? 'text-emerald-800' : 'text-slate-800')}>
                   {i + 1}. {s.title}
                 </span>
+                {s.pro && !s.done && (
+                  <Crown className="w-4 h-4 text-amber-500" fill="currentColor" aria-label="Pro feature" />
+                )}
                 <StatusBadge step={s} />
               </div>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-xl">{s.desc}</p>
