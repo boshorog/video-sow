@@ -62,7 +62,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const activeFirstSyncDone = activeStats?.firstSyncDone ?? imp.config.firstSyncDone;
   const isFirstRun = !activeFirstSyncDone;
   const [filter, setFilter] = useState('');
-  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortKey, setSortKey] = useState<SortKey>('importedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
 
