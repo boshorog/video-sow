@@ -370,13 +370,18 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
       <div className="space-y-4">
         <div data-vs-anchor="apikey" className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
-          <Input
-            type="password"
-            value={config.apiKey}
-            onChange={(e) => update("apiKey", e.target.value)}
-            placeholder="AIza..."
-            className="h-9 text-sm font-mono"
-          />
+          <div className="relative">
+            <Input
+              type="password"
+              value={config.apiKey}
+              onChange={(e) => update("apiKey", e.target.value)}
+              placeholder="AIza..."
+              className="h-9 text-sm font-mono pr-9"
+            />
+            <div className="absolute inset-y-0 right-2.5 flex items-center">
+              <ApiKeyValidator apiKey={config.apiKey} playlistId={config.playlistId} />
+            </div>
+          </div>
           <p className="text-[11px] text-muted-foreground">
             Get a key from{' '}
             <a
