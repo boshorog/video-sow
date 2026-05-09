@@ -4508,8 +4508,13 @@ function videosow_scan_css_asset_urls( DOMXPath $xp, $base_url ) {
         for ( $i = 0; $i < $links->length; $i++ ) {
             $href = $links->item( $i )->getAttribute( 'href' );
             if ( ! $href ) continue;
-            $urls[] = function_exists( 'wp_http_validate_url' ) && wp_http_validate_url( $href ) ? $href : wp_make_link_relative( $href );
-            if ( strpos( $href, 'http' ) !== 0 ) $urls[ count( $urls ) - 1 ] = esc_url_raw( wp_parse_url( home_url( '/' ), PHP_URL_SCHEME ) . '://' . wp_parse_url( home_url( '/' ), PHP_URL_HOST ) . '/' . ltrim( $href, '/' ) );
+            if ( strpos( $href, '//' ) === 0 ) {
+                $href = ( is_ssl() ? 'https:' : 'http:' ) . $href;
+            } elseif ( strpos( $href, 'http' ) !== 0 ) {
+                $href = esc_url_raw( home_url( '/' . ltrim( $href, '/' ) ) );
+            }
+            if ( function_exists( 'wp_http_validate_url' ) && ! wp_http_validate_url( $href ) ) continue;
+            $urls[] = $href;
         }
     }
     return array_values( array_unique( array_filter( $urls ) ) );
