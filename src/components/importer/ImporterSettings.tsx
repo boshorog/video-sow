@@ -339,7 +339,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-1.5">
+        <div data-vs-anchor="apikey" className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">YouTube Data API v3 Key</Label>
           <Input
             type="password"
