@@ -427,7 +427,7 @@ const SermonImporterWidget = ({
                   )}
                 </div>
               ) : (
-                <div className="text-center py-1">
+                <div className="text-center flex-1 flex flex-col justify-center">
                   <p className="font-bold text-amber-800 text-sm">Not connected</p>
                   <p className="text-[10px] text-amber-700 mt-0.5">Click to add a playlist</p>
                 </div>
