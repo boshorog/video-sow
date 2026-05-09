@@ -284,6 +284,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         ))}
       </div>
 
+      <DashboardCardShowcaseV2 />
 
       {/* To do — setup roadmap */}
       <TodoVariants
