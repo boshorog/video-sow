@@ -4331,6 +4331,12 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(), // [{url, found}]
+        // v1.2.10 — deeper CSS/theme intelligence.
+        'content_classes'    => '',
+        'breadcrumb_selector'=> '',
+        'css_assets_scanned' => 0,
+        'theme_css_rules'    => array(),
+        'theme_spacing'      => array(),
     );
     return array_merge( $defaults, $opt );
 }
@@ -4387,10 +4393,10 @@ function videosow_scan_fetch( $url ) {
         }
     }
     $resp = wp_remote_get( add_query_arg( 'videosow_scan', '1', $url ), array(
-        'timeout'   => 15,
+        'timeout'   => 30,
         'sslverify' => false,
         'cookies'   => $cookies,
-        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.1' ),
+        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.2' ),
     ) );
     if ( is_wp_error( $resp ) ) return '';
     $code = wp_remote_retrieve_response_code( $resp );
