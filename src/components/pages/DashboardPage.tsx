@@ -292,8 +292,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           hasPlaylist: !!cfg.playlistId,
           firstSyncDone: !!cfg.firstSyncDone,
           syncEnabled: !!cfg.enabled,
-          hasAi: !!cfg.aiApiKey,
-          transcriptOn: !!cfg.fetchTranscript,
+          hasAi: !!cfg.aiApiKey && license.isPro,
+          transcriptOn: !!cfg.fetchTranscript && license.isPro,
           isPro: license.isPro,
         })}
         onAction={(key) => {
