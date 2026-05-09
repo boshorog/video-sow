@@ -515,7 +515,9 @@ const SermonImporterWidget = ({
             ) : null}
             {!isLive && (
               <p className="text-[11px] text-muted-foreground">
-                Use “{activeTotal === 0 ? "Run full backfill" : "Sync now"}” at the top of the page.
+                {activeTotal === 0
+                  ? "Click “Run full backfill” at the top to import all videos."
+                  : "Click “Sync now” at the top to import new videos."}
               </p>
             )}
           </div>
