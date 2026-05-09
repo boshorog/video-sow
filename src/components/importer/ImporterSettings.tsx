@@ -5,11 +5,18 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown } from "lucide-react";
+import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown, LayoutDashboard, ArrowUp, ArrowDown, Crown } from "lucide-react";
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
 import { useLicense } from "@/hooks/useLicense";
+import { Switch } from "@/components/ui/switch";
+import {
+  DASHBOARD_CARD_REGISTRY,
+  reconcileDashboardCards,
+  defaultDashboardCards,
+  type DashboardCardPref,
+} from "@/components/dashboard/DashboardCards";
 
 const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; description: string; icon: typeof Hash; needsValue: boolean }> = {
   boilerplate: {
