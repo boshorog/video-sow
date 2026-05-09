@@ -560,7 +560,18 @@ const SermonImporterWidget = ({
                 {isSyncing ? "Syncing…" : isFirstRun ? "Run full backfill" : "Sync now"}
               </button>
             ) : null}
+            {config.slug && (
+              <a
+                href={`/${config.slug}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-1.5 text-[11px] font-medium text-primary hover:text-primary/80 hover:underline"
+              >
+                View archive <ArrowUpRight className="w-3 h-3" />
+              </a>
+            )}
           </div>
+
         </div>
       </div>
 
