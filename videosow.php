@@ -647,6 +647,40 @@ function videosow_sermon_post_type_archive_title( $name, $post_type = '' ) {
     return $name;
 }
 add_filter( 'post_type_archive_title', 'videosow_sermon_post_type_archive_title', 10, 2 );
+add_filter( 'post_type_archive_link', function( $link, $post_type ) {
+    if ( $post_type !== 'videosow_video' ) return $link;
+    $cfg = videosow_get_sermon_importer_config();
+    $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
+    return home_url( user_trailingslashit( $slug ) );
+}, 10, 2 );
+add_filter( 'wpseo_breadcrumb_links', function( $links ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) || ! is_array( $links ) ) return $links;
+    $cfg = videosow_get_sermon_importer_config();
+    $title = ! empty( $cfg['archiveTitle'] ) ? $cfg['archiveTitle'] : videosow_sermon_post_type_archive_title( 'Articles', 'videosow_video' );
+    $url = get_post_type_archive_link( 'videosow_video' );
+    $last = count( $links ) - 1;
+    if ( $last < 0 || ( isset( $links[ $last ]['text'] ) && trim( (string) $links[ $last ]['text'] ) !== $title ) ) {
+        $links[] = array( 'url' => $url, 'text' => $title );
+    } else {
+        $links[ $last ]['text'] = $title;
+        $links[ $last ]['url']  = $url;
+    }
+    return $links;
+}, 999 );
+add_filter( 'rank_math/frontend/breadcrumb/items', function( $crumbs ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) || ! is_array( $crumbs ) ) return $crumbs;
+    $cfg = videosow_get_sermon_importer_config();
+    $title = ! empty( $cfg['archiveTitle'] ) ? $cfg['archiveTitle'] : videosow_sermon_post_type_archive_title( 'Articles', 'videosow_video' );
+    $url = get_post_type_archive_link( 'videosow_video' );
+    $last = count( $crumbs ) - 1;
+    if ( $last < 0 || ! isset( $crumbs[ $last ][0] ) || trim( (string) $crumbs[ $last ][0] ) !== $title ) {
+        $crumbs[] = array( $title, $url );
+    } else {
+        $crumbs[ $last ][0] = $title;
+        $crumbs[ $last ][1] = $url;
+    }
+    return $crumbs;
+}, 999 );
 add_filter( 'single_post_title', function( $title, $post = null ) {
     // Don't truncate single videosow_video titles — return full post title.
     if ( $post && get_post_type( $post ) === 'videosow_video' ) {
