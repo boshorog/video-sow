@@ -51,7 +51,7 @@ const SAMPLE_ARCHIVE: ArchiveRow[] = [
 const formatViews = (n: number) =>
   n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n);
 
-type SortKey = 'title' | 'date' | 'status' | 'views';
+type SortKey = 'title' | 'date' | 'importedAt' | 'status' | 'views';
 type SortDir = 'asc' | 'desc';
 
 const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {}) => {
