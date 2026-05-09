@@ -2,6 +2,7 @@ import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
+import { defaultDashboardCards, type DashboardCardPref } from "@/components/dashboard/DashboardCards";
 
 export interface SermonLogEntry {
   time: number;
@@ -86,6 +87,8 @@ export interface SermonImporterConfig {
     lastSyncMsg?: string;
     firstSyncDone?: boolean;
   }>;
+  /** Dashboard card visibility + ordering — managed in Settings → Dashboard cards. */
+  dashboardCards?: DashboardCardPref[];
 }
 
 export const defaultSermonImporterConfig: SermonImporterConfig = {
@@ -142,6 +145,7 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   totalImported: 0,
   log: [],
   firstSyncDone: false,
+  dashboardCards: defaultDashboardCards(),
 };
 
 export interface SermonProgress {

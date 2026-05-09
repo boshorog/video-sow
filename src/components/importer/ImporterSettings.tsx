@@ -5,11 +5,17 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown } from "lucide-react";
+import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown, LayoutDashboard, ArrowUp, ArrowDown, Crown } from "lucide-react";
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
 import { useLicense } from "@/hooks/useLicense";
+import {
+  DASHBOARD_CARD_REGISTRY,
+  reconcileDashboardCards,
+  defaultDashboardCards,
+  type DashboardCardPref,
+} from "@/components/dashboard/DashboardCards";
 
 const SIMPLE_INSTRUCTION_META: Record<SimpleInstructionType, { label: string; description: string; icon: typeof Hash; needsValue: boolean }> = {
   boilerplate: {
@@ -603,6 +609,12 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
        </aside>
       </div>
 
+      <DashboardCardsSection
+        prefs={reconcileDashboardCards(config.dashboardCards)}
+        isPro={isPro}
+        onChange={(next) => update("dashboardCards", next)}
+      />
+
       <TroubleshootingSection
         config={config}
         onRepair={onRepair}
@@ -620,6 +632,99 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
 };
 
 export default SermonImporterSettings;
+
+/* ─────────────────────────────────────────────────
+   Dashboard cards picker — toggle & reorder which
+   cards appear on the Dashboard KPI row.
+   ───────────────────────────────────────────────── */
+
+const DashboardCardsSection = ({
+  prefs,
+  isPro,
+  onChange,
+}: {
+  prefs: DashboardCardPref[];
+  isPro: boolean;
+  onChange: (next: DashboardCardPref[]) => void;
+}) => {
+  const move = (idx: number, delta: number) => {
+    const next = [...prefs];
+    const target = idx + delta;
+    if (target < 0 || target >= next.length) return;
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+  const toggle = (idx: number) => {
+    const next = prefs.map((p, i) => (i === idx ? { ...p, enabled: !p.enabled } : p));
+    onChange(next);
+  };
+  const resetDefaults = () => onChange(defaultDashboardCards());
+
+  return (
+    <div className="space-y-3 pt-4 mt-2 border-t border-border">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
+          <h4 className="text-sm font-bold text-foreground">Dashboard cards</h4>
+        </div>
+        <Button variant="ghost" size="sm" onClick={resetDefaults} className="h-7 text-xs">
+          Reset to defaults
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Choose which KPI cards appear on the Dashboard and in what order. Pro cards are visible to everyone, but only deliver live data on the Pro plan.
+      </p>
+
+      <ul className="rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
+        {prefs.map((p, idx) => {
+          const meta = DASHBOARD_CARD_REGISTRY.find((m) => m.key === p.key);
+          if (!meta) return null;
+          const proLocked = !!meta.pro && !isPro;
+          return (
+            <li key={p.key} className="flex items-center gap-3 px-3 py-2.5">
+              <div className="flex flex-col">
+                <button
+                  type="button"
+                  onClick={() => move(idx, -1)}
+                  disabled={idx === 0}
+                  className="h-4 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  aria-label="Move up"
+                >
+                  <ArrowUp className="w-3 h-3" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(idx, 1)}
+                  disabled={idx === prefs.length - 1}
+                  className="h-4 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
+                  aria-label="Move down"
+                >
+                  <ArrowDown className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-medium text-foreground truncate">{meta.title}</span>
+                  {meta.pro && (
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-500/40 rounded px-1 py-0.5">
+                      <Crown className="w-2.5 h-2.5" /> Pro
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-muted-foreground truncate">{meta.subtitle}</p>
+              </div>
+              <Switch
+                checked={p.enabled}
+                onCheckedChange={() => toggle(idx)}
+                aria-label={`Toggle ${meta.title}`}
+              />
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+};
 
 /* ─────────────────────────────────────────────────
    Troubleshooting tools (bottom of the dashboard)
