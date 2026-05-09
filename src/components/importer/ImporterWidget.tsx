@@ -479,11 +479,16 @@ const SermonImporterWidget = ({
                 <StageIcon className={cn("w-3 h-3", stageSpin && "animate-spin")} /> {stageLabelText}
               </span>
               <span className="tabular-nums text-[11px] text-slate-700 font-semibold">
-                {importedNow}{denominator > 0 ? ` / ${denominator}` : ""} · {stagePct}%
+                {isRepairLive && repairProgress
+                  ? `${repairProgress.processed} / ${repairProgress.total} · ${repairPct}%`
+                  : `${importedNow}${denominator > 0 ? ` / ${denominator}` : ""} · ${stagePct}%`}
               </span>
             </div>
             <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div className={cn("h-full transition-all", tone.bar)} style={{ width: `${stagePct}%` }} />
+              <div
+                className={cn("h-full transition-all", tone.bar)}
+                style={{ width: `${isRepairLive ? repairPct : stagePct}%` }}
+              />
             </div>
             <p className="text-[10px] text-muted-foreground mt-1">{stageNote}</p>
           </div>
