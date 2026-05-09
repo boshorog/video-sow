@@ -187,6 +187,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         </div>
       </div>
 
+      <div data-vs-anchor="firstimport">
       <ImporterWidget
         config={imp.config}
         progress={imp.progress}
