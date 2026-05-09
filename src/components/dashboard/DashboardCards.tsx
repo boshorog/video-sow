@@ -195,7 +195,7 @@ const CardPublished = ({ ctx, hero }: CtxCardProps) => (
 );
 
 const CardDrafts = ({ ctx, hero }: CtxCardProps) => (
-  <Tile eyebrow="Queue" title="Drafts pending" icon={Sparkles} hero={hero}>
+  <Tile eyebrow="Queue" title="Drafts pending" icon={Inbox} hero={hero}>
     <ValueTile hero={hero} value={ctx.loaded ? ctx.draft : '—'} sub="Review & publish" trend="−3%" up={false} />
   </Tile>
 );
