@@ -516,7 +516,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
         </div>
 
         {isPro && (
-        <div className="p-3 rounded-lg border border-border bg-secondary/20">
+        <div data-vs-anchor="transcripts" className="p-3 rounded-lg border border-border bg-secondary/20">
           <div className="flex items-center justify-between">
             <div className="pr-3">
               <Label className="text-sm font-medium text-foreground flex items-center gap-2">
