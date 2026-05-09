@@ -195,6 +195,7 @@ const SermonImporterWidget = ({
   channelName?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const { scanned: themeScanned } = useThemeMap();
   const isConfigured = !!config.apiKey && !!config.playlistId;
   // Per-playlist stats: prefer scoped record, fall back to top-level (legacy).
   const stats = (config.playlistId && config.playlistStats?.[config.playlistId]) || {};
