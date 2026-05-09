@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.9
+ * Version: 1.2.10
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.9' );
+define( 'VIDEOSOW_VERSION', '1.2.10' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -562,10 +562,12 @@ function videosow_clear_stage() {
 function videosow_register_sermon_cpt() {
     $cfg  = videosow_get_sermon_importer_config();
     $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
+    $archive_label = ! empty( $cfg['archiveTitle'] ) ? sanitize_text_field( $cfg['archiveTitle'] ) : 'Articles';
     register_post_type( 'videosow_video', array(
         'labels' => array(
             'name'          => 'Articles',
             'singular_name' => 'Article',
+            'archives'      => $archive_label,
             'add_new_item'  => 'Add Article',
             'edit_item'     => 'Edit Article',
             'menu_name'     => 'Articles',
@@ -645,6 +647,40 @@ function videosow_sermon_post_type_archive_title( $name, $post_type = '' ) {
     return $name;
 }
 add_filter( 'post_type_archive_title', 'videosow_sermon_post_type_archive_title', 10, 2 );
+add_filter( 'post_type_archive_link', function( $link, $post_type ) {
+    if ( $post_type !== 'videosow_video' ) return $link;
+    $cfg = videosow_get_sermon_importer_config();
+    $slug = ! empty( $cfg['slug'] ) ? sanitize_title( $cfg['slug'] ) : 'articles';
+    return home_url( user_trailingslashit( $slug ) );
+}, 10, 2 );
+add_filter( 'wpseo_breadcrumb_links', function( $links ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) || ! is_array( $links ) ) return $links;
+    $cfg = videosow_get_sermon_importer_config();
+    $title = ! empty( $cfg['archiveTitle'] ) ? $cfg['archiveTitle'] : videosow_sermon_post_type_archive_title( 'Articles', 'videosow_video' );
+    $url = get_post_type_archive_link( 'videosow_video' );
+    $last = count( $links ) - 1;
+    if ( $last < 0 || ( isset( $links[ $last ]['text'] ) && trim( (string) $links[ $last ]['text'] ) !== $title ) ) {
+        $links[] = array( 'url' => $url, 'text' => $title );
+    } else {
+        $links[ $last ]['text'] = $title;
+        $links[ $last ]['url']  = $url;
+    }
+    return $links;
+}, 999 );
+add_filter( 'rank_math/frontend/breadcrumb/items', function( $crumbs ) {
+    if ( ! is_post_type_archive( 'videosow_video' ) || ! is_array( $crumbs ) ) return $crumbs;
+    $cfg = videosow_get_sermon_importer_config();
+    $title = ! empty( $cfg['archiveTitle'] ) ? $cfg['archiveTitle'] : videosow_sermon_post_type_archive_title( 'Articles', 'videosow_video' );
+    $url = get_post_type_archive_link( 'videosow_video' );
+    $last = count( $crumbs ) - 1;
+    if ( $last < 0 || ! isset( $crumbs[ $last ][0] ) || trim( (string) $crumbs[ $last ][0] ) !== $title ) {
+        $crumbs[] = array( $title, $url );
+    } else {
+        $crumbs[ $last ][0] = $title;
+        $crumbs[ $last ][1] = $url;
+    }
+    return $crumbs;
+}, 999 );
 add_filter( 'single_post_title', function( $title, $post = null ) {
     // Don't truncate single videosow_video titles — return full post title.
     if ( $post && get_post_type( $post ) === 'videosow_video' ) {
@@ -705,6 +741,11 @@ function videosow_sermon_archive_css() {
         . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
         . '.post-type-archive-videosow_video .blog-content > p:empty,'
         . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
+        . '.post-type-archive-videosow_video #videosow-toolbar,'
+        . '.post-type-archive-videosow_video #videosow-grid{position:relative !important;top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-loop-compact{padding-top:0 !important;margin-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-loop-compact > :first-child{margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-before-loop-empty{display:none !important;margin:0 !important;padding:0 !important;border:0 !important;height:0 !important;min-height:0 !important;}'
         . '.post-type-archive-videosow_video .entry-meta,'
         . '.post-type-archive-videosow_video .post-meta,'
         . '.post-type-archive-videosow_video .byline,'
@@ -812,7 +853,10 @@ function videosow_single_video_aspect_css() {
         // theme line-clamps or fixed heights.
         . '.single-videosow_video .entry-title,'
         . '.single-videosow_video h1.entry-title,'
-        . '.single-videosow_video .entry-header h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;word-break:break-word !important;}'
+        . '.single-videosow_video .entry-header h1,'
+        . '.single-videosow_video .elementor-heading-title,'
+        . '.single-videosow_video h1.post-title,'
+        . '.single-videosow_video article h1{display:block !important;overflow:visible !important;text-overflow:clip !important;white-space:normal !important;-webkit-line-clamp:unset !important;-webkit-box-orient:unset !important;max-height:none !important;height:auto !important;min-height:0 !important;word-break:break-word !important;}'
         . '</style>';
 }
 add_action( 'wp_head', 'videosow_single_video_aspect_css', 100 );
@@ -838,7 +882,7 @@ function videosow_sermon_archive_title_js() {
         $title = $obj && ! empty( $obj->labels->name ) ? $obj->labels->name : 'Videos';
     }
     $title_js = wp_json_encode( $title );
-    echo '<script id="videosow-archive-title-js">(function(){function run(){var els=document.querySelectorAll(".archive-heading");for(var i=0;i<els.length;i++){var el=els[i];el.innerHTML="";var h1=document.createElement("h1");h1.textContent=' . $title_js . ';h1.style.margin="0";h1.style.padding="0";h1.style.border="0";h1.style.fontWeight="700";el.appendChild(h1);el.style.border="0";el.style.padding="0";}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}})();</script>';
+    echo '<script id="videosow-archive-title-js">(function(){var title=' . $title_js . ';function fixTitle(){document.querySelectorAll(".archive-heading").forEach(function(el){el.innerHTML="";var h1=document.createElement("h1");h1.textContent=title;h1.style.margin="0";h1.style.padding="0";h1.style.border="0";h1.style.fontWeight="700";el.appendChild(h1);el.style.border="0";el.style.padding="0";});}function fixBreadcrumbs(){var sels=[".breadcrumbs",".breadcrumb","#breadcrumbs",".rank-math-breadcrumb",".yoast-breadcrumb","nav[aria-label*=Breadcrumb]"];sels.forEach(function(sel){try{document.querySelectorAll(sel).forEach(function(bc){var txt=(bc.textContent||"").replace(/\s+/g," ").trim();if(!txt||txt.indexOf(title)!==-1)return;var lastLink=bc.querySelector("a:last-of-type");if(!lastLink)return;var sep=document.createElement("span");sep.className="videosow-breadcrumb-sep";sep.textContent=" › ";var cur=document.createElement("span");cur.className="videosow-breadcrumb-current";cur.textContent=title;bc.appendChild(sep);bc.appendChild(cur);});}catch(e){}});}function run(){fixTitle();fixBreadcrumbs();}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}setTimeout(run,500);})();</script>';
 }
 add_action( 'wp_footer', 'videosow_sermon_archive_title_js', 99 );
 
@@ -850,7 +894,7 @@ function videosow_single_video_full_title_js() {
     if ( ! is_singular( 'videosow_video' ) ) return;
     $full = html_entity_decode( get_the_title( get_queried_object_id() ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
     $full_js = wp_json_encode( $full );
-    echo '<script id="videosow-single-title-js">(function(){function run(){var sels=["h1.entry-title",".entry-header h1",".elementor-heading-title","h1.post-title","article h1"];var seen={};for(var i=0;i<sels.length;i++){var els=document.querySelectorAll(sels[i]);for(var j=0;j<els.length;j++){var el=els[j];if(seen[el.dataset.kpFixed]||el.dataset.kpFixed==="1")continue;el.textContent=' . $full_js . ';el.dataset.kpFixed="1";el.style.display="block";el.style.overflow="visible";el.style.textOverflow="clip";el.style.whiteSpace="normal";el.style.maxHeight="none";el.style.webkitLineClamp="unset";}}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}setTimeout(run,300);setTimeout(run,1200);})();</script>';
+    echo '<script id="videosow-single-title-js">(function(){var full=' . $full_js . ';function fix(el){if(!el||el.dataset.kpFixedTitle==="1")return;var txt=(el.textContent||"").trim();if(!txt||txt.length<=full.length||full.indexOf(txt.replace(/…|\.\.\.$/,""))===0){el.textContent=full;}el.dataset.kpFixedTitle="1";el.style.display="block";el.style.overflow="visible";el.style.textOverflow="clip";el.style.whiteSpace="normal";el.style.maxHeight="none";el.style.minHeight="0";el.style.height="auto";el.style.webkitLineClamp="unset";el.style.webkitBoxOrient="unset";}function run(){var sels=["h1.entry-title",".entry-header h1",".elementor-heading-title","h1.post-title",".post-title h1",".page-title","article h1","main h1","h1"];for(var i=0;i<sels.length;i++){document.querySelectorAll(sels[i]).forEach(fix);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",run);}else{run();}setTimeout(run,100);setTimeout(run,500);setTimeout(run,1500);try{new MutationObserver(run).observe(document.body,{childList:true,subtree:true});}catch(e){}})();</script>';
 }
 add_action( 'wp_footer', 'videosow_single_video_full_title_js', 99 );
 
@@ -992,14 +1036,14 @@ function videosow_sermon_archive_toolbar() {
             if ( $layout === 'magazine-2' || $layout === 'magazine-3' ) {
                 $custom = '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;padding:0 !important;border-top:0 !important;transition:box-shadow .25s ease, transform .25s ease;}'
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;transform:translateY(-2px);}'
-                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card > article{background:transparent !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] > .videosow-card > article{background:transparent !important;display:flex !important;flex-direction:column !important;gap:0 !important;}'
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .post-thumbnail,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] figure{margin:0 !important;aspect-ratio:16/9 !important;display:block !important;overflow:hidden !important;}'
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .post-thumbnail img,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;}'
-                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding:0 1.1rem !important;}'
-                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta{padding-top:1rem !important;font-size:.78rem !important;color:rgba(0,0,0,.55) !important;}'
-                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title{font-size:' . ($layout === 'magazine-3' ? '1.05rem' : '1.2rem') . ' !important;font-weight:700 !important;line-height:1.3 !important;margin:.5rem 0 .6rem 0 !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title,.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{box-sizing:border-box !important;padding-left:1.25rem !important;padding-right:1.25rem !important;width:100% !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-meta{padding-top:1rem !important;padding-bottom:.45rem !important;font-size:.78rem !important;color:rgba(0,0,0,.55) !important;}'
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title{font-size:' . ($layout === 'magazine-3' ? '1.05rem' : '1.2rem') . ' !important;font-weight:700 !important;line-height:1.3 !important;margin:0 0 .6rem 0 !important;}'
                     . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-title a{color:#111 !important;text-decoration:none !important;}'
-                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding-bottom:1.1rem !important;color:rgba(0,0,0,.65) !important;font-size:.9rem !important;line-height:1.55 !important;}';
+                    . '.videosow-grid[data-vs-layout="' . esc_attr($layout) . '"] .entry-summary{padding-bottom:1.15rem !important;color:rgba(0,0,0,.65) !important;font-size:.9rem !important;line-height:1.55 !important;}';
             } elseif ( $layout === 'list' ) {
                 // Wide list: thumbnail on the LEFT, meta/title/excerpt stacked on the RIGHT.
                 // We use higher specificity (body.post-type-archive-videosow_video) so the
@@ -1023,6 +1067,10 @@ function videosow_sermon_archive_toolbar() {
         })()
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{display:block !important;width:auto !important;max-width:none !important;min-width:0 !important;float:none !important;clear:none !important;margin:0 !important;padding:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article{display:block !important;margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;max-width:none !important;float:none !important;clear:none !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > :first-child{margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > .post-thumbnail:first-child,'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > a.post-thumbnail:first-child,'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article > figure:first-child{margin-top:0 !important;padding-top:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid img{opacity:1 !important;visibility:visible !important;display:block !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card > article::before{display:none !important;}'
         // Cover image hover effect (lost when cloning into custom grid)
@@ -1047,12 +1095,15 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video .videosow-grid h1,'
         . '.post-type-archive-videosow_video .videosow-grid h2,'
         . '.post-type-archive-videosow_video .videosow-grid h3,'
-        . '.post-type-archive-videosow_video .videosow-grid .entry-title{margin:0 0 1rem 0 !important;padding:0 !important;line-height:1.2 !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid .entry-title{margin:0 0 1rem 0 !important;line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title a{line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + .entry-summary,'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + *{margin-top:1rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1rem 1.25rem .45rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:0 1.25rem !important;margin:0 0 .6rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem 1.15rem !important;margin-top:0 !important;}'
         // Divider between rows
-        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:2.25rem !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
+        . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="1"],'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="2"]{padding-top:0 !important;border-top:0 !important;}'
         . '@media (max-width:768px){.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="2"]{padding-top:2.25rem !important;border-top:1px solid rgba(0,0,0,.08) !important;}}'
@@ -1249,6 +1300,46 @@ function videosow_sermon_archive_toolbar_js() {
   // inherit the theme's CSS classes and visual styling for date/excerpt/title.
   var TEMPLATE_ARTICLE = null;
 
+  function markThemeSynthetic(article){
+    if (!article) return;
+    var junk = article.querySelectorAll('.videosow-scan-strip,[data-videosow-strip="1"],.post-categories,.cat-links,.tags-links,.comments-link,.read-more,.more-link,.post-author,.author,.byline');
+    junk.forEach(function(n){ if(n && n.parentNode) n.parentNode.removeChild(n); });
+    var thumb = article.querySelector('.post-thumbnail, a.post-thumbnail, figure, a:has(> figure), a:has(img)');
+    if (thumb) thumb.classList.add('videosow-part-thumb');
+    var title = article.querySelector('.kp-slot-title') || article.querySelector('.entry-title') || article.querySelector('h1,h2,h3');
+    if (title) title.classList.add('videosow-part-title');
+    var meta = article.querySelector('.kp-slot-date-wrap') || article.querySelector('.entry-meta') || article.querySelector('.post-meta') || (article.querySelector('time') && article.querySelector('time').parentNode);
+    if (meta && meta.classList) meta.classList.add('videosow-part-meta');
+    var excerpt = article.querySelector('.kp-slot-excerpt') || article.querySelector('.entry-summary') || article.querySelector('.entry-content') || article.querySelector('p');
+    if (excerpt) excerpt.classList.add('videosow-part-excerpt');
+  }
+
+  function normalizeCardOrder(article){
+    if (!article) return;
+    var thumb = article.querySelector('.videosow-part-thumb') || article.querySelector('.post-thumbnail, a.post-thumbnail, figure, a:has(> figure), a:has(img)');
+    var meta = article.querySelector('.videosow-part-meta') || article.querySelector('.entry-meta,.post-meta,.kp-slot-date-wrap');
+    var title = article.querySelector('.videosow-part-title') || article.querySelector('.kp-slot-title,.entry-title,h1,h2,h3');
+    var excerpt = article.querySelector('.videosow-part-excerpt') || article.querySelector('.kp-slot-excerpt,.entry-summary');
+    [thumb, meta, title, excerpt].forEach(function(n){
+      if (!n || !n.parentNode || n.parentNode !== article) return;
+      article.appendChild(n);
+    });
+  }
+
+  function compactBeforeLoop(node){
+    if (!node || !node.parentNode) return;
+    var parent = node.parentNode;
+    parent.classList && parent.classList.add('videosow-loop-compact');
+    var kids = Array.prototype.slice.call(parent.children);
+    for (var i=0;i<kids.length;i++){
+      var el = kids[i];
+      if (el === node || el.id === 'videosow-toolbar' || el.id === 'videosow-grid') break;
+      if (el.matches && (el.matches('p:empty, hr, .wp-block-spacer, .elementor-spacer, .post-separator, .entries-divider') || (el.textContent || '').trim() === '')) {
+        el.classList.add('videosow-before-loop-empty');
+      }
+    }
+  }
+
   function dedupeBlocks(article){
     if (!article) return;
     // Keep only the first occurrence of each meta/summary block — themes sometimes
@@ -1331,6 +1422,8 @@ function videosow_sermon_archive_toolbar_js() {
       es.innerHTML = '<p></p>';
       clone.appendChild(es);
     }
+    markThemeSynthetic(clone);
+    normalizeCardOrder(clone);
     TEMPLATE_ARTICLE = clone;
   }
 
@@ -1433,6 +1526,8 @@ function videosow_sermon_archive_toolbar_js() {
     article.id = 'post-' + d.id + '-kp-view';
     article.classList.add('post-' + d.id);
     populateArticle(article, d);
+    markThemeSynthetic(article);
+    normalizeCardOrder(article);
     article.__kpCard = card;
     card.__kpArticle = article;
     card.appendChild(article);
@@ -1765,6 +1860,7 @@ function videosow_sermon_archive_toolbar_js() {
           anchorT = anchorParentT.firstChild;
         }
         anchorParentT.insertBefore(toolbar, anchorT);
+        compactBeforeLoop(toolbar);
         toolbar.style.display = '';
         buildTags(toolbar);
         var sT = toolbar.querySelector('#videosow-search');
@@ -1828,6 +1924,7 @@ function videosow_sermon_archive_toolbar_js() {
       }
     }
     insertHost.insertBefore(grid, insertBefore);
+    compactBeforeLoop(grid);
 
     // Physically REMOVE only the original article wrappers, and ONLY when
     // they live inside the loop container. This guarantees we never strip
@@ -1844,6 +1941,7 @@ function videosow_sermon_archive_toolbar_js() {
 
     if (toolbar) {
       grid.parentNode.insertBefore(toolbar, grid);
+      compactBeforeLoop(toolbar);
       toolbar.style.display = '';
       buildTags(toolbar);
       var s = toolbar.querySelector('#videosow-search');
@@ -4236,6 +4334,12 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(), // [{url, found}]
+        // v1.2.10 — deeper CSS/theme intelligence.
+        'content_classes'    => '',
+        'breadcrumb_selector'=> '',
+        'css_assets_scanned' => 0,
+        'theme_css_rules'    => array(),
+        'theme_spacing'      => array(),
     );
     return array_merge( $defaults, $opt );
 }
@@ -4269,7 +4373,7 @@ function videosow_dom_selector_for( $node ) {
 }
 
 /* Try a list of CSS-ish queries via XPath; return the first matching element. */
-function videosow_dom_first_match( DOMXPath $xp, array $queries, DOMNode $context = null ) {
+function videosow_dom_first_match( DOMXPath $xp, array $queries, ?DOMNode $context = null ) {
     foreach ( $queries as $q ) {
         $list = $xp->query( $q, $context );
         if ( $list && $list->length > 0 ) return $list->item( 0 );
@@ -4292,10 +4396,10 @@ function videosow_scan_fetch( $url ) {
         }
     }
     $resp = wp_remote_get( add_query_arg( 'videosow_scan', '1', $url ), array(
-        'timeout'   => 15,
+        'timeout'   => 30,
         'sslverify' => false,
         'cookies'   => $cookies,
-        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.1' ),
+        'headers'   => array( 'User-Agent' => 'VideoSowThemeScanner/1.2' ),
     ) );
     if ( is_wp_error( $resp ) ) return '';
     $code = wp_remote_retrieve_response_code( $resp );
@@ -4400,6 +4504,80 @@ function videosow_extract_css_vars( DOMXPath $xp ) {
     return $vars;
 }
 
+function videosow_scan_css_asset_urls( DOMXPath $xp, $base_url ) {
+    $urls = array();
+    $links = $xp->query( '//link[contains(@rel,"stylesheet") and @href]' );
+    if ( $links ) {
+        for ( $i = 0; $i < $links->length; $i++ ) {
+            $href = $links->item( $i )->getAttribute( 'href' );
+            if ( ! $href ) continue;
+            if ( strpos( $href, '//' ) === 0 ) {
+                $href = ( is_ssl() ? 'https:' : 'http:' ) . $href;
+            } elseif ( strpos( $href, 'http' ) !== 0 ) {
+                $href = esc_url_raw( home_url( '/' . ltrim( $href, '/' ) ) );
+            }
+            if ( function_exists( 'wp_http_validate_url' ) && ! wp_http_validate_url( $href ) ) continue;
+            $urls[] = $href;
+        }
+    }
+    return array_values( array_unique( array_filter( $urls ) ) );
+}
+
+function videosow_extract_relevant_css_rules( $css, array $class_tokens ) {
+    $rules = array();
+    if ( ! $css || empty( $class_tokens ) ) return $rules;
+    $css = preg_replace( '~/\*.*?\*/~s', '', (string) $css );
+    foreach ( $class_tokens as $token ) {
+        if ( ! $token || strlen( $token ) < 3 ) continue;
+        if ( preg_match_all( '/([^{}]*\.' . preg_quote( $token, '/' ) . '[^{}]*)\{([^{}]+)\}/i', $css, $m, PREG_SET_ORDER ) ) {
+            foreach ( $m as $r ) {
+                $sel = trim( preg_replace( '/\s+/', ' ', $r[1] ) );
+                $body = trim( $r[2] );
+                if ( strlen( $sel ) > 220 || strlen( $body ) > 500 ) continue;
+                $rules[] = $sel . '{' . $body . '}';
+                if ( count( $rules ) >= 80 ) return array_values( array_unique( $rules ) );
+            }
+        }
+    }
+    return array_values( array_unique( $rules ) );
+}
+
+function videosow_extract_spacing_from_rules( array $rules ) {
+    $spacing = array();
+    foreach ( $rules as $rule ) {
+        if ( preg_match( '/\{(.+)\}/', $rule, $m ) ) {
+            foreach ( array( 'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin', 'gap', 'column-gap', 'row-gap', 'border-radius' ) as $prop ) {
+                if ( ! isset( $spacing[ $prop ] ) && preg_match( '/' . preg_quote( $prop, '/' ) . '\s*:\s*([^;!]+)(?:!important)?\s*;?/i', $m[1], $pm ) ) {
+                    $val = trim( $pm[1] );
+                    if ( strlen( $val ) <= 80 ) $spacing[ $prop ] = $val;
+                }
+            }
+        }
+    }
+    return $spacing;
+}
+
+function videosow_collect_theme_css_intelligence( DOMXPath $xp, $scan_url, array $tokens ) {
+    $rules = array();
+    $inline = $xp->query( '//style' );
+    if ( $inline ) {
+        for ( $i = 0; $i < $inline->length; $i++ ) {
+            $rules = array_merge( $rules, videosow_extract_relevant_css_rules( (string) $inline->item( $i )->textContent, $tokens ) );
+            if ( count( $rules ) >= 80 ) break;
+        }
+    }
+    $assets_scanned = 0;
+    foreach ( array_slice( videosow_scan_css_asset_urls( $xp, $scan_url ), 0, 12 ) as $href ) {
+        $resp = wp_remote_get( $href, array( 'timeout' => 12, 'sslverify' => false, 'headers' => array( 'User-Agent' => 'VideoSowThemeScanner/1.2' ) ) );
+        if ( is_wp_error( $resp ) || wp_remote_retrieve_response_code( $resp ) >= 400 ) continue;
+        $assets_scanned++;
+        $rules = array_merge( $rules, videosow_extract_relevant_css_rules( wp_remote_retrieve_body( $resp ), $tokens ) );
+        if ( count( $rules ) >= 80 ) break;
+    }
+    $rules = array_values( array_unique( array_slice( $rules, 0, 80 ) ) );
+    return array( 'assets' => $assets_scanned, 'rules' => $rules, 'spacing' => videosow_extract_spacing_from_rules( $rules ) );
+}
+
 /** Find a representative descendant in a sample card and return its class chain. */
 function videosow_extract_card_part_class( DOMElement $card, DOMXPath $xp, $kind ) {
     $candidates = array();
@@ -4469,6 +4647,11 @@ function videosow_scan_active_theme() {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(),
+        'content_classes'    => '',
+        'breadcrumb_selector'=> '',
+        'css_assets_scanned' => 0,
+        'theme_css_rules'    => array(),
+        'theme_spacing'      => array(),
     );
 
     $best = null; $attempts = array();
@@ -4550,6 +4733,19 @@ function videosow_scan_active_theme() {
 
     if ( $container instanceof DOMElement ) $map['loop_container'] = videosow_dom_selector_for( $container );
 
+    $content = videosow_dom_first_match( $xp, array(
+        '//*[@id="primary"]', '//*[@id="content"]', '//*[contains(concat(" ",normalize-space(@class)," ")," site-content ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," content-area ")]', '//main', '//*[@role="main"]',
+    ) );
+    if ( $content ) $map['content_classes'] = trim( (string) $content->getAttribute( 'class' ) );
+
+    $breadcrumb = videosow_dom_first_match( $xp, array(
+        '//*[contains(concat(" ",normalize-space(@class)," ")," breadcrumbs ")]',
+        '//*[contains(concat(" ",normalize-space(@class)," ")," breadcrumb ")]',
+        '//*[@id="breadcrumbs"]', '//*[contains(@class,"rank-math-breadcrumb")]', '//*[contains(@class,"yoast-breadcrumb")]',
+    ) );
+    if ( $breadcrumb ) $map['breadcrumb_selector'] = videosow_dom_selector_for( $breadcrumb );
+
     $pag = videosow_dom_first_match( $xp, array(
         '//nav[contains(@class,"pagination")]', '//*[contains(@class,"page-navigation")]', '//*[@class="nav-links"]',
     ) );
@@ -4579,6 +4775,17 @@ function videosow_scan_active_theme() {
     $map['link_classes']    = videosow_extract_card_part_class( $first, $xp, 'link' );
 
     $map['theme_css_vars']  = videosow_extract_css_vars( $xp );
+
+    $tokens = array();
+    foreach ( array( $map['card_classes'], $map['title_classes'], $map['thumb_classes'], $map['excerpt_classes'], $map['meta_classes'], $map['content_classes'] ) as $cls ) {
+        foreach ( preg_split( '/\s+/', (string) $cls ) as $tok ) {
+            if ( $tok && preg_match( '/^[a-zA-Z][\w\-]*$/', $tok ) && strlen( $tok ) > 2 ) $tokens[] = $tok;
+        }
+    }
+    $css_iq = videosow_collect_theme_css_intelligence( $xp, $best['url'], array_values( array_unique( $tokens ) ) );
+    $map['css_assets_scanned'] = $css_iq['assets'];
+    $map['theme_css_rules']    = $css_iq['rules'];
+    $map['theme_spacing']      = $css_iq['spacing'];
 
     $body = $xp->query( '//body' );
     if ( $body && $body->length ) {
