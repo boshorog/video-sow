@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.10
+ * Version: 1.2.11
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.10' );
+define( 'VIDEOSOW_VERSION', '1.2.11' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -741,6 +741,24 @@ function videosow_sermon_archive_css() {
         . '.post-type-archive-videosow_video .entries-wrapper > p:empty,'
         . '.post-type-archive-videosow_video .blog-content > p:empty,'
         . '.post-type-archive-videosow_video main > p:empty{display:none !important;}'
+        // Aggressively collapse any spacer/wrapper that sits ABOVE our toolbar
+        // inside the main content column so the toolbar starts at the very top.
+        . '.post-type-archive-videosow_video .site-main > *:not(#videosow-toolbar):not(#videosow-grid):not(#videosow-load-more-wrap):not(article):not(.videosow-card),'
+        . '.post-type-archive-videosow_video main > *:not(#videosow-toolbar):not(#videosow-grid):not(#videosow-load-more-wrap):not(article):not(.videosow-card){margin-top:0 !important;padding-top:0 !important;}'
+        . '.post-type-archive-videosow_video .page-header,'
+        . '.post-type-archive-videosow_video .archive-header,'
+        . '.post-type-archive-videosow_video .entry-header{margin-top:0 !important;padding-top:0 !important;margin-bottom:0 !important;padding-bottom:0 !important;}'
+        // Breadcrumb spacing — many themes pack our injected current crumb
+        // tightly. Force consistent gaps around separators and items.
+        . '.post-type-archive-videosow_video .breadcrumbs,'
+        . '.post-type-archive-videosow_video .breadcrumb,'
+        . '.post-type-archive-videosow_video #breadcrumbs,'
+        . '.post-type-archive-videosow_video nav[aria-label*="readcrumb"]{line-height:1.7 !important;}'
+        . '.post-type-archive-videosow_video .breadcrumbs > *,'
+        . '.post-type-archive-videosow_video .breadcrumb > *,'
+        . '.post-type-archive-videosow_video #breadcrumbs > *{margin-left:.15em;margin-right:.15em;}'
+        . '.videosow-breadcrumb-sep{display:inline-block;margin:0 .55em !important;opacity:.55;}'
+        . '.videosow-breadcrumb-current{display:inline-block;margin-left:.15em;}'
         . '.post-type-archive-videosow_video #videosow-toolbar,'
         . '.post-type-archive-videosow_video #videosow-grid{position:relative !important;top:0 !important;}'
         . '.post-type-archive-videosow_video .videosow-loop-compact{padding-top:0 !important;margin-top:0 !important;}'
@@ -990,11 +1008,11 @@ function videosow_sermon_archive_toolbar() {
         . '.videosow-toolbar .kp-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;background:#ffffff;padding:.5rem .65rem;border:1px solid rgba(0,0,0,.08);border-radius:12px;}'
         . '.post-type-archive-videosow_video .videosow-toolbar{overflow:visible;}'
         . '.videosow-toolbar .kp-search{flex:1 1 240px;min-width:0;max-width:560px;}'
-        . '.videosow-toolbar .kp-search input{width:100%;height:2.25rem;line-height:1.2;padding:.35rem .75rem;font-size:.875rem;background:rgba(0,0,0,.04);border:0;border-radius:8px;color:#111;outline:none;font-family:inherit !important;box-shadow:none !important;}'
+        . '.videosow-toolbar .kp-search input{width:100% !important;height:2.5rem !important;min-height:2.5rem !important;max-height:2.5rem !important;line-height:1.2 !important;padding:.4rem .85rem !important;font-size:.9rem !important;background:rgba(0,0,0,.04) !important;border:0 !important;border-radius:9999px !important;color:#111 !important;outline:none !important;font-family:inherit !important;box-shadow:none !important;box-sizing:border-box !important;}'
         . '.videosow-toolbar .kp-search input::placeholder{color:rgba(0,0,0,.45);}'
-        . '.videosow-toolbar .kp-sort{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}'
-        . '.videosow-toolbar .kp-sort label{font-size:.85rem;color:rgba(0,0,0,.55);font-weight:500;font-family:inherit !important;}'
-        . '.videosow-toolbar .kp-sort select{background:transparent;border:0;font-size:.9rem;font-weight:600;color:#111;cursor:pointer;outline:none;font-family:inherit !important;padding:.25rem .25rem .25rem 0;}'
+        . '.videosow-toolbar .kp-sort{display:flex !important;align-items:center;gap:.4rem;flex-shrink:0;flex-wrap:nowrap;white-space:nowrap;}'
+        . '.videosow-toolbar .kp-sort label{font-size:.85rem;color:rgba(0,0,0,.55);font-weight:500;font-family:inherit !important;white-space:nowrap !important;flex-shrink:0;}'
+        . '.videosow-toolbar .kp-sort select{background:transparent;border:0;font-size:.9rem;font-weight:600;color:#111;cursor:pointer;outline:none;font-family:inherit !important;padding:.25rem 1rem .25rem 0;white-space:nowrap;}'
         . '.videosow-toolbar .kp-tags{display:flex;flex-wrap:wrap;align-content:flex-start;gap:.45rem;margin-top:.85rem;line-height:1;max-height:calc((1.625rem * var(--kp-tag-lines-desktop)) + (.45rem * (var(--kp-tag-lines-desktop) - 1)));overflow:hidden;}'
         . '@media (max-width:768px){.videosow-toolbar .kp-tags{max-height:calc((1.625rem * var(--kp-tag-lines-mobile)) + (.45rem * (var(--kp-tag-lines-mobile) - 1)));}}'
         . '.videosow-toolbar .kp-tag{display:inline-flex;align-items:center;height:1.625rem;padding:0 .8rem;background:#ffffff;border:1px solid rgba(0,0,0,.08);border-radius:9999px;font-size:.78rem;font-weight:500;color:rgba(0,0,0,.65);cursor:pointer;transition:all .15s ease;font-family:inherit !important;line-height:1;white-space:nowrap;}'
@@ -1051,16 +1069,16 @@ function videosow_sermon_archive_toolbar() {
                 // that appears further down in this stylesheet.
                 $custom = 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card{background:#fff !important;border:1px solid rgba(0,0,0,.08) !important;border-radius:14px !important;overflow:hidden !important;display:flex !important;flex-direction:row !important;padding:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;transition:box-shadow .25s ease;min-height:200px;}'
                     . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.08) !important;}'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:grid !important;grid-template-columns:minmax(240px,34%) 1fr !important;grid-template-rows:auto auto 1fr !important;column-gap:0 !important;row-gap:0 !important;flex:1 1 auto !important;min-width:0 !important;width:100% !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:grid !important;grid-template-columns:minmax(240px,34%) 1fr !important;grid-template-rows:1fr auto auto auto 1fr !important;column-gap:0 !important;row-gap:0 !important;flex:1 1 auto !important;min-width:0 !important;width:100% !important;}'
                     . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .post-thumbnail,'
                     . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > a.post-thumbnail,'
                     . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > figure,'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > a:has(> figure){grid-column:1 !important;grid-row:1 / -1 !important;align-self:stretch !important;margin:0 !important;aspect-ratio:auto !important;display:block !important;overflow:hidden !important;height:100% !important;min-height:200px;}'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card .post-thumbnail img,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;display:block !important;}'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-meta{grid-column:2 !important;grid-row:1 !important;padding:1.2rem 1.4rem 0 1.4rem !important;font-size:.8rem !important;color:rgba(0,0,0,.55) !important;}'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title{grid-column:2 !important;grid-row:2 !important;padding:.5rem 1.4rem .65rem 1.4rem !important;font-size:1.4rem !important;font-weight:700 !important;line-height:1.25 !important;margin:0 !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > a:has(> figure){grid-column:1 !important;grid-row:1 / -1 !important;align-self:stretch !important;margin:0 !important;padding:0 !important;aspect-ratio:auto !important;display:block !important;overflow:hidden !important;height:100% !important;min-height:200px;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card .post-thumbnail img,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card figure img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:0 !important;display:block !important;margin:0 !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-meta{grid-column:2 !important;grid-row:2 !important;padding:0 1.4rem .35rem 1.4rem !important;font-size:.8rem !important;color:rgba(0,0,0,.55) !important;align-self:end !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title{grid-column:2 !important;grid-row:3 !important;padding:0 1.4rem .65rem 1.4rem !important;font-size:1.4rem !important;font-weight:700 !important;line-height:1.25 !important;margin:0 !important;}'
                     . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title a{color:#111 !important;text-decoration:none !important;}'
-                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-summary{grid-column:2 !important;grid-row:3 !important;padding:0 1.4rem 1.3rem 1.4rem !important;color:rgba(0,0,0,.65) !important;font-size:.95rem !important;line-height:1.55 !important;}'
+                    . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-summary{grid-column:2 !important;grid-row:4 !important;padding:0 1.4rem 0 1.4rem !important;color:rgba(0,0,0,.65) !important;font-size:.95rem !important;line-height:1.55 !important;}'
                     . '@media (max-width:768px){body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card{flex-direction:column !important;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article{display:block !important;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .post-thumbnail,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > figure{aspect-ratio:16/9 !important;min-height:0;height:auto;}body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] > .videosow-card > article > .entry-summary{padding-left:1.2rem !important;padding-right:1.2rem !important;}}';
             }
             return $base . $custom;
@@ -1099,9 +1117,15 @@ function videosow_sermon_archive_toolbar() {
         . '.post-type-archive-videosow_video .videosow-grid .entry-title a{line-height:1.2 !important;}'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + .entry-summary,'
         . '.post-type-archive-videosow_video .videosow-grid .entry-title + *{margin-top:1rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1rem 1.25rem .45rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:0 1.25rem !important;margin:0 0 .6rem !important;}'
-        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem 1.15rem !important;margin-top:0 !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta{padding:1.1rem 1.25rem .45rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-title{padding:1.1rem 1.25rem 0 !important;margin:0 0 .55rem !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-meta + .entry-title,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-meta + .entry-title{padding-top:0 !important;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-2"] .entry-summary,body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="magazine-3"] .entry-summary{padding:0 1.25rem .35rem !important;margin-top:0 !important;}'
+        // Read more affordance after the excerpt on every card layout.
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more{display:inline-flex;align-items:center;gap:.35em;margin:.6rem 1.25rem 1.15rem 1.25rem;font-size:.85rem;font-weight:600;color:#111;text-decoration:none;border-bottom:1px solid currentColor;padding:0 0 1px 0;line-height:1.4;transition:opacity .15s ease, transform .15s ease;}'
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more:hover{opacity:.7;transform:translateX(2px);}'
+        . '.post-type-archive-videosow_video .videosow-grid .videosow-read-more svg{width:.85em;height:.85em;}'
+        . 'body.post-type-archive-videosow_video .videosow-grid[data-vs-layout="list"] .videosow-read-more{margin:.75rem 1.4rem 1.3rem 1.4rem;}'
         // Divider between rows
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card{padding-top:0 !important;border-top:1px solid rgba(0,0,0,.08) !important;}'
         . '.post-type-archive-videosow_video .videosow-grid > .videosow-card[data-kp-vis-pos="1"],'
@@ -1133,7 +1157,7 @@ function videosow_sermon_archive_toolbar() {
         }
         $sort_html .= '</select></div>';
     }
-    $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search videos..." autocomplete="off" /></div>' : '';
+    $search_html = $show_search ? '<div class="kp-search"><input type="search" id="videosow-search" placeholder="Search articles..." autocomplete="off" /></div>' : '';
     $tags_html   = $show_tags ? '<div class="kp-tags" id="videosow-tags"></div>' : '';
     $bar_html    = ( $search_html || $sort_html ) ? '<div class="kp-bar">' . $search_html . $sort_html . '</div>' : '';
     $excerpt_words = max( 5, min( 200, intval( isset( $cfg['archiveExcerptWords'] ) ? $cfg['archiveExcerptWords'] : 40 ) ) );
@@ -1320,7 +1344,8 @@ function videosow_sermon_archive_toolbar_js() {
     var meta = article.querySelector('.videosow-part-meta') || article.querySelector('.entry-meta,.post-meta,.kp-slot-date-wrap');
     var title = article.querySelector('.videosow-part-title') || article.querySelector('.kp-slot-title,.entry-title,h1,h2,h3');
     var excerpt = article.querySelector('.videosow-part-excerpt') || article.querySelector('.kp-slot-excerpt,.entry-summary');
-    [thumb, meta, title, excerpt].forEach(function(n){
+    var more = article.querySelector('.videosow-read-more');
+    [thumb, meta, title, excerpt, more].forEach(function(n){
       if (!n || !n.parentNode || n.parentNode !== article) return;
       article.appendChild(n);
     });
@@ -1451,6 +1476,18 @@ function videosow_sermon_archive_toolbar_js() {
       var text = d.excerpt ? trimExcerpt(d.excerpt, EXCERPT_WORDS) : '';
       if (text){ p.textContent = text; summary.style.display = ''; }
       else { p.textContent = ''; summary.style.display = 'none'; }
+    }
+    // Read more link (after the excerpt). Always present so users have a clear CTA.
+    var existingMore = article.querySelector('.videosow-read-more');
+    if (existingMore && existingMore.parentNode) existingMore.parentNode.removeChild(existingMore);
+    if (d.url){
+      var more = document.createElement('a');
+      more.className = 'videosow-read-more';
+      more.setAttribute('href', d.url);
+      more.innerHTML = 'Read more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>';
+      var anchor = summary || article.querySelector('.entry-title') || article;
+      if (anchor && anchor.parentNode === article){ article.insertBefore(more, anchor.nextSibling); }
+      else { article.appendChild(more); }
     }
     // Thumbnail — make sure the cover image links to the article.
     var thumbA = article.querySelector('.post-thumbnail, a:has(img), figure');
@@ -4334,7 +4371,7 @@ function videosow_get_theme_map( $stylesheet = '' ) {
         'body_classes'      => '',
         'cards_found'       => 0,
         'scan_attempts'     => array(), // [{url, found}]
-        // v1.2.10 — deeper CSS/theme intelligence.
+        // v1.2.11 — deeper CSS/theme intelligence.
         'content_classes'    => '',
         'breadcrumb_selector'=> '',
         'css_assets_scanned' => 0,
