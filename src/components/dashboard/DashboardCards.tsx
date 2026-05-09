@@ -166,7 +166,7 @@ type Ctx = {
 };
 
 const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any; sub?: string; trend?: string; up?: boolean; hero?: boolean }) => (
-  <>
+  <div className="mt-auto">
     <div className="flex items-end justify-between gap-3">
       <p className={cn('font-bold text-slate-900 tabular-nums leading-none', hero ? 'text-6xl' : 'text-3xl')}>{String(value)}</p>
       <Spark up={up} className={hero ? 'w-28 h-12' : 'w-16 h-8'} />
@@ -175,7 +175,7 @@ const ValueTile = ({ value, sub, trend, up = true, hero = false }: { value: any;
       {sub ? <p className={cn('text-muted-foreground truncate', hero ? 'text-xs' : 'text-[11px]')}>{sub}</p> : <span />}
       {trend && <Trend up={up} value={trend} />}
     </div>
-  </>
+  </div>
 );
 
 type CardProps = { hero?: boolean };
