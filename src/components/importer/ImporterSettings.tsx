@@ -647,18 +647,17 @@ const DashboardCardsSection = ({
   isPro: boolean;
   onChange: (next: DashboardCardPref[]) => void;
 }) => {
-  const move = (idx: number, delta: number) => {
-    const next = [...prefs];
-    const target = idx + delta;
-    if (target < 0 || target >= next.length) return;
-    [next[idx], next[target]] = [next[target], next[idx]];
-    onChange(next);
-  };
   const toggle = (idx: number) => {
-    const next = prefs.map((p, i) => (i === idx ? { ...p, enabled: !p.enabled } : p));
-    onChange(next);
+    onChange(prefs.map((p, i) => (i === idx ? { ...p, enabled: !p.enabled } : p)));
   };
   const resetDefaults = () => onChange(defaultDashboardCards());
+  const reorder = (from: number, to: number) => {
+    if (from === to || from < 0 || to < 0 || from >= prefs.length || to >= prefs.length) return;
+    const next = [...prefs];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    onChange(next);
+  };
 
   return (
     <div className="space-y-3 pt-4 mt-2 border-t border-border">
@@ -672,39 +671,47 @@ const DashboardCardsSection = ({
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Choose which KPI cards appear on the Dashboard and in what order. Pro cards are visible to everyone, but only deliver live data on the Pro plan.
+        Drag to reorder, toggle to show/hide. The <strong className="text-foreground">first enabled card</strong> becomes the large <em>Main card</em> on the Dashboard.
       </p>
 
       <ul className="rounded-lg border border-border bg-card divide-y divide-border overflow-hidden">
         {prefs.map((p, idx) => {
           const meta = DASHBOARD_CARD_REGISTRY.find((m) => m.key === p.key);
           if (!meta) return null;
-          const proLocked = !!meta.pro && !isPro;
+          // First enabled card = main/hero tile.
+          const firstEnabledIdx = prefs.findIndex((x) => x.enabled);
+          const isMain = p.enabled && idx === firstEnabledIdx;
           return (
-            <li key={p.key} className="flex items-center gap-3 px-3 py-2.5">
-              <div className="flex flex-col">
-                <button
-                  type="button"
-                  onClick={() => move(idx, -1)}
-                  disabled={idx === 0}
-                  className="h-4 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  aria-label="Move up"
-                >
-                  <ArrowUp className="w-3 h-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => move(idx, 1)}
-                  disabled={idx === prefs.length - 1}
-                  className="h-4 w-5 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  aria-label="Move down"
-                >
-                  <ArrowDown className="w-3 h-3" />
-                </button>
-              </div>
+            <li
+              key={p.key}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', String(idx));
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const from = parseInt(e.dataTransfer.getData('text/plain') || '-1', 10);
+                if (!isNaN(from)) reorder(from, idx);
+              }}
+              className={cn(
+                'flex items-center gap-3 px-3 py-2.5 transition-colors',
+                isMain ? 'bg-primary/[0.04]' : 'hover:bg-secondary/30',
+              )}
+            >
+              <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab active:cursor-grabbing shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-medium text-foreground truncate">{meta.title}</span>
+                  {isMain && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/40 rounded px-1 py-0.5">
+                      Main card
+                    </span>
+                  )}
                   {meta.pro && (
                     <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-500/40 rounded px-1 py-0.5">
                       <Crown className="w-2.5 h-2.5" /> Pro
