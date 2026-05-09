@@ -985,6 +985,11 @@ type ThemeMap = {
   theme_css_vars?: Record<string, string>;
   body_classes?: string;
   cards_found?: number;
+  content_classes?: string;
+  breadcrumb_selector?: string;
+  css_assets_scanned?: number;
+  theme_css_rules?: string[];
+  theme_spacing?: Record<string, string>;
   scan_attempts?: { url: string; found: number; error?: string }[];
 };
 
@@ -1078,6 +1083,7 @@ const ThemeScanTile = () => {
               <div><span className="text-muted-foreground">wrapper:</span> {map.article_wrapper || '—'}</div>
               <div><span className="text-muted-foreground">pagination:</span> {map.pagination_selector || '—'}</div>
               <div><span className="text-muted-foreground">sidebar:</span> {map.sidebar_selector || '—'}</div>
+                <div><span className="text-muted-foreground">breadcrumb:</span> {map.breadcrumb_selector || '—'}</div>
               <div className="pt-1 border-t border-border/50">
                 <div className="text-muted-foreground mb-0.5">theme styling registered:</div>
                 <div>· card: {map.card_classes || '—'}</div>
@@ -1086,6 +1092,9 @@ const ThemeScanTile = () => {
                 <div>· excerpt: {map.excerpt_classes || '—'}</div>
                 <div>· meta: {map.meta_classes || '—'}</div>
                 <div>· css vars: {map.theme_css_vars ? Object.keys(map.theme_css_vars).length : 0}</div>
+                  <div>· css assets scanned: {map.css_assets_scanned ?? 0}</div>
+                  <div>· css rules stored: {map.theme_css_rules?.length ?? 0}</div>
+                  <div>· spacing hints: {map.theme_spacing ? Object.keys(map.theme_spacing).length : 0}</div>
               </div>
               {map.scan_attempts && map.scan_attempts.length > 0 && (
                 <div className="pt-1 border-t border-border/50">
