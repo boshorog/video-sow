@@ -4313,10 +4313,15 @@ function videosow_ajax_dashboard_stats() {
     ) );
     $recent = array();
     foreach ( $q->posts as $p ) {
+        // "when" should reflect when WE imported the video — not its YouTube
+        // publish date (which is what post_date stores). Fall back to
+        // post_modified for posts created before we tracked import time.
+        $imp = (int) get_post_meta( $p->ID, '_videosow_imported_at', true );
+        if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
         $recent[] = array(
             'id'        => $p->ID,
             'title'     => get_the_title( $p ),
-            'when'      => human_time_diff( get_post_time( 'U', true, $p ), current_time( 'timestamp', true ) ) . ' ago',
+            'when'      => $imp ? human_time_diff( $imp, current_time( 'timestamp', true ) ) . ' ago' : '—',
             'status'    => $p->post_status === 'publish' ? 'Published' : 'Drafted',
             'editLink'  => get_edit_post_link( $p->ID, '' ),
             'permalink' => get_permalink( $p ),
