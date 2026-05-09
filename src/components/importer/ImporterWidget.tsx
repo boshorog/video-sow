@@ -422,20 +422,21 @@ const SermonImporterWidget = ({
             </div>
 
             {/* WP archive tile */}
-            <div data-vs-anchor="slug" className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+            <button
+              type="button"
+              data-vs-anchor="slug"
+              onClick={() => onConfigChange && setArchiveOpen(true)}
+              disabled={!onConfigChange}
+              className="rounded-lg border border-blue-200 bg-blue-50/40 p-3 text-left transition-colors hover:bg-blue-50 disabled:cursor-default"
+            >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground inline-flex items-center gap-1">
                   <img src={wpLogo} alt="" className="w-3 h-3" /> WP archive
                 </span>
                 {onConfigChange && (
-                  <button
-                    type="button"
-                    onClick={() => setArchiveOpen(true)}
-                    title="Edit archive"
-                    className="p-0.5 rounded hover:bg-blue-100 text-blue-700"
-                  >
+                  <span title="Edit archive" className="p-0.5 rounded text-blue-700">
                     <Pencil className="w-3 h-3" />
-                  </button>
+                  </span>
                 )}
               </div>
               <div className="text-center">
@@ -446,7 +447,7 @@ const SermonImporterWidget = ({
                 </div>
                 <p className="text-[10px] text-blue-700 font-semibold mt-1">Public archive page</p>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Progress block */}
