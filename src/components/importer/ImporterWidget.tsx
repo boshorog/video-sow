@@ -1,8 +1,10 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, Scan, Zap, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
 import { defaultDashboardCards, type DashboardCardPref } from "@/components/dashboard/DashboardCards";
+import wpLogo from "@/assets/wordpress-logo.svg";
+import { cn } from "@/lib/utils";
 
 export interface SermonLogEntry {
   time: number;
