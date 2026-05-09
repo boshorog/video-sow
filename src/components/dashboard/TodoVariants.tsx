@@ -110,7 +110,7 @@ const TodoVariants = ({ steps, onAction }: Props) => {
         <div className="h-full bg-primary transition-all" style={{ width: `${percent}%` }} />
       </div>
 
-      <ol className="relative pl-2">
+      <ol className="relative pl-2 md:pl-8">
         {steps.map((s, i) => {
           const last = i === steps.length - 1;
           return (
@@ -130,7 +130,7 @@ const TodoVariants = ({ steps, onAction }: Props) => {
                   {i + 1}. {s.title}
                 </span>
                 {s.pro && !s.done && (
-                  <Crown className="w-4 h-4 text-amber-500" fill="currentColor" aria-label="Pro feature" />
+                  <Crown className="w-4 h-4 text-amber-500" aria-label="Pro feature" />
                 )}
                 <StatusBadge step={s} />
               </div>
