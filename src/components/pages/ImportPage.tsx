@@ -33,6 +33,7 @@ type ArchiveRow = {
   title: string;
   videoId: string;
   date: string;
+  importedAt?: string;
   status: 'Published' | 'Draft';
   views: number;
   editLink?: string;
@@ -40,11 +41,11 @@ type ArchiveRow = {
 };
 
 const SAMPLE_ARCHIVE: ArchiveRow[] = [
-  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-05-07', status: 'Draft',     views: 1200 },
-  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-05-07', status: 'Draft',     views: 843 },
-  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2026-05-06', status: 'Published', views: 4600 },
-  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2026-05-05', status: 'Published', views: 2100 },
-  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2026-05-04', status: 'Published', views: 7800 },
+  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-04-12', importedAt: '2026-05-07', status: 'Draft',     views: 1200 },
+  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-03-30', importedAt: '2026-05-07', status: 'Draft',     views: 843 },
+  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2025-11-18', importedAt: '2026-05-06', status: 'Published', views: 4600 },
+  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2025-09-02', importedAt: '2026-05-05', status: 'Published', views: 2100 },
+  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2025-07-21', importedAt: '2026-05-04', status: 'Published', views: 7800 },
 ];
 
 const formatViews = (n: number) =>
