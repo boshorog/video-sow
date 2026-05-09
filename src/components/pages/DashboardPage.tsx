@@ -217,134 +217,19 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </Card>
       </div>
 
-      {/* To do — interactive setup roadmap */}
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-border">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                To do — your setup roadmap
-              </CardTitle>
-              <CardDescription>
-                Tick each step off to get from zero to a fully automated YouTube → WordPress pipeline.
-              </CardDescription>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="text-2xl font-bold text-slate-800 leading-none">
-                {completed}<span className="text-base font-normal text-muted-foreground">/{total}</span>
-              </div>
-              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">
-                {percent}% complete
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 h-1.5 w-full rounded-full bg-primary/10 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-500"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ol className="relative">
-            {steps.map((step, i) => {
-              const Icon = step.icon;
-              const last = i === steps.length - 1;
-              return (
-                <li
-                  key={step.key}
-                  className={cn(
-                    'relative flex gap-4 px-5 py-4 transition-colors',
-                    !last && 'border-b border-border/60',
-                    step.done && 'bg-emerald-50/40',
-                    step.pro && !step.done && 'bg-amber-50/40'
-                  )}
-                >
-                  {/* connector line */}
-                  {!last && (
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'absolute left-[34px] top-12 bottom-[-1px] w-px',
-                        step.done ? 'bg-emerald-300' : 'bg-border'
-                      )}
-                    />
-                  )}
-                  {/* status dot */}
-                  <div
-                    className={cn(
-                      'relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 transition-all',
-                      step.done
-                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30'
-                        : step.pro
-                          ? 'bg-amber-100 border-amber-300 text-amber-700'
-                          : 'bg-background border-primary/40 text-primary'
-                    )}
-                  >
-                    {step.done ? (
-                      <CheckCircle2 className="w-5 h-5" />
-                    ) : step.pro ? (
-                      <Lock className="w-4 h-4" />
-                    ) : (
-                      <Icon className="w-4 h-4" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0 flex items-center gap-4 flex-wrap">
-                    <div className="flex-1 min-w-[220px]">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={cn(
-                            'text-sm font-semibold',
-                            step.done ? 'text-emerald-800' : 'text-slate-800'
-                          )}
-                        >
-                          {i + 1}. {step.title}
-                        </span>
-                        {step.pro && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500 text-white">
-                            Pro
-                          </span>
-                        )}
-                        {step.done && (
-                          <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700">
-                            Done
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                        {step.desc}
-                      </p>
-                    </div>
-                    {step.cta && (
-                      <Button
-                        size="sm"
-                        variant={step.cta.variant || 'default'}
-                        onClick={step.cta.onClick}
-                        disabled={step.cta.loading}
-                        className="gap-1.5 shrink-0"
-                      >
-                        {step.cta.loading ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            {step.cta.loadingLabel || 'Working…'}
-                          </>
-                        ) : (
-                          <>
-                            {step.cta.label}
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </CardContent>
-      </Card>
+      {/* To do — SHOWCASE: pick a variant */}
+      <TodoVariants
+        steps={buildShowcaseSteps({
+          themeOk,
+          hasApiKey: !!cfg.apiKey,
+          hasPlaylist: !!cfg.playlistId,
+          firstSyncDone: !!cfg.firstSyncDone,
+          syncEnabled: !!cfg.enabled,
+          hasAi: !!cfg.aiApiKey,
+          transcriptOn: !!cfg.fetchTranscript,
+          isPro: license.isPro,
+        })}
+      />
 
       {/* Recent activity */}
       <Card>
