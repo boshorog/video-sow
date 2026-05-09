@@ -270,13 +270,32 @@ const SermonImporterWidget = ({
       stageTone = "syncing"; StageIcon = Search; stageSpin = false;
       stageLabelText = "Scanning playlist";
       stageNote = "Reading playlist contents from YouTube…";
+    } else if (restingInfo) {
+      stageTone = "paused"; StageIcon = Coffee; stageSpin = false;
+      stageLabelText = restingInfo.reason || "Coffee break";
+      stageNote = `Resting ${restingInfo.remaining}s of ${restingInfo.total}s — ${progress!.done} / ${progress!.total} imported.`;
+    } else if (cancelPending) {
+      stageTone = "paused"; StageIcon = Loader2; stageSpin = true;
+      stageLabelText = "Stopping";
+      stageNote = `Stopping after current video — ${progress!.done} / ${progress!.total}`;
     } else {
       stageTone = "syncing"; StageIcon = Loader2; stageSpin = true;
-      stageLabelText = cancelPending ? "Stopping" : "Backfilling";
-      stageNote = cancelPending
-        ? `Stopping after current video — ${progress!.done} / ${progress!.total}`
-        : `Importing video ${progress!.done} of ${progress!.total}`;
+      stageLabelText = "Backfilling";
+      const sub = stageLabel(stageInfo?.stage);
+      const base = `Importing video ${progress!.done + 1} of ${progress!.total}`;
+      stageNote = sub ? `${base} — ${sub}` : base;
+      if (stallInfo) {
+        stageNote = `${stageNote} · taking unusually long (${stallInfo.seconds}s)`;
+        stageTone = "error"; StageIcon = AlertTriangle; stageSpin = false;
+        stageLabelText = "Slow step";
+      }
     }
+  } else if (isRepairLive) {
+    stageTone = "syncing"; StageIcon = RefreshCw; stageSpin = true;
+    stageLabelText = "Repairing metadata";
+    stageNote = repairProgress && repairProgress.total > 0
+      ? `Refetching YouTube metadata — ${repairProgress.processed} / ${repairProgress.total}${repairProgress.updated ? ` · ${repairProgress.updated} updated` : ""}`
+      : "Refetching YouTube metadata…";
   } else if (!isConfigured) {
     stageTone = "idle"; StageIcon = PlayCircle;
     stageLabelText = "Not connected";
