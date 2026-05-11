@@ -1,4 +1,4 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Pencil, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, ArrowRight, Wifi, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
@@ -223,20 +223,10 @@ const SermonImporterWidget = ({
   const activeSyncAt = hasScopedStats ? (stats.lastSyncAt ?? 0) : (stats.lastSyncAt ?? config.lastSyncAt);
   const activeSyncStatus = hasScopedStats ? (stats.lastSyncStatus ?? "") : (stats.lastSyncStatus ?? config.lastSyncStatus);
   const activeSyncMsg = hasScopedStats ? (stats.lastSyncMsg ?? "") : (stats.lastSyncMsg ?? config.lastSyncMsg);
-  const StatusIcon = activeSyncStatus === "success" ? CheckCircle2 : activeSyncStatus === "error" ? AlertCircle : Clock;
-  const statusColor = activeSyncStatus === "success" ? "text-emerald-600" : activeSyncStatus === "error" ? "text-destructive" : "text-muted-foreground";
-
   const isLive = progress && (progress.phase === "scanning" || progress.phase === "importing");
   const pct = progress && progress.total > 0 ? Math.min(100, Math.round((progress.done / progress.total) * 100)) : 0;
   const repairPct = repairProgress && repairProgress.total > 0 ? Math.min(100, Math.round((repairProgress.processed / repairProgress.total) * 100)) : 0;
   const isRepairLive = !!isRepairing || (!!repairProgress && repairProgress.total > 0 && repairProgress.processed < repairProgress.total);
-
-  // Merge live + persisted log into the rendered list (live first, dedup by video_id)
-  const persistedFlat = config.log.slice(0, 10).flatMap((e) => e.imported);
-  const seen = new Set<string>();
-  const liveItems = (progress?.liveImported || []).filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
-  const persistedItems = persistedFlat.filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
-  const renderedItems = [...liveItems, ...persistedItems];
 
   const stageLabel = (s?: string) => {
     switch (s) {
