@@ -25,10 +25,10 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
-import ImporterConsoleShowcase from '@/components/importer/ImporterConsoleShowcase';
 
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
+import { getWPGlobal } from '@/config/pluginIdentity';
 import { cn } from '@/lib/utils';
 
 type ArchiveRow = {
@@ -67,6 +67,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const [sortKey, setSortKey] = useState<SortKey>('importedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
+  const wpGlobal = getWPGlobal();
+  const siteTitle = wpGlobal?.siteTitle || 'WordPress site';
 
   useEffect(() => {
     const { apiKey, playlistId } = imp.config;
@@ -180,10 +182,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         </div>
       </div>
 
-
-      <ImporterConsoleShowcase />
-
-      <div data-vs-anchor="firstimport" className="hidden">
+      <div data-vs-anchor="firstimport">
       <ImporterWidget
         config={imp.config}
         progress={imp.progress}
@@ -204,6 +203,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         playlistName={playlistInfo.name}
         playlistCount={playlistInfo.count}
         channelName={playlistInfo.channel}
+        siteTitle={siteTitle}
         onPlaylistClick={() => {
           onNavigate?.('settings');
           import('@/lib/highlightAnchor').then(({ highlightAnchor }) => {
