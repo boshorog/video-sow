@@ -35,13 +35,13 @@ const TasksPage = () => {
       </div>
 
       {/* Simple tasks */}
-      <Card className="border-2 border-emerald-300/60 shadow-md bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/20">
+      <Card className="vs-theme-emerald border-2 border-emerald-300/60 shadow-md bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/20">
         <CardHeader className="border-b border-emerald-200/60 bg-emerald-100/40 dark:bg-emerald-950/30 dark:border-emerald-900/40">
           <CardTitle className="flex items-center gap-2 text-lg">
             <span className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
               <Wand2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </span>
-            Simple tasks
+            Simple Tasks
           </CardTitle>
           <CardDescription>
             Deterministic, no-AI rules applied to every video description before saving. Drag pills to reorder
@@ -58,13 +58,13 @@ const TasksPage = () => {
       </Card>
 
       {/* AI tasks */}
-      <Card data-vs-anchor="ai" className="border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
+      <Card data-vs-anchor="ai" className="vs-theme-violet border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
         <CardHeader className="border-b border-violet-200/60 bg-violet-100/40 dark:bg-violet-950/30 dark:border-violet-900/40">
           <CardTitle className="flex items-center gap-2 text-lg">
             <span className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
             </span>
-            AI tasks
+            AI Tasks
           </CardTitle>
           <CardDescription>
             Optional AI processing per video. Pick a provider, model and prompt template. Suggested workflows:
