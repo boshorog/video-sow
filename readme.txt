@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.30
+Stable tag: 1.2.31
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.30 =
+= 1.2.31 =
 * Fix: WP admin sidebar — sibling plugin icons (PDF Gallery, Countdown) no longer turn dark while Video Sow is the current menu item. Root cause was an explicit fill on our toplevel icon that halted WordPress's svg-painter; the icon now uses currentColor and is painted natively by WP.
 * Tasks: Simple Tasks card uses a green accent throughout (toggles, selections); AI Tasks uses purple. Titles changed to Title Case.
 * Import: Archive pagination — "Load 20 more" replaces the temporary showcase.
