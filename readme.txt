@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.28
+Stable tag: 1.2.29
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,11 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.29 =
+* Importer console: Pause/Resume backfill (renamed from Cancel), capitalized rest reasons, last-sync card shows Paused.
+* Archive: tighter columns for longer titles, stable secondary sort by import order.
+* Pagination showcase added below archive.
 
 = 1.2.28 =
 * Tweak: Importer console outer frame no longer wraps the navy header — border now starts from the header's bottom edge for a cleaner double-tone look.
