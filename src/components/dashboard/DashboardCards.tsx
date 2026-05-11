@@ -296,23 +296,45 @@ const CardAiUsage = ({ locked, onUnlock, hero }: LockCardProps) => (
   </Tile>
 );
 
-const CardBackfill = ({ locked, onUnlock, hero }: LockCardProps) => (
-  <Tile eyebrow="Backfill" title="Importing playlist" icon={PlayCircle} locked={locked} onUnlock={onUnlock} hero={hero}>
-    <div className="mt-auto">
-      <div className="flex items-baseline gap-2">
-        <p className={cn('font-bold text-slate-900 tabular-nums', hero ? 'text-6xl' : 'text-3xl')}>142</p>
-        <p className="text-sm text-muted-foreground">/ 248</p>
+/**
+ * Always-on card shown above the dashboard grid while an import is running.
+ * Covers any sync (full backfill or incremental) on the current playlist.
+ */
+export const ImportProgressCard = ({
+  done = 0,
+  total = 0,
+  playlistName,
+  etaLabel,
+}: {
+  done?: number;
+  total?: number;
+  playlistName?: string;
+  etaLabel?: string;
+}) => {
+  const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/[0.04] p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-0.5">Import in progress</p>
+          <h4 className="text-[15px] font-bold text-slate-800 truncate">{playlistName || 'Currently importing playlist'}</h4>
+        </div>
+        <PlayCircle className="w-4 h-4 text-primary shrink-0 mt-0.5" />
       </div>
-      <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-        <div className="h-full bg-primary transition-all" style={{ width: '57%' }} />
+      <div className="mt-3 flex items-baseline gap-2">
+        <p className="text-2xl font-bold text-slate-900 tabular-nums leading-none">{done}</p>
+        {total > 0 && <p className="text-sm text-muted-foreground">/ {total}</p>}
+      </div>
+      <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
       </div>
       <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
-        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> ~4m left</span>
-        <span>57% complete</span>
+        <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" /> {etaLabel || 'Working…'}</span>
+        <span className="tabular-nums">{pct}% complete</span>
       </div>
     </div>
-  </Tile>
-);
+  );
+};
 
 const CardRecent = ({ ctx, hero }: CtxCardProps) => {
   const rows = [...(ctx.recent || [])]
@@ -373,7 +395,6 @@ const renderCard = (key: DashboardCardKey, isPro: boolean, ctx: Ctx, onUnlock: (
     case 'syncHealth': return <CardSyncHealth hero={hero} />;
     case 'taxonomy':   return <CardTaxonomy   hero={hero} />;
     case 'aiUsage':    return <CardAiUsage    locked={locked} onUnlock={onUnlock} hero={hero} />;
-    case 'backfill':   return <CardBackfill   locked={locked} onUnlock={onUnlock} hero={hero} />;
     default: return null;
   }
 };
