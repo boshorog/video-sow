@@ -187,6 +187,7 @@ const SermonImporterWidget = ({
   playlistName,
   playlistCount,
   channelName,
+  siteTitle = "WordPress site",
 }: {
   config: SermonImporterConfig;
   progress?: SermonProgress;
@@ -208,6 +209,7 @@ const SermonImporterWidget = ({
   playlistName?: string;
   playlistCount?: number;
   channelName?: string;
+  siteTitle?: string;
 }) => {
   const [archiveOpen, setArchiveOpen] = useState(false);
   const { scanned: themeScanned } = useThemeMap();
@@ -335,9 +337,9 @@ const SermonImporterWidget = ({
   const tone = toneClasses[stageTone];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-primary/25 bg-primary/[0.05] shadow-md overflow-hidden">
       {/* ---- Navy header with faded logo bleed --------------------- */}
-      <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-700 to-slate-600">
+      <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-16 -left-6 w-[180px] h-[180px] opacity-[0.10]"
@@ -374,7 +376,7 @@ const SermonImporterWidget = ({
               className={cn(
                 "rounded-lg border p-3 text-left transition-colors flex flex-col",
                 config.playlistId
-                  ? "border-emerald-200 bg-emerald-50/40"
+                  ? "border-emerald-200 bg-white"
                   : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
               )}
             >
@@ -449,7 +451,7 @@ const SermonImporterWidget = ({
               data-vs-anchor="slug"
               onClick={() => onConfigChange && setArchiveOpen(true)}
               disabled={!onConfigChange}
-              className="rounded-lg border border-blue-200 bg-blue-50/40 p-3 text-left transition-colors hover:bg-blue-50 disabled:cursor-default"
+              className="rounded-lg border border-blue-200 bg-white p-3 text-left transition-colors hover:bg-blue-50/50 disabled:cursor-default"
             >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground inline-flex items-center gap-1">
@@ -465,7 +467,7 @@ const SermonImporterWidget = ({
                 <p className="font-bold font-mono text-slate-900 text-base truncate">/{config.slug}/</p>
                 <div className="mt-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                   <img src={wpLogo} alt="" className="w-3.5 h-3.5" />
-                  <span>WordPress site</span>
+                  <span className="truncate" title={siteTitle}>{siteTitle}</span>
                 </div>
                 <p className="text-[10px] text-blue-700 font-semibold mt-1">Public archive page</p>
               </div>
