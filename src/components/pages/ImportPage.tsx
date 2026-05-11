@@ -128,18 +128,25 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       }));
 
   const sorted = useMemo(() => {
-    const f = sourceRows.filter(
-      (r) =>
+    const indexed = sourceRows.map((r, i) => ({ r, i }));
+    const f = indexed.filter(
+      ({ r }) =>
         r.title.toLowerCase().includes(filter.toLowerCase()) ||
         r.videoId.toLowerCase().includes(filter.toLowerCase())
     );
     const dir = sortDir === 'asc' ? 1 : -1;
-    return [...f].sort((a, b) => {
-      const av = a[sortKey];
-      const bv = b[sortKey];
-      if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
-      return String(av).localeCompare(String(bv)) * dir;
-    });
+    return [...f]
+      .sort((a, b) => {
+        const av = a.r[sortKey];
+        const bv = b.r[sortKey];
+        let cmp = 0;
+        if (typeof av === 'number' && typeof bv === 'number') cmp = (av - bv);
+        else cmp = String(av).localeCompare(String(bv));
+        if (cmp !== 0) return cmp * dir;
+        // Stable tiebreaker: preserve server order (most recent import first).
+        return a.i - b.i;
+      })
+      .map(({ r }) => r);
   }, [filter, sortKey, sortDir, sourceRows]);
 
   const SortHeader = ({
