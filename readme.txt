@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.27
+Stable tag: 1.2.28
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,7 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.27 =
+= 1.2.28 =
 * Tweak: Importer console Recent Imports section removed; right action panel is now pure white.
 * Tweak: Importer console contrast refined for the faded coral body, including progress track, idle/paused status pills, and outer border.
 * Fix: WordPress admin sidebar icon CSS scoped to Video Sow only, preventing sibling KIND PIXELS plugin icons from being repainted.
