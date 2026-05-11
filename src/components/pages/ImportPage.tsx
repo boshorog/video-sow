@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
+import PaginationShowcase from '@/components/importer/PaginationShowcase';
 
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
