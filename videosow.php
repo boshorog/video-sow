@@ -3138,7 +3138,7 @@ function videosow_ajax_step_sermon_sync() {
             $rest_reason  = 'Coffee break';
         } elseif ( $r_delay > 0 ) {
             $rest_seconds = $r_delay;
-            $rest_reason  = 'pause between videos';
+            $rest_reason  = 'Pause between videos';
         }
         if ( $rest_seconds > 0 ) {
             $session['rest_until']  = time() + $rest_seconds;
