@@ -298,6 +298,12 @@ const SermonImporterWidget = ({
     stageTone = "paused"; StageIcon = PauseCircle;
     stageLabelText = "Paused";
     stageNote = "Auto-sync is off — click “Sync now” for a manual run.";
+  } else if (activeSyncStatus === "cancelled") {
+    stageTone = "paused"; StageIcon = PauseCircle;
+    stageLabelText = "Paused";
+    stageNote = activeSyncMsg
+      ? `${activeSyncMsg} · resume to continue.`
+      : `Backfill paused${totalKnown ? ` at ${activeTotal} / ${totalKnown}` : ""} — resume to continue.`;
   } else if (activeSyncStatus === "error") {
     stageTone = "error"; StageIcon = AlertTriangle;
     stageLabelText = "Last sync failed";
