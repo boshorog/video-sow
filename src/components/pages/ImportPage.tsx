@@ -249,9 +249,20 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
             <Input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Escape') { setFilter(''); (e.target as HTMLInputElement).blur(); } }}
               placeholder="Filter by title or video ID…"
-              className="pl-8 h-9 text-xs"
+              className="pl-8 pr-8 h-9 text-xs"
             />
+            {filter && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => setFilter('')}
+                className="absolute right-1.5 top-1.5 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="relative">
