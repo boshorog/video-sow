@@ -4286,7 +4286,7 @@ function videosow_ajax_list_archive() {
         'post_type'      => 'videosow_video',
         'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
         'posts_per_page' => 100,
-        'orderby'        => 'date',
+        'orderby'        => 'ID',
         'order'          => 'DESC',
     );
     // NOTE: per-playlist filtering is not yet wired (playlist_id meta not stored on import).
@@ -4304,6 +4304,7 @@ function videosow_ajax_list_archive() {
         if ( ! $imp ) $imp = (int) get_post_modified_time( 'U', true, $p );
         $rows[] = array(
             'id'         => $p->ID,
+            'importedTs' => $imp,
             'title'      => get_the_title( $p ),
             'videoId'    => $vid,
             'date'       => get_the_date( 'Y-m-d', $p ),    // YouTube publish date
@@ -4314,6 +4315,12 @@ function videosow_ajax_list_archive() {
             'permalink'  => get_permalink( $p ),
         );
     }
+    usort( $rows, function( $a, $b ) {
+        $ai = isset( $a['importedTs'] ) ? (int) $a['importedTs'] : 0;
+        $bi = isset( $b['importedTs'] ) ? (int) $b['importedTs'] : 0;
+        if ( $ai !== $bi ) return $bi - $ai;
+        return (int) $b['id'] - (int) $a['id'];
+    } );
     wp_send_json_success( array( 'rows' => $rows ) );
 }
 add_action( 'wp_ajax_videosow_list_archive', 'videosow_ajax_list_archive' );
