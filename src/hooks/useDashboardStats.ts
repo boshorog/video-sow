@@ -12,6 +12,7 @@ export type DashboardStats = {
     id: number;
     title: string;
     when: string;
+    importedTs?: number;
     status: 'Published' | 'Drafted';
     editLink?: string;
     permalink?: string;
