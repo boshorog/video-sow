@@ -168,7 +168,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           <ImportProgressCard
             done={imp.progress?.done || 0}
             total={imp.progress?.total || 0}
-            playlistName={cfg.playlistName || cfg.playlistId || 'Currently importing playlist'}
+            playlistName={cfg.playlistId || 'Currently importing playlist'}
             etaLabel={ph === 'scanning' ? 'Scanning playlist…' : 'Importing…'}
           />
         );
