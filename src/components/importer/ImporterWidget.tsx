@@ -567,9 +567,11 @@ const SermonImporterWidget = ({
               <button
                 type="button"
                 onClick={onCancelSync}
-                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-rose-600 py-2 rounded-md hover:bg-rose-700"
+                disabled={!!cancelPending}
+                className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-amber-600 py-2 rounded-md hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <X className="w-4 h-4" /> Cancel sync
+                {cancelPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <PauseCircle className="w-4 h-4" />}
+                {cancelPending ? "Pausing…" : "Pause sync"}
               </button>
             ) : onSync ? (
               <button
@@ -579,7 +581,13 @@ const SermonImporterWidget = ({
                 className="w-full inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-primary py-2 rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                {isSyncing ? "Syncing…" : isFirstRun ? "Run full backfill" : "Sync now"}
+                {isSyncing
+                  ? "Syncing…"
+                  : activeSyncStatus === "cancelled"
+                    ? "Resume backfill"
+                    : isFirstRun
+                      ? "Run full backfill"
+                      : "Sync now"}
               </button>
             ) : null}
             {config.slug && (
