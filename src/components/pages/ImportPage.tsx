@@ -150,6 +150,11 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       .map(({ r }) => r);
   }, [filter, sortKey, sortDir, sourceRows]);
 
+  // Reset pagination on any filter/sort change.
+  useEffect(() => { setVisibleCount(20); }, [filter, sortKey, sortDir, sourceRows.length]);
+
+  const visibleRows = sorted.slice(0, visibleCount);
+  const hasMore = visibleCount < sorted.length;
   const SortHeader = ({
     label,
     keyName,
