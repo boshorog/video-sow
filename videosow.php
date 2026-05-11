@@ -130,33 +130,16 @@ class VideoSow_Plugin {
     }
 
     /**
-     * Force the Video Sow toplevel menu icon to follow WP's standard
-     * inactive/active coloring (grey when idle, white when current/hover).
-     * WordPress's svg-painter does not always recolor custom data-URI SVGs
-     * reliably, which can leave the icon dark when the menu is current.
+     * No-op kept for backward compat. The Video Sow toplevel icon now uses
+     * fill="currentColor" in the SVG itself, so WordPress's built-in
+     * svg-painter colors it correctly in every state (idle, hover, current)
+     * without us having to inject filter overrides. Injecting filter rules
+     * also caused WP's svg-painter to bail when our SVG used a literal
+     * fill="black", which left sibling plugin icons (PDF Gallery, Countdown)
+     * dark while Video Sow was the current menu item.
      */
     public function fix_menu_icon_colors() {
-        echo '<style>
-        /* Normalize only the Video Sow custom SVG icon; do not repaint sibling plugin icons. */
-        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg,
-        #adminmenu a[href*="page=video-sow"] .wp-menu-image img {
-            filter: brightness(0) invert(1) !important;
-            opacity: .6 !important;
-        }
-        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg {
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-            background-size: 20px auto !important;
-        }
-        #adminmenu li:hover > a[href*="page=video-sow"] .wp-menu-image,
-        #adminmenu li.wp-menu-open > a[href*="page=video-sow"] .wp-menu-image,
-        #adminmenu li.wp-has-current-submenu > a[href*="page=video-sow"] .wp-menu-image,
-        #adminmenu li.current > a[href*="page=video-sow"] .wp-menu-image,
-        #adminmenu li.opensub > a[href*="page=video-sow"] .wp-menu-image {
-            filter: brightness(0) invert(1) !important;
-            opacity: 1 !important;
-        }
-        </style>';
+        // Intentionally empty — see method docblock.
     }
 
     public function add_admin_menu() {
