@@ -500,7 +500,7 @@ const SermonImporterWidget = ({
 
           {/* Mini stat row */}
           <div className="grid grid-cols-4 gap-2">
-            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Imported</p>
                 <ListMusic className="w-3 h-3 text-muted-foreground" />
@@ -508,7 +508,7 @@ const SermonImporterWidget = ({
               <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{activeTotal}</p>
               {totalKnown > 0 && <p className="text-[10px] text-muted-foreground">of {totalKnown}</p>}
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Interval</p>
                 <TimerReset className="w-3 h-3 text-muted-foreground" />
@@ -516,7 +516,7 @@ const SermonImporterWidget = ({
               <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{config.syncIntervalH}h</p>
               <p className="text-[10px] text-muted-foreground">Cron tick</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Auto-sync</p>
                 <RefreshCw className="w-3 h-3 text-muted-foreground" />
@@ -526,7 +526,7 @@ const SermonImporterWidget = ({
               </p>
               <p className="text-[10px] text-muted-foreground">Background</p>
             </div>
-            <div className="rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Last sync</p>
                 <CalendarClock className="w-3 h-3 text-muted-foreground" />
@@ -542,7 +542,7 @@ const SermonImporterWidget = ({
         </div>
 
         {/* ---- Action panel (right, narrower) --------------------- */}
-        <div className="p-4 flex flex-col justify-between gap-3 bg-gradient-to-br from-primary/8 via-primary/3 to-transparent border-l border-primary/10">
+        <div className="p-4 flex flex-col justify-between gap-3 bg-white/70 border-l border-primary/15">
           {(() => {
             const showNext = !isLive && config.enabled && isConfigured && activeSyncAt > 0 && config.syncIntervalH > 0;
             const nextAtSec = activeSyncAt + config.syncIntervalH * 3600;
@@ -613,7 +613,7 @@ const SermonImporterWidget = ({
       )}
 
       {(renderedItems.length > 0 || isLive) && (
-        <div className="px-5 py-4 border-t border-slate-100 space-y-2 bg-slate-50/30">
+        <div className="px-5 py-4 border-t border-primary/15 space-y-2 bg-white/45">
           <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
           <div className="space-y-1 max-h-48 overflow-y-auto">
             {renderedItems.map((it) => (
