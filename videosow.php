@@ -4348,12 +4348,12 @@ function videosow_ajax_dashboard_stats() {
     $q = new WP_Query( array(
         'post_type'      => 'videosow_video',
         'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
-        'posts_per_page' => 10,
-        'orderby'        => 'date',
+        'posts_per_page' => 50,
+        'orderby'        => 'ID',
         'order'          => 'DESC',
         'no_found_rows'  => true,
     ) );
-    $recent = array();
+    $recent_rows = array();
     foreach ( $q->posts as $p ) {
         // "when" should reflect when WE imported the video — not its YouTube
         // publish date (which is what post_date stores). Drafts have their
@@ -4365,8 +4365,9 @@ function videosow_ajax_dashboard_stats() {
         if ( ! $imp && $is_publish ) {
             $imp = (int) get_post_modified_time( 'U', true, $p );
         }
-        $recent[] = array(
+        $recent_rows[] = array(
             'id'        => $p->ID,
+            'importedTs'=> $imp,
             'title'     => get_the_title( $p ),
             'when'      => $imp ? human_time_diff( $imp, current_time( 'timestamp', true ) ) . ' ago' : '—',
             'status'    => $is_publish ? 'Published' : 'Drafted',
@@ -4375,6 +4376,13 @@ function videosow_ajax_dashboard_stats() {
             'videoId'   => (string) get_post_meta( $p->ID, '_videosow_yt_video_id', true ),
         );
     }
+    usort( $recent_rows, function( $a, $b ) {
+        $ai = isset( $a['importedTs'] ) ? (int) $a['importedTs'] : 0;
+        $bi = isset( $b['importedTs'] ) ? (int) $b['importedTs'] : 0;
+        if ( $ai !== $bi ) return $bi - $ai;
+        return (int) $b['id'] - (int) $a['id'];
+    } );
+    $recent = array_slice( $recent_rows, 0, 10 );
 
     wp_send_json_success( array(
         'imported'      => $imported,
