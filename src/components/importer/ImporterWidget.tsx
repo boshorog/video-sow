@@ -224,7 +224,6 @@ const SermonImporterWidget = ({
   const activeSyncStatus = hasScopedStats ? (stats.lastSyncStatus ?? "") : (stats.lastSyncStatus ?? config.lastSyncStatus);
   const activeSyncMsg = hasScopedStats ? (stats.lastSyncMsg ?? "") : (stats.lastSyncMsg ?? config.lastSyncMsg);
   const isLive = progress && (progress.phase === "scanning" || progress.phase === "importing");
-  const pct = progress && progress.total > 0 ? Math.min(100, Math.round((progress.done / progress.total) * 100)) : 0;
   const repairPct = repairProgress && repairProgress.total > 0 ? Math.min(100, Math.round((repairProgress.processed / repairProgress.total) * 100)) : 0;
   const isRepairLive = !!isRepairing || (!!repairProgress && repairProgress.total > 0 && repairProgress.processed < repairProgress.total);
 
