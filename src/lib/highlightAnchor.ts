@@ -13,8 +13,6 @@ export function highlightAnchor(name: string, opts: { pulses?: number; delay?: n
       ? el.firstElementChild
       : null;
     if (child) return { target: child, card: true };
-    const card = el.closest<HTMLElement>(cardSelector);
-    if (card) return { target: card, card: true };
     return { target: el, card: false };
   };
 
