@@ -153,7 +153,7 @@ class VideoSow_Plugin {
     }
 
     public function add_admin_menu() {
-        add_menu_page( 'Video Sow', 'Video Sow', 'manage_options', 'video-sow', array( $this, 'render_admin_page' ), 'none', 100 );
+        add_menu_page( 'Video Sow', 'Video Sow', 'manage_options', 'video-sow', array( $this, 'render_admin_page' ), $this->get_menu_icon_data_uri(), 100 );
         // Explicit Dashboard submenu — guarantees it exists even when the CPT's
         // show_in_menu auto-attachment runs before our add_menu_page (in which
         // case WP skips the auto-mirror because $submenu['video-sow'] is non-empty).
