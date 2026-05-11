@@ -381,6 +381,8 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           </div>
         </CardContent>
       </Card>
+
+      <PaginationShowcase />
     </div>
   );
 };
