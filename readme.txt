@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.22
+Stable tag: 1.2.26
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,10 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.26 =
+* Tweak: Importer console now uses the faint coral full-card treatment and shows the actual WordPress site title on the archive card.
+* Fix: WordPress admin sidebar image icons stay white/grey while Video Sow pages are active.
 
 = 1.2.25 =
 * Fix: Importer status & stat cards now reset when switching between playlists (no longer show stale "Up to date" from previous playlist).
