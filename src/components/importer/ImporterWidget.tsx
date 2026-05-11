@@ -327,7 +327,7 @@ const SermonImporterWidget = ({
   const tone = toneClasses[stageTone];
 
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/[0.05] shadow-md overflow-hidden">
+    <div className="rounded-xl border border-slate-300 bg-primary/[0.05] shadow-md overflow-hidden">
       {/* ---- Navy header with faded logo bleed --------------------- */}
       <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700">
         <div
@@ -367,7 +367,7 @@ const SermonImporterWidget = ({
                 "rounded-lg border p-3 text-left transition-colors flex flex-col",
                 config.playlistId
                   ? "border-emerald-200 bg-white"
-                  : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
+                  : "border-amber-300 bg-amber-50/90 hover:bg-amber-100 cursor-pointer"
               )}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -479,7 +479,7 @@ const SermonImporterWidget = ({
                   : `${importedNow}${denominator > 0 ? ` / ${denominator}` : ""} · ${stagePct}%`}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
               <div
                 className={cn("h-full transition-all", tone.bar)}
                 style={{ width: `${isRepairLive ? repairPct : stagePct}%` }}
@@ -532,7 +532,7 @@ const SermonImporterWidget = ({
         </div>
 
         {/* ---- Action panel (right, narrower) --------------------- */}
-        <div className="p-4 flex flex-col justify-between gap-3 bg-white/70 border-l border-primary/15">
+        <div className="p-4 flex flex-col justify-between gap-3 bg-white border-l border-slate-200">
           {(() => {
             const showNext = !isLive && config.enabled && isConfigured && activeSyncAt > 0 && config.syncIntervalH > 0;
             const nextAtSec = activeSyncAt + config.syncIntervalH * 3600;
@@ -600,55 +600,6 @@ const SermonImporterWidget = ({
           onChange={onConfigChange}
           onSave={onSave}
         />
-      )}
-
-      {(renderedItems.length > 0 || isLive) && (
-        <div className="px-5 py-4 border-t border-primary/15 space-y-2 bg-white/45">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
-          <div className="space-y-1 max-h-48 overflow-y-auto">
-            {renderedItems.map((it) => (
-                <div key={it.video_id} className="flex items-center gap-2 text-xs p-2 rounded-md hover:bg-secondary/40">
-                  <span className="truncate text-foreground flex-1">{it.title}</span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <a
-                      href={`https://www.youtube.com/watch?v=${it.video_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="View on YouTube"
-                      className="p-1.5 rounded-md hover:bg-red-50 text-red-600 transition-colors"
-                    >
-                      <Youtube className="w-3.5 h-3.5" />
-                    </a>
-                    {it.edit_link && (
-                      <a
-                        href={it.edit_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Edit post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {it.permalink && (
-                      <a
-                        href={it.permalink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="View public post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-            ))}
-            {renderedItems.length === 0 && !isLive && (
-              <p className="text-xs text-muted-foreground italic">No imports recorded yet.</p>
-            )}
-          </div>
-        </div>
       )}
 
     </div>
