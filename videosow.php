@@ -3053,6 +3053,8 @@ function videosow_ajax_step_sermon_sync() {
 
     if ( get_transient( 'videosow_sync_cancelled' ) ) {
         delete_transient( 'videosow_sync_cancelled' );
+        $imported_so_far = isset( $session['imported'] ) ? $session['imported'] : array();
+        videosow_log_sync( $cfg, 'cancelled', sprintf( 'Paused — %d imported', count( $imported_so_far ) ), $imported_so_far );
         delete_option( 'videosow_sync_session' );
         wp_send_json_success( array( 'done' => true, 'cancelled' => true ) );
     }
