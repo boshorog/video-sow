@@ -201,7 +201,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           }
           if (key === 'configure') {
             onNavigate?.('import');
-            highlightAnchor('slug');
+            const p = pulsesForAnchor('slug');
+            if (p > 0) highlightAnchor('slug', { pulses: p });
             return;
           }
           const tabFor: Record<string, string> = {
@@ -224,7 +225,10 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           };
           onNavigate?.(tabFor[key] || 'settings');
           const anchor = anchorFor[key];
-          if (anchor) highlightAnchor(anchor);
+          if (anchor) {
+            const p = pulsesForAnchor(anchor);
+            if (p > 0) highlightAnchor(anchor, { pulses: p });
+          }
         }}
       />
     </div>
