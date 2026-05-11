@@ -6,7 +6,7 @@ export function highlightAnchor(name: string, opts: { pulses?: number; delay?: n
   const { pulses = 2, delay = 0 } = opts;
 
   const find = () => document.querySelector<HTMLElement>(`[data-vs-anchor="${name}"]`);
-  const cardSelector = '.rounded-lg.border, .rounded-xl.border, .rounded-xl.shadow-md, [data-vs-highlight-card]';
+  const cardSelector = '.rounded-lg.border, .rounded-lg.border-2, .rounded-xl.border, .rounded-xl.border-2, .rounded-xl.shadow-md, [data-vs-highlight-card]';
   const getHighlightTarget = (el: HTMLElement) => {
     if (el.matches(cardSelector)) return { target: el, card: true };
     const child = el.firstElementChild instanceof HTMLElement && el.firstElementChild.matches(cardSelector)
