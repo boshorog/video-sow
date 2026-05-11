@@ -299,6 +299,7 @@ class VideoSow_Plugin {
             'fsAvailable'   => $fs_available,
             'licensedTo'    => $fs_licensed_to,
             'pluginBasename'=> plugin_basename( __FILE__ ),
+            'siteTitle'     => get_bloginfo( 'name' ),
         ) );
     }
 
