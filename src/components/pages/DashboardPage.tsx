@@ -25,9 +25,9 @@ import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
-import DashboardCards, { reconcileDashboardCards } from '@/components/dashboard/DashboardCards';
+import DashboardCards, { reconcileDashboardCards, ImportProgressCard } from '@/components/dashboard/DashboardCards';
 
-import { highlightAnchor } from '@/lib/highlightAnchor';
+import { highlightAnchor, pulsesForAnchor } from '@/lib/highlightAnchor';
 
 
 const useThemeScan = () => {
@@ -159,6 +159,21 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         </p>
       </div>
 
+      {/* Always-on import progress card while a sync is running */}
+      {(() => {
+        const ph = imp.progress?.phase;
+        const isLive = ph === 'scanning' || ph === 'importing';
+        if (!isLive) return null;
+        return (
+          <ImportProgressCard
+            done={imp.progress?.done || 0}
+            total={imp.progress?.total || 0}
+            playlistName={cfg.playlistId || 'Currently importing playlist'}
+            etaLabel={ph === 'scanning' ? 'Scanning playlist…' : 'Importing…'}
+          />
+        );
+      })()}
+
       {/* KPI cards — visibility & order managed in Settings → Dashboard cards */}
       <DashboardCards
         prefs={reconcileDashboardCards(cfg.dashboardCards)}
@@ -201,7 +216,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           }
           if (key === 'configure') {
             onNavigate?.('import');
-            highlightAnchor('slug');
+            const p = pulsesForAnchor('slug');
+            if (p > 0) highlightAnchor('slug', { pulses: p });
             return;
           }
           const tabFor: Record<string, string> = {
@@ -224,7 +240,10 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           };
           onNavigate?.(tabFor[key] || 'settings');
           const anchor = anchorFor[key];
-          if (anchor) highlightAnchor(anchor);
+          if (anchor) {
+            const p = pulsesForAnchor(anchor);
+            if (p > 0) highlightAnchor(anchor, { pulses: p });
+          }
         }}
       />
     </div>

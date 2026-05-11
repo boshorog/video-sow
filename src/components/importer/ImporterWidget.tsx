@@ -508,7 +508,7 @@ const SermonImporterWidget = ({
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Interval</p>
                 <TimerReset className="w-3 h-3 text-muted-foreground" />
               </div>
-              <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{config.syncIntervalH}h</p>
+              <p className="text-base font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{(() => { const h = config.syncIntervalH || 0; if (h < 48) return `${h}h`; const d = Math.floor(h / 24); const r = h % 24; return r ? `${d}d ${r}h` : `${d}d`; })()}</p>
               <p className="text-[10px] text-muted-foreground">Cron tick</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">

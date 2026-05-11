@@ -667,8 +667,8 @@ const DashboardCardsSection = ({
           <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
           <h4 className="text-sm font-bold text-foreground">Dashboard cards</h4>
         </div>
-        <Button variant="ghost" size="sm" onClick={resetDefaults} className="h-7 text-xs gap-1.5">
-          <RefreshCw className="w-3 h-3" /> Reset to defaults
+        <Button variant="ghost" size="sm" onClick={resetDefaults} className="h-6 px-1.5 text-[10px] gap-1 text-muted-foreground hover:text-foreground">
+          <RefreshCw className="w-2.5 h-2.5" /> Reset to defaults
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
@@ -703,8 +703,8 @@ const DashboardCardsSection = ({
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-sm font-medium text-foreground truncate">{meta.title}</span>
                   {meta.pro && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 border border-amber-500/40 rounded px-1 py-0.5">
-                      <Crown className="w-2.5 h-2.5" /> Pro
+                    <span className="inline-flex items-center gap-0.5 text-[8px] font-bold uppercase tracking-wider text-amber-600 border border-amber-500/40 rounded px-1 leading-3">
+                      <Crown className="w-2 h-2" /> Pro
                     </span>
                   )}
                 </div>

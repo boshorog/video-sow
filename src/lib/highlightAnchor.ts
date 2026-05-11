@@ -2,8 +2,30 @@
  * Scrolls to a [data-vs-anchor="name"] element and pulses a highlight ring
  * around it a few times so the user can spot it after navigating tabs.
  */
+/**
+ * Per-anchor click-count rule. 1st time = 2 blinks, 2nd = 1 blink, 3rd+ = 0.
+ * Tracked in sessionStorage so it survives tab switches but resets per session.
+ */
+const CLICK_COUNT_KEY = 'vs_highlight_click_counts';
+const readCounts = (): Record<string, number> => {
+  try { return JSON.parse(sessionStorage.getItem(CLICK_COUNT_KEY) || '{}'); } catch { return {}; }
+};
+const writeCounts = (c: Record<string, number>) => {
+  try { sessionStorage.setItem(CLICK_COUNT_KEY, JSON.stringify(c)); } catch {}
+};
+export function pulsesForAnchor(name: string): number {
+  const c = readCounts();
+  const n = (c[name] || 0) + 1;
+  c[name] = n;
+  writeCounts(c);
+  if (n === 1) return 2;
+  if (n === 2) return 1;
+  return 0;
+}
+
 export function highlightAnchor(name: string, opts: { pulses?: number; delay?: number } = {}) {
   const { pulses = 2, delay = 0 } = opts;
+  if (pulses <= 0) return;
 
   const find = () => document.querySelector<HTMLElement>(`[data-vs-anchor="${name}"]`);
   const cardSelector = '.rounded-lg.border, .rounded-lg.border-2, .rounded-xl.border, .rounded-xl.border-2, .rounded-xl.shadow-md, [data-vs-highlight-card]';
