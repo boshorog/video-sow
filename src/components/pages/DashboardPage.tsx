@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
 import DashboardCards, { reconcileDashboardCards } from '@/components/dashboard/DashboardCards';
+import ScrollbarShowcase from '@/components/dashboard/ScrollbarShowcase';
 import { highlightAnchor } from '@/lib/highlightAnchor';
 
 
@@ -176,6 +177,8 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         isPro={license.isPro}
         onUnlock={() => onNavigate?.('pro')}
       />
+
+      <ScrollbarShowcase />
 
       {/* To do — setup roadmap */}
       <TodoVariants
