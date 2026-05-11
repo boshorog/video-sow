@@ -530,7 +530,7 @@ const SermonImporterWidget = ({
                 {activeSyncAt ? fmtTime(activeSyncAt) : "Never"}
               </p>
               <p className="text-[10px] text-muted-foreground truncate">
-                {activeSyncStatus === "success" ? "Successful" : activeSyncStatus === "error" ? "Failed" : "—"}
+                {activeSyncStatus === "success" ? "Successful" : activeSyncStatus === "cancelled" ? "Paused" : activeSyncStatus === "error" ? "Failed" : "—"}
               </p>
             </div>
           </div>
