@@ -178,7 +178,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         onUnlock={() => onNavigate?.('pro')}
       />
 
-      <ScrollbarShowcase />
+      
 
       {/* To do — setup roadmap */}
       <TodoVariants
