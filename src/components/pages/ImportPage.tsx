@@ -140,6 +140,11 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
     const dir = sortDir === 'asc' ? 1 : -1;
     return [...f]
       .sort((a, b) => {
+        if (sortKey === 'importedAt') {
+          const ai = a.r.importedTs || 0;
+          const bi = b.r.importedTs || 0;
+          if (ai !== bi) return (ai - bi) * dir;
+        }
         const av = a.r[sortKey];
         const bv = b.r[sortKey];
         let cmp = 0;
