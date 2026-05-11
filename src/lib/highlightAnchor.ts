@@ -6,6 +6,17 @@ export function highlightAnchor(name: string, opts: { pulses?: number; delay?: n
   const { pulses = 2, delay = 0 } = opts;
 
   const find = () => document.querySelector<HTMLElement>(`[data-vs-anchor="${name}"]`);
+  const cardSelector = '.rounded-lg.border, .rounded-xl.border, .rounded-xl.shadow-md, [data-vs-highlight-card]';
+  const getHighlightTarget = (el: HTMLElement) => {
+    if (el.matches(cardSelector)) return { target: el, card: true };
+    const child = el.firstElementChild instanceof HTMLElement && el.firstElementChild.matches(cardSelector)
+      ? el.firstElementChild
+      : null;
+    if (child) return { target: child, card: true };
+    const card = el.closest<HTMLElement>(cardSelector);
+    if (card) return { target: card, card: true };
+    return { target: el, card: false };
+  };
 
   const run = () => {
     const el = find();
@@ -15,13 +26,14 @@ export function highlightAnchor(name: string, opts: { pulses?: number; delay?: n
     } catch {
       el.scrollIntoView();
     }
-    el.classList.remove('vs-flash');
+    const { target, card } = getHighlightTarget(el);
+    target.classList.remove('vs-flash', 'vs-flash-card');
     // Force reflow so the animation can restart
-    void el.offsetWidth;
-    el.style.setProperty('--vs-flash-iterations', String(pulses));
-    el.classList.add('vs-flash');
+    void target.offsetWidth;
+    target.style.setProperty('--vs-flash-iterations', String(pulses));
+    target.classList.add(card ? 'vs-flash-card' : 'vs-flash');
     const duration = 1200 * pulses + 200;
-    window.setTimeout(() => el.classList.remove('vs-flash'), duration);
+    window.setTimeout(() => target.classList.remove('vs-flash', 'vs-flash-card'), duration);
   };
 
   // Wait briefly so a tab switch has time to mount the target.
