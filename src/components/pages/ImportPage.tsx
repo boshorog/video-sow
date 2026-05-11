@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import ImporterWidget from '@/components/importer/ImporterWidget';
+import ImporterConsoleShowcase from '@/components/importer/ImporterConsoleShowcase';
 
 import { useImporter } from '@/hooks/useImporter';
 import { useLicense } from '@/hooks/useLicense';
@@ -180,7 +181,9 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
       </div>
 
 
-      <div data-vs-anchor="firstimport">
+      <ImporterConsoleShowcase />
+
+      <div data-vs-anchor="firstimport" className="hidden">
       <ImporterWidget
         config={imp.config}
         progress={imp.progress}
