@@ -1,4 +1,4 @@
-import { Youtube, CheckCircle2, AlertCircle, Clock, Pencil, ExternalLink, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, ArrowRight, Wifi, Activity, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, Pause, PauseCircle } from "lucide-react";
+import { Youtube, CheckCircle2, AlertCircle, Pencil, Loader2, Search, RefreshCw, X, AlertTriangle, Coffee, ListMusic, ArrowRight, Wifi, TimerReset, CalendarClock, ArrowUpRight, PlayCircle, PauseCircle } from "lucide-react";
 import { useState } from "react";
 import ArchivePageSettingsDialog from "./ArchivePageDialog";
 import { useThemeMap } from "@/hooks/useThemeMap";
@@ -223,20 +223,9 @@ const SermonImporterWidget = ({
   const activeSyncAt = hasScopedStats ? (stats.lastSyncAt ?? 0) : (stats.lastSyncAt ?? config.lastSyncAt);
   const activeSyncStatus = hasScopedStats ? (stats.lastSyncStatus ?? "") : (stats.lastSyncStatus ?? config.lastSyncStatus);
   const activeSyncMsg = hasScopedStats ? (stats.lastSyncMsg ?? "") : (stats.lastSyncMsg ?? config.lastSyncMsg);
-  const StatusIcon = activeSyncStatus === "success" ? CheckCircle2 : activeSyncStatus === "error" ? AlertCircle : Clock;
-  const statusColor = activeSyncStatus === "success" ? "text-emerald-600" : activeSyncStatus === "error" ? "text-destructive" : "text-muted-foreground";
-
   const isLive = progress && (progress.phase === "scanning" || progress.phase === "importing");
-  const pct = progress && progress.total > 0 ? Math.min(100, Math.round((progress.done / progress.total) * 100)) : 0;
   const repairPct = repairProgress && repairProgress.total > 0 ? Math.min(100, Math.round((repairProgress.processed / repairProgress.total) * 100)) : 0;
   const isRepairLive = !!isRepairing || (!!repairProgress && repairProgress.total > 0 && repairProgress.processed < repairProgress.total);
-
-  // Merge live + persisted log into the rendered list (live first, dedup by video_id)
-  const persistedFlat = config.log.slice(0, 10).flatMap((e) => e.imported);
-  const seen = new Set<string>();
-  const liveItems = (progress?.liveImported || []).filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
-  const persistedItems = persistedFlat.filter((it) => { if (seen.has(it.video_id)) return false; seen.add(it.video_id); return true; });
-  const renderedItems = [...liveItems, ...persistedItems];
 
   const stageLabel = (s?: string) => {
     switch (s) {
@@ -328,16 +317,16 @@ const SermonImporterWidget = ({
   }
 
   const toneClasses = {
-    idle:    { pill: "bg-slate-100 text-slate-600",     bar: "bg-slate-300" },
+    idle:    { pill: "bg-white border border-slate-300 text-slate-700",     bar: "bg-slate-400" },
     syncing: { pill: "bg-primary/10 text-primary",       bar: "bg-gradient-to-r from-primary to-red-400" },
-    paused:  { pill: "bg-amber-50 text-amber-700",       bar: "bg-amber-400" },
+    paused:  { pill: "bg-amber-50 border border-amber-200 text-amber-800",       bar: "bg-amber-500" },
     error:   { pill: "bg-rose-50 text-rose-700",         bar: "bg-rose-500" },
     done:    { pill: "bg-emerald-50 text-emerald-700",   bar: "bg-emerald-500" },
   } as const;
   const tone = toneClasses[stageTone];
 
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/[0.05] shadow-md overflow-hidden">
+    <div className="rounded-xl border border-slate-300 bg-primary/[0.05] shadow-md overflow-hidden">
       {/* ---- Navy header with faded logo bleed --------------------- */}
       <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700">
         <div
@@ -377,7 +366,7 @@ const SermonImporterWidget = ({
                 "rounded-lg border p-3 text-left transition-colors flex flex-col",
                 config.playlistId
                   ? "border-emerald-200 bg-white"
-                  : "border-amber-200 bg-amber-50 hover:bg-amber-100 cursor-pointer"
+                  : "border-amber-300 bg-amber-50/90 hover:bg-amber-100 cursor-pointer"
               )}
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -489,7 +478,7 @@ const SermonImporterWidget = ({
                   : `${importedNow}${denominator > 0 ? ` / ${denominator}` : ""} · ${stagePct}%`}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
               <div
                 className={cn("h-full transition-all", tone.bar)}
                 style={{ width: `${isRepairLive ? repairPct : stagePct}%` }}
@@ -542,7 +531,7 @@ const SermonImporterWidget = ({
         </div>
 
         {/* ---- Action panel (right, narrower) --------------------- */}
-        <div className="p-4 flex flex-col justify-between gap-3 bg-white/70 border-l border-primary/15">
+        <div className="p-4 flex flex-col justify-between gap-3 bg-white border-l border-slate-200">
           {(() => {
             const showNext = !isLive && config.enabled && isConfigured && activeSyncAt > 0 && config.syncIntervalH > 0;
             const nextAtSec = activeSyncAt + config.syncIntervalH * 3600;
@@ -610,55 +599,6 @@ const SermonImporterWidget = ({
           onChange={onConfigChange}
           onSave={onSave}
         />
-      )}
-
-      {(renderedItems.length > 0 || isLive) && (
-        <div className="px-5 py-4 border-t border-primary/15 space-y-2 bg-white/45">
-          <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Recent imports</p>
-          <div className="space-y-1 max-h-48 overflow-y-auto">
-            {renderedItems.map((it) => (
-                <div key={it.video_id} className="flex items-center gap-2 text-xs p-2 rounded-md hover:bg-secondary/40">
-                  <span className="truncate text-foreground flex-1">{it.title}</span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <a
-                      href={`https://www.youtube.com/watch?v=${it.video_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="View on YouTube"
-                      className="p-1.5 rounded-md hover:bg-red-50 text-red-600 transition-colors"
-                    >
-                      <Youtube className="w-3.5 h-3.5" />
-                    </a>
-                    {it.edit_link && (
-                      <a
-                        href={it.edit_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Edit post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {it.permalink && (
-                      <a
-                        href={it.permalink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="View public post"
-                        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-            ))}
-            {renderedItems.length === 0 && !isLive && (
-              <p className="text-xs text-muted-foreground italic">No imports recorded yet.</p>
-            )}
-          </div>
-        </div>
       )}
 
     </div>

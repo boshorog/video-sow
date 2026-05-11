@@ -295,3 +295,26 @@ All colors MUST be HSL.
   pointer-events: none;
   animation: vs-flash-pulse 1.2s ease-out var(--vs-flash-iterations, 3);
 }
+
+/* Minimal scrollbar mock styles for small dashboard cards. */
+.vs-scrollbar-simplebar { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+.vs-scrollbar-simplebar::-webkit-scrollbar { width: 4px; }
+.vs-scrollbar-simplebar::-webkit-scrollbar-track { background: transparent; }
+.vs-scrollbar-simplebar::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 9999px; }
+
+.vs-scrollbar-overlay { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / 0.32) transparent; }
+.vs-scrollbar-overlay::-webkit-scrollbar { width: 6px; }
+.vs-scrollbar-overlay::-webkit-scrollbar-track { background: transparent; }
+.vs-scrollbar-overlay::-webkit-scrollbar-thumb { background: hsl(var(--primary) / 0.24); border: 2px solid transparent; border-radius: 9999px; background-clip: content-box; }
+
+.vs-scrollbar-perfect { scrollbar-width: thin; scrollbar-color: hsl(var(--muted-foreground) / 0.24) hsl(var(--muted) / 0.38); }
+.vs-scrollbar-perfect::-webkit-scrollbar { width: 5px; }
+.vs-scrollbar-perfect::-webkit-scrollbar-track { background: hsl(var(--muted) / 0.38); border-radius: 9999px; }
+.vs-scrollbar-perfect::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.24); border-radius: 9999px; }
+
+.vs-scrollbar-invisible { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.vs-scrollbar-invisible:hover { scrollbar-color: hsl(var(--border)) transparent; }
+.vs-scrollbar-invisible::-webkit-scrollbar { width: 4px; }
+.vs-scrollbar-invisible::-webkit-scrollbar-track { background: transparent; }
+.vs-scrollbar-invisible::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; }
+.vs-scrollbar-invisible:hover::-webkit-scrollbar-thumb { background: hsl(var(--border)); }

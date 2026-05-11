@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.26
+ * Version: 1.2.27
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.26' );
+define( 'VIDEOSOW_VERSION', '1.2.27' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -137,16 +137,22 @@ class VideoSow_Plugin {
      */
     public function fix_menu_icon_colors() {
         echo '<style>
-        /* Normalize custom SVG image icons so WordPress current-menu states never leave them dark. */
-        #adminmenu .wp-menu-image img {
+        /* Normalize only the Video Sow custom SVG icon; do not repaint sibling plugin icons. */
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg,
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image img {
             filter: brightness(0) invert(1) !important;
             opacity: .6 !important;
         }
-        #adminmenu li:hover > a .wp-menu-image img,
-        #adminmenu li.wp-menu-open > a .wp-menu-image img,
-        #adminmenu li.wp-has-current-submenu > a .wp-menu-image img,
-        #adminmenu li.current > a .wp-menu-image img,
-        #adminmenu li.opensub > a .wp-menu-image img {
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg {
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: 20px auto !important;
+        }
+        #adminmenu li:hover > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.wp-menu-open > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.wp-has-current-submenu > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.current > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.opensub > a[href*="page=video-sow"] .wp-menu-image {
             filter: brightness(0) invert(1) !important;
             opacity: 1 !important;
         }
