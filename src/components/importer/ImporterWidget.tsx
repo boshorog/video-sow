@@ -353,7 +353,7 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      <div className="grid lg:grid-cols-[1.9fr_1fr]">
+      <div className="grid lg:grid-cols-[1.9fr_1fr] border-x border-b border-slate-300 bg-primary/[0.05] rounded-b-xl">
         {/* ---- Status side (left, larger) -------------------------- */}
         <div className="p-5 space-y-4">
           {/* Pipeline: Source → Sync → WP archive */}
