@@ -4285,7 +4285,7 @@ function videosow_ajax_list_archive() {
     $args = array(
         'post_type'      => 'videosow_video',
         'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
-        'posts_per_page' => 100,
+        'posts_per_page' => -1,
         'orderby'        => 'ID',
         'order'          => 'DESC',
     );
