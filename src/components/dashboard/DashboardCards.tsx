@@ -319,7 +319,7 @@ const CardRecent = ({ ctx, hero }: CtxCardProps) => {
       {rows.length === 0 ? (
         <p className="text-xs text-muted-foreground">No imports yet.</p>
       ) : (
-        <div className="-mt-2 -mb-2 -mr-5 flex-1 min-h-0 overflow-y-auto pr-3 vs-scrollbar-perfect">
+        <div className="-mt-2 -mb-2 -mr-2 flex-1 min-h-0 overflow-y-auto pr-3 vs-scrollbar-perfect">
           <ul className="divide-y divide-primary/10">
             {rows.map((row) => {
               const link = row.editLink || row.permalink;
