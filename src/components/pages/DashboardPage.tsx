@@ -27,7 +27,7 @@ import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
 import DashboardCards, { reconcileDashboardCards } from '@/components/dashboard/DashboardCards';
 
-import { highlightAnchor } from '@/lib/highlightAnchor';
+import { highlightAnchor, pulsesForAnchor } from '@/lib/highlightAnchor';
 
 
 const useThemeScan = () => {
