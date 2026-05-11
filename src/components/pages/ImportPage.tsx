@@ -285,7 +285,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((r) => (
+              {visibleRows.map((r) => (
                 <TableRow key={r.videoId}>
                   <TableCell className="font-medium text-slate-700 max-w-0">
                     <div className="flex items-center gap-3 min-w-0">
@@ -383,11 +383,28 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
               )}
             </TableBody>
           </Table>
+          {hasMore && (
+            <div className="flex flex-col items-center gap-1.5 pt-4 pb-2">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((c) => c + 20)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:border-primary hover:text-primary shadow-sm transition-colors"
+              >
+                Load 20 more
+              </button>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
+                Showing {visibleRows.length} of {sorted.length}
+              </span>
+            </div>
+          )}
+          {!hasMore && sorted.length > 20 && (
+            <div className="text-center text-[11px] text-muted-foreground pt-3 pb-1 tabular-nums">
+              Showing all {sorted.length} entries
+            </div>
+          )}
           </div>
         </CardContent>
       </Card>
-
-      <PaginationShowcase />
     </div>
   );
 };
