@@ -36,6 +36,7 @@ type ArchiveRow = {
   videoId: string;
   date: string;
   importedAt?: string;
+  importedTs?: number;
   status: 'Published' | 'Draft';
   views: number;
   editLink?: string;
@@ -43,11 +44,11 @@ type ArchiveRow = {
 };
 
 const SAMPLE_ARCHIVE: ArchiveRow[] = [
-  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-04-12', importedAt: '2026-05-07', status: 'Draft',     views: 1200 },
-  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-03-30', importedAt: '2026-05-07', status: 'Draft',     views: 843 },
-  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2025-11-18', importedAt: '2026-05-06', status: 'Published', views: 4600 },
-  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2025-09-02', importedAt: '2026-05-05', status: 'Published', views: 2100 },
-  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2025-07-21', importedAt: '2026-05-04', status: 'Published', views: 7800 },
+  { title: 'How to plant tomatoes the right way',       videoId: 'aB1cD2eF3gH', date: '2026-04-12', importedAt: '2026-05-07', importedTs: 1778170800, status: 'Draft',     views: 1200 },
+  { title: 'Pruning citrus in mid-season — full guide', videoId: 'iJ4kL5mN6oP', date: '2026-03-30', importedAt: '2026-05-07', importedTs: 1778167200, status: 'Draft',     views: 843 },
+  { title: 'Composting in apartments without smell',    videoId: 'qR7sT8uV9wX', date: '2025-11-18', importedAt: '2026-05-06', importedTs: 1778080800, status: 'Published', views: 4600 },
+  { title: 'Soil testing for beginners (live Q&A)',     videoId: 'yZ0aB1cD2eF', date: '2025-09-02', importedAt: '2026-05-05', importedTs: 1777994400, status: 'Published', views: 2100 },
+  { title: 'Greenhouse setup on a budget',              videoId: 'gH3iJ4kL5mN', date: '2025-07-21', importedAt: '2026-05-04', importedTs: 1777908000, status: 'Published', views: 7800 },
 ];
 
 const formatViews = (n: number) =>
@@ -122,6 +123,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
         videoId: r.videoId,
         date: r.date,
         importedAt: r.importedAt,
+        importedTs: r.importedTs,
         status: r.status,
         views: r.views,
         editLink: r.editLink,
@@ -138,6 +140,11 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
     const dir = sortDir === 'asc' ? 1 : -1;
     return [...f]
       .sort((a, b) => {
+        if (sortKey === 'importedAt') {
+          const ai = a.r.importedTs || 0;
+          const bi = b.r.importedTs || 0;
+          if (ai !== bi) return (ai - bi) * dir;
+        }
         const av = a.r[sortKey];
         const bv = b.r[sortKey];
         let cmp = 0;

@@ -295,6 +295,19 @@ All colors MUST be HSL.
   pointer-events: none;
   animation: vs-flash-pulse 1.2s ease-out var(--vs-flash-iterations, 3);
 }
+.vs-flash-card {
+  position: relative;
+  scroll-margin-top: 96px;
+  overflow: hidden;
+}
+.vs-flash-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: vs-flash-pulse 1.2s ease-out var(--vs-flash-iterations, 3);
+}
 
 /* Minimal scrollbar mock styles for small dashboard cards. */
 .vs-scrollbar-simplebar { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
