@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.28
+ * Version: 1.2.29
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.28' );
+define( 'VIDEOSOW_VERSION', '1.2.29' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -3053,6 +3053,8 @@ function videosow_ajax_step_sermon_sync() {
 
     if ( get_transient( 'videosow_sync_cancelled' ) ) {
         delete_transient( 'videosow_sync_cancelled' );
+        $imported_so_far = isset( $session['imported'] ) ? $session['imported'] : array();
+        videosow_log_sync( $cfg, 'cancelled', sprintf( 'Paused — %d imported', count( $imported_so_far ) ), $imported_so_far );
         delete_option( 'videosow_sync_session' );
         wp_send_json_success( array( 'done' => true, 'cancelled' => true ) );
     }
@@ -3102,6 +3104,8 @@ function videosow_ajax_step_sermon_sync() {
 
     if ( get_transient( 'videosow_sync_cancelled' ) ) {
         delete_transient( 'videosow_sync_cancelled' );
+        $imported_so_far = isset( $session['imported'] ) ? $session['imported'] : array();
+        videosow_log_sync( $cfg, 'cancelled', sprintf( 'Paused — %d imported', count( $imported_so_far ) ), $imported_so_far );
         delete_option( 'videosow_sync_session' );
         wp_send_json_success( array( 'done' => true, 'cancelled' => true, 'entry' => $entry ) );
     }
@@ -3138,7 +3142,7 @@ function videosow_ajax_step_sermon_sync() {
             $rest_reason  = 'Coffee break';
         } elseif ( $r_delay > 0 ) {
             $rest_seconds = $r_delay;
-            $rest_reason  = 'pause between videos';
+            $rest_reason  = 'Pause between videos';
         }
         if ( $rest_seconds > 0 ) {
             $session['rest_until']  = time() + $rest_seconds;
