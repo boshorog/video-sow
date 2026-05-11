@@ -66,6 +66,7 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
   const [filter, setFilter] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('importedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [visibleCount, setVisibleCount] = useState(20);
   const [playlistInfo, setPlaylistInfo] = useState<{ name?: string; count?: number; channel?: string }>({});
   const wpGlobal = getWPGlobal();
   const siteTitle = wpGlobal?.siteTitle || 'WordPress site';
