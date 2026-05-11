@@ -317,9 +317,9 @@ const SermonImporterWidget = ({
   }
 
   const toneClasses = {
-    idle:    { pill: "bg-slate-100 text-slate-600",     bar: "bg-slate-300" },
+    idle:    { pill: "bg-white border border-slate-300 text-slate-700",     bar: "bg-slate-400" },
     syncing: { pill: "bg-primary/10 text-primary",       bar: "bg-gradient-to-r from-primary to-red-400" },
-    paused:  { pill: "bg-amber-50 text-amber-700",       bar: "bg-amber-400" },
+    paused:  { pill: "bg-amber-50 border border-amber-200 text-amber-800",       bar: "bg-amber-500" },
     error:   { pill: "bg-rose-50 text-rose-700",         bar: "bg-rose-500" },
     done:    { pill: "bg-emerald-50 text-emerald-700",   bar: "bg-emerald-500" },
   } as const;
