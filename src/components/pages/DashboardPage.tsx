@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 
 import { useThemeMap } from '@/hooks/useThemeMap';
 import TodoVariants, { buildShowcaseSteps } from '@/components/dashboard/TodoVariants';
-import DashboardCards, { reconcileDashboardCards } from '@/components/dashboard/DashboardCards';
+import DashboardCards, { reconcileDashboardCards, ImportProgressCard } from '@/components/dashboard/DashboardCards';
 
 import { highlightAnchor, pulsesForAnchor } from '@/lib/highlightAnchor';
 
@@ -158,6 +158,21 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           WordPress articles, complete with transcripts, tags and AI-enriched descriptions.
         </p>
       </div>
+
+      {/* Always-on import progress card while a sync is running */}
+      {(() => {
+        const ph = imp.progress?.phase;
+        const isLive = ph === 'scanning' || ph === 'importing';
+        if (!isLive) return null;
+        return (
+          <ImportProgressCard
+            done={imp.progress?.done || 0}
+            total={imp.progress?.total || 0}
+            playlistName={cfg.playlistName || cfg.playlistId || 'Currently importing playlist'}
+            etaLabel={ph === 'scanning' ? 'Scanning playlist…' : 'Importing…'}
+          />
+        );
+      })()}
 
       {/* KPI cards — visibility & order managed in Settings → Dashboard cards */}
       <DashboardCards
