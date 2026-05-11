@@ -137,26 +137,22 @@ class VideoSow_Plugin {
      */
     public function fix_menu_icon_colors() {
         echo '<style>
-        /* Normalize custom SVG menu icons so WordPress current-menu states never leave them dark. */
-        #adminmenu .wp-menu-image.svg,
-        #adminmenu .wp-menu-image img {
+        /* Normalize only the Video Sow custom SVG icon; do not repaint sibling plugin icons. */
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg,
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image img {
             filter: brightness(0) invert(1) !important;
             opacity: .6 !important;
         }
-        #adminmenu .wp-menu-image.svg {
+        #adminmenu a[href*="page=video-sow"] .wp-menu-image.svg {
             background-repeat: no-repeat !important;
             background-position: center !important;
             background-size: 20px auto !important;
         }
-        #adminmenu li:hover > a .wp-menu-image img,
-        #adminmenu li:hover > a .wp-menu-image.svg,
-        #adminmenu li.wp-menu-open > a .wp-menu-image img,
-        #adminmenu li.wp-menu-open > a .wp-menu-image.svg,
-        #adminmenu li.wp-has-current-submenu > a .wp-menu-image img,
-        #adminmenu li.wp-has-current-submenu > a .wp-menu-image.svg,
-        #adminmenu li.current > a .wp-menu-image img,
-        #adminmenu li.current > a .wp-menu-image.svg,
-        #adminmenu li.opensub > a .wp-menu-image img {
+        #adminmenu li:hover > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.wp-menu-open > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.wp-has-current-submenu > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.current > a[href*="page=video-sow"] .wp-menu-image,
+        #adminmenu li.opensub > a[href*="page=video-sow"] .wp-menu-image {
             filter: brightness(0) invert(1) !important;
             opacity: 1 !important;
         }
