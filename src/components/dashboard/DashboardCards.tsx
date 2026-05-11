@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 
 export type DashboardCardKey =
   | 'imported' | 'published' | 'drafts' | 'lastSync' | 'recent'
-  | 'autosync' | 'syncHealth' | 'taxonomy' | 'aiUsage' | 'backfill';
+  | 'autosync' | 'syncHealth' | 'taxonomy' | 'aiUsage';
 
 export type DashboardCardMeta = {
   key: DashboardCardKey;
@@ -23,6 +23,8 @@ export type DashboardCardMeta = {
 /**
  * Order here is the default order shown to a fresh install.
  * The user can reorder & toggle each one in Settings → Dashboard cards.
+ * Note: the "Import in progress" card is NOT in this list — it appears
+ * automatically on the dashboard whenever an import is running.
  */
 export const DASHBOARD_CARD_REGISTRY: DashboardCardMeta[] = [
   { key: 'recent',     title: 'Recent activity',     subtitle: 'Last 10 imported videos' },
@@ -34,7 +36,6 @@ export const DASHBOARD_CARD_REGISTRY: DashboardCardMeta[] = [
   { key: 'syncHealth', title: 'Sync Health',         subtitle: 'API quota & error tracking' },
   { key: 'taxonomy',   title: 'Taxonomy',            subtitle: 'Top tags this month' },
   { key: 'aiUsage',    title: 'AI usage',            subtitle: 'Tokens spent this month',      pro: true },
-  { key: 'backfill',   title: 'Backfill',            subtitle: 'Currently importing playlist' },
 ];
 
 const DEFAULT_ENABLED: DashboardCardKey[] = ['recent', 'imported', 'published', 'drafts'];
