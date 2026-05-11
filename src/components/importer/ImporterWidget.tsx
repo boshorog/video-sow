@@ -317,7 +317,7 @@ const SermonImporterWidget = ({
   }
 
   const toneClasses = {
-    idle:    { pill: "bg-white border border-slate-300 text-slate-700",     bar: "bg-slate-400" },
+    idle:    { pill: "bg-slate-200 text-slate-700",      bar: "bg-slate-400" },
     syncing: { pill: "bg-primary/10 text-primary",       bar: "bg-gradient-to-r from-primary to-red-400" },
     paused:  { pill: "bg-amber-50 border border-amber-200 text-amber-800",       bar: "bg-amber-500" },
     error:   { pill: "bg-rose-50 text-rose-700",         bar: "bg-rose-500" },
@@ -326,7 +326,7 @@ const SermonImporterWidget = ({
   const tone = toneClasses[stageTone];
 
   return (
-    <div className="rounded-xl border border-slate-300 bg-primary/[0.05] shadow-md overflow-hidden">
+    <div className="rounded-xl shadow-md overflow-hidden">
       {/* ---- Navy header with faded logo bleed --------------------- */}
       <div className="px-5 py-2.5 flex items-center gap-2 relative overflow-hidden bg-gradient-to-r from-slate-800 to-slate-700">
         <div
@@ -353,7 +353,7 @@ const SermonImporterWidget = ({
         </span>
       </div>
 
-      <div className="grid lg:grid-cols-[1.9fr_1fr]">
+      <div className="grid lg:grid-cols-[1.9fr_1fr] border-x border-b border-slate-300 bg-primary/[0.05] rounded-b-xl">
         {/* ---- Status side (left, larger) -------------------------- */}
         <div className="p-5 space-y-4">
           {/* Pipeline: Source → Sync → WP archive */}
