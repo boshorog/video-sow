@@ -257,22 +257,22 @@ const ImportPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = {})
           )}
           <div className={cn(showEmptyOverlay && 'opacity-30 pointer-events-none select-none')}>
 
-          <Table className="table-fixed w-full">
+          <Table className="table-fixed w-full [&_th]:px-2 [&_td]:px-2">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[38%]">
+                <TableHead className="w-[48%]">
                   <SortHeader label="Title" keyName="title" align="left" />
                 </TableHead>
-                <TableHead className="w-[14%] text-center whitespace-nowrap">
+                <TableHead className="w-[12%] text-center whitespace-nowrap">
                   <SortHeader label="Video date" keyName="date" align="center" />
                 </TableHead>
-                <TableHead className="w-[14%] text-center whitespace-nowrap">
+                <TableHead className="w-[12%] text-center whitespace-nowrap">
                   <SortHeader label="Import date" keyName="importedAt" align="center" />
                 </TableHead>
-                <TableHead className="w-[12%] text-center">
+                <TableHead className="w-[10%] text-center">
                   <SortHeader label="Status" keyName="status" align="center" />
                 </TableHead>
-                <TableHead className="w-[12%] text-center">
+                <TableHead className="w-[8%] text-center">
                   <SortHeader label="Views" keyName="views" align="center" />
                 </TableHead>
                 <TableHead className="w-[10%] text-center">Actions</TableHead>
