@@ -318,3 +318,17 @@ All colors MUST be HSL.
 .vs-scrollbar-invisible::-webkit-scrollbar-track { background: transparent; }
 .vs-scrollbar-invisible::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; }
 .vs-scrollbar-invisible:hover::-webkit-scrollbar-thumb { background: hsl(var(--border)); }
+
+/* Scoped accent themes — override --primary/--ring inside a card so all
+   inner controls (Switch, accent-primary, bg-primary, border-primary, ring)
+   pick up the section's color. */
+.vs-theme-emerald {
+  --primary: 158 64% 40%;          /* emerald-600 */
+  --primary-foreground: 0 0% 100%;
+  --ring: 158 64% 40%;
+}
+.vs-theme-violet {
+  --primary: 262 83% 58%;          /* violet-600 */
+  --primary-foreground: 0 0% 100%;
+  --ring: 262 83% 58%;
+}
