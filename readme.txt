@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.31
+Stable tag: 1.2.32
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,9 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.32 =
+* Frontend archive toolbar: restored Antiohia-style search field, sort selector, and tag cloud spacing for cleaner appearance.
 
 = 1.2.31 =
 * Fix: WP admin sidebar — sibling plugin icons (PDF Gallery, Countdown) no longer turn dark while Video Sow is the current menu item. Root cause was an explicit fill on our toplevel icon that halted WordPress's svg-painter; the icon now uses currentColor and is painted natively by WP.
