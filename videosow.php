@@ -4252,7 +4252,7 @@ function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
     };
 
     if ( $mode === 'plain' ) {
-        $html  = '<div class="videosow-transcript-plain" style="margin-top:24px;">';
+        $html  = '<div class="videosow-transcript-plain" itemprop="transcript" style="margin-top:24px;">';
         $html .= '<h3 style="margin:0 0 12px 0;font-size:18px;font-weight:600;color:#1a1a1a;">Transcript</h3>';
         $html .= '<div class="videosow-transcript-body" style="line-height:1.7;color:#333;">';
         foreach ( $paragraphs as $p ) {
@@ -4262,14 +4262,30 @@ function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
         return $html;
     }
 
-    // Default: details (collapsible)
-    $html  = '<details class="videosow-transcript" style="margin-top:24px;border:1px solid #e5e7eb;border-radius:8px;padding:12px 16px;background:#fafafa;">';
-    $html .= '<summary style="cursor:pointer;font-weight:600;color:#1a1a1a;list-style:none;">Transcript</summary>';
-    $html .= '<div class="videosow-transcript-body" style="margin-top:12px;line-height:1.7;color:#333;">';
+    // Collapsible: SEO-friendly checkbox-toggle pattern. The transcript body
+    // stays in the DOM at all times (no display:none / visibility:hidden) so
+    // crawlers see the full text and weight it normally. Users still get an
+    // expandable summary toggled purely with CSS (no JS, no <details>).
+    $toggle_id = 'videosow-tr-' . wp_generate_uuid4();
+    $tid       = esc_attr( $toggle_id );
+    $html  = '<style>'
+           . '.videosow-transcript{margin-top:24px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;overflow:hidden;}'
+           . '.videosow-transcript-toggle{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}'
+           . '.videosow-transcript-summary{display:block;cursor:pointer;padding:12px 16px;font-weight:600;color:#1a1a1a;user-select:none;}'
+           . '.videosow-transcript-summary::before{content:"\\25B6";display:inline-block;margin-right:8px;font-size:.7em;transition:transform .2s;}'
+           . '.videosow-transcript-toggle:checked ~ .videosow-transcript-summary::before{transform:rotate(90deg);}'
+           . '.videosow-transcript-body{max-height:0;overflow:hidden;transition:max-height .35s ease;padding:0 16px;line-height:1.7;color:#333;}'
+           . '.videosow-transcript-toggle:checked ~ .videosow-transcript-body{max-height:none;padding-bottom:12px;}'
+           . '@media print{.videosow-transcript-body{max-height:none !important;padding-bottom:12px !important;}}'
+           . '</style>';
+    $html .= '<section class="videosow-transcript" itemprop="transcript">';
+    $html .= '<input type="checkbox" id="' . $tid . '" class="videosow-transcript-toggle" aria-hidden="true">';
+    $html .= '<label for="' . $tid . '" class="videosow-transcript-summary">Transcript</label>';
+    $html .= '<div class="videosow-transcript-body">';
     foreach ( $paragraphs as $p ) {
         $html .= '<p><span class="videosow-ts" style="color:#9ca3af;font-size:12px;font-family:monospace;margin-right:8px;">[' . esc_html( $fmt( $p['start'] ) ) . ']</span>' . esc_html( $p['text'] ) . '</p>';
     }
-    $html .= '</div></details>';
+    $html .= '</div></section>';
     return $html;
 }
 
