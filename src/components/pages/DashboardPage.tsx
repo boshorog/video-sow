@@ -110,6 +110,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
   const imp = useImporter();
   const license = useLicense();
   const themeScan = useThemeScan();
+  const seo = useSeoDetect();
 
   const imported = stats?.imported ?? 0;
   const published = stats?.published ?? 0;
