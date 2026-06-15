@@ -3188,7 +3188,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
 
     // Fetch fresh snippet from videos endpoint (more reliable than playlistItems cache)
     $url  = add_query_arg( array(
-        'part' => 'snippet,statistics',
+        'part' => 'snippet,statistics,contentDetails',
         'id'   => $video_id,
         'key'  => $cfg['apiKey'],
     ), 'https://www.googleapis.com/youtube/v3/videos' );
@@ -3211,6 +3211,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
     }
     $sn = isset( $items[0]['snippet'] ) ? $items[0]['snippet'] : array();
     $stats_views = isset( $items[0]['statistics']['viewCount'] ) ? intval( $items[0]['statistics']['viewCount'] ) : 0;
+    $duration_iso = isset( $items[0]['contentDetails']['duration'] ) ? (string) $items[0]['contentDetails']['duration'] : '';
 
     $title       = isset( $sn['title'] ) ? $sn['title'] : '';
     if ( $title === 'Private video' || $title === 'Deleted video' || $title === '' ) return null;
