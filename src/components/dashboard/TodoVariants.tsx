@@ -10,6 +10,7 @@ import {
   FileText,
   Crown,
   Layout,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,9 @@ export const buildShowcaseSteps = (opts: {
   hasAi: boolean;
   transcriptOn: boolean;
   isPro: boolean;
+  seoPlugin?: string;       // '' = none, else slug
+  seoPluginLabel?: string;  // human label, e.g. 'Yoast SEO'
+  seoDetected?: boolean;    // true once detection has run at least once
 }): ShowcaseStep[] => [
   { key: 'scan', icon: Scan, title: 'Scan your theme', short: 'Theme scan',
     desc: 'Detect where your theme renders the post loop so the public archive sits exactly where it should.',
@@ -48,6 +52,14 @@ export const buildShowcaseSteps = (opts: {
   { key: 'playlist', icon: Youtube, title: 'Connect a YouTube playlist', short: 'Playlist',
     desc: 'Pick the playlist Video Sow should turn into WordPress articles.',
     done: opts.hasPlaylist, cta: opts.hasPlaylist ? 'Change' : 'Connect' },
+  { key: 'seo', icon: Search, title: 'SEO integration', short: 'SEO',
+    desc: opts.seoPluginLabel
+      ? `Detected ${opts.seoPluginLabel} — Video Sow will write per-article meta descriptions to its fields automatically, and inject VideoObject schema for rich results.`
+      : opts.seoDetected
+        ? 'No SEO plugin detected — Video Sow will write the meta description tag directly on each article, plus VideoObject schema for rich results.'
+        : 'Detect your SEO plugin (Yoast, Rank Math, AIOSEO, SEOPress, SEO Framework, Squirrly, Slim SEO) so Video Sow can populate meta descriptions automatically.',
+    done: !!opts.seoDetected,
+    cta: opts.seoDetected ? 'Re-detect' : 'Detect now' },
   { key: 'firstimport', icon: PlayCircle, title: 'Run your first import', short: 'First import',
     desc: 'Backfills the entire playlist. Future runs are incremental and safe to repeat.',
     done: opts.firstSyncDone, cta: opts.firstSyncDone ? 'Sync now' : 'Run backfill' },

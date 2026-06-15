@@ -74,6 +74,14 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
+= 1.2.33 =
+* SEO: VideoObject JSON-LD is now injected in the head of every imported article (name, description, thumbnail, uploadDate, contentUrl, embedUrl, duration, view count, transcript) — unlocks YouTube-style rich results in Google.
+* SEO: per-article meta description is generated at import time and mirrored automatically to the active SEO plugin (Yoast, Rank Math, AIOSEO, SEOPress, The SEO Framework, Squirrly, Slim SEO). When no SEO plugin is installed, Video Sow writes the meta description tag itself.
+* SEO: transcripts now use an SEO-friendly CSS toggle (checkbox pattern) instead of <details> — the full text always stays in the DOM (no display:none / visibility:hidden) so crawlers index every word.
+* Setup roadmap: new "SEO integration" step auto-detects the installed SEO plugin and reports how meta descriptions will be written.
+* Import: video duration (ISO 8601) is now captured from the YouTube API and stored as post meta for use in schema.
+* Bump version to 1.2.33.
+
 = 1.2.32 =
 * Frontend archive toolbar: restored Antiohia-style search field, sort selector, and tag cloud spacing for cleaner appearance.
 

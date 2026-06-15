@@ -1,93 +1,104 @@
-## Goal
 
-Make the archive page reliably render inside the active theme's normal layout (header, menu, sidebar, footer all intact), regardless of which theme the site uses, plus a small UI tweak to the admin header.
+## SEO Upgrades for Imported Articles
 
-## Why the archive currently breaks
+Three improvements to make Video Sow articles index better in Google and surface as rich results.
 
-Today the plugin tries to "guess" where to inject its toolbar/grid by walking the DOM at runtime:
+---
 
-- **Custom layouts (Magazine / List)** call `findArchiveAnchor()` and `getSlot()`, then fall back to `document.querySelector('main') || document.body` and physically `removeChild` the original `<article>` nodes. On themes whose article wrappers also contain header/footer/sidebar siblings (or where `<main>` doesn't exist), this rips out parts of the page chrome — that's why "only the toolbar and articles" remain.
-- **Theme default mode** inserts the toolbar before the first `<article>`. On themes that render the site logo/menu inside the same parent as the first article, the toolbar lands among the header items.
+### 1. Crawlable transcript (no `display:none`)
 
-There is no per-theme knowledge of where the post loop actually lives, so the same code can't be safe everywhere.
+Today the transcript uses a `<details>` element. Google does index `<details>`/`<summary>` content (modern Googlebot expands them), but the more robust pattern is a CSS-only collapse that keeps the text always in the DOM and unhidden.
 
-## Approach: a one-time Theme Structure Scan
+**Approach:** Replace `videosow_render_transcript_block()` (`videosow.php` ~4224) `details` mode with a checkbox-toggle pattern:
 
-Add a lightweight scanner that detects the active theme's archive structure *once* (on activation, on theme switch, or on demand), stores the resulting selectors as plugin options, and then uses those exact selectors on the public archive instead of guessing.
-
-### What gets detected and stored
-
-A new option `videosow_theme_map` (per active theme stylesheet slug) containing:
-
-- `loop_container` — the element that holds the post loop (e.g. `main .site-main`, `#primary .content-area`, `.elementor-posts-container`).
-- `article_selector` — the selector that matches each post card inside the loop.
-- `article_wrapper` — the *parent of* `<article>` when the theme wraps cards in column DIVs (Bootstrap/Foundation/Elementor grids), so the right node is removed/replaced.
-- `pagination_selector` — native pagination element to hide.
-- `header_end_anchor` — last element of the site header, used so the toolbar is never injected above it in theme-default mode.
-- `footer_start_anchor` — first element of the site footer, used as a hard stop so DOM cleanup never crosses into the footer.
-- `sidebar_selector` — theme widget area, used by the existing "Show sidebar" toggles.
-- `theme_slug`, `scanned_at`, `confidence` (high/medium/low).
-
-### How the scan works
-
-A new admin-side AJAX endpoint `videosow_ajax_scan_theme` opens the public sermon archive URL via `wp_remote_get()` (with a logged-in admin nonce so any private theme markup still renders), parses the returned HTML server-side using `DOMDocument`, and walks it with a prioritized selector list:
-
-```text
-loop:        main .site-main, #primary, #content .content-area,
-             .elementor-posts-container, .ast-row, .fl-post-grid, body
-article:     article.post, article[id^="post-"], .elementor-post,
-             .ast-article-post, .fl-post
-wrapper:     closest column ancestor (.col-*, .elementor-column,
-             .wp-block-column, .ast-grid-common-col, etc.)
-header end:  header#masthead :last-child, .site-header :last-child
-footer start:footer#colophon :first-child, .site-footer :first-child
-pagination:  .nav-links, .pagination, .page-navigation
-sidebar:     #secondary, aside.widget-area, .sidebar
+```html
+<section class="videosow-transcript" itemprop="transcript">
+  <input type="checkbox" id="vs-tr-{post_id}" class="videosow-transcript-toggle" hidden>
+  <label for="vs-tr-{post_id}" class="videosow-transcript-summary">Transcript</label>
+  <div class="videosow-transcript-body">
+     <p>…full transcript paragraphs…</p>
+  </div>
+</section>
 ```
 
-Each candidate gets a confidence score; the best match for each role is saved. If no `<article>` is matched (rare/odd themes), `confidence = low` and the public layout falls back to "Theme default" automatically.
+CSS uses `max-height:0; overflow:hidden; transition:max-height .3s` on the body by default, and `:checked ~ .videosow-transcript-body { max-height:none }` to expand. No `display:none`, no `visibility:hidden`, no JS. Content remains in the DOM, fully visible to crawlers, while users still see an expandable block. Add `itemprop="transcript"` so it pairs with the VideoObject schema below.
 
-### When the scan runs
+Alternative options I considered (in case you prefer one):
+- Keep `<details>` (Google handles it well now but ranking weight is slightly lower).
+- Always-expanded transcript with no toggle (best for SEO, worst for UX on long videos).
 
-1. **Plugin activation** — `register_activation_hook` schedules a one-shot scan on next admin load.
-2. **Theme switch** — `switch_theme` action triggers a re-scan.
-3. **Manual** — new tile in *Settings → Diagnostic tools* (the 6th tile) called **"Scan theme structure"** with a "Re-scan now" button, status badge (e.g. "Last scan: today, confidence: high"), and a collapsible details view showing the saved selectors.
+Recommended: the checkbox-toggle pattern above. It gives the SEO weight of always-visible content with the UX of a collapsible.
 
-### How the public archive uses the map
+---
 
-`videosow.php` archive script gets a new `THEME_MAP` JSON injected (already does this for `CONFIG_LAYOUT` / `CONFIG_EXCERPT_WORDS`). The init code is rewritten to:
+### 2. VideoObject JSON-LD per article
 
-- **Theme default**: insert the toolbar inside `loop_container`, before its first child — never above it. If `loop_container` is missing, do nothing destructive (toolbar still appears, but no DOM moves into the header).
-- **Custom layouts**: build the synthetic grid, insert it inside `loop_container`, then remove only nodes matched by `article_selector` *and* contained within `loop_container`. Never touch nodes outside that container, so header/menu/footer/sidebar are guaranteed safe.
-- **Confidence = low**: silently force theme-default behavior even if the user picked Magazine/List, and surface a small admin notice ("Couldn't reliably detect your theme's structure — using theme default. Re-run the scan from Settings → Diagnostic tools.").
+The biggest opportunity. Inject `<script type="application/ld+json">` in `wp_head` on every single `videosow_video` article.
 
-### Diagnostic tools — 6th tile
+**Source fields (already stored per post):**
+- `name` → post title
+- `description` → meta description (see §3) or trimmed excerpt
+- `thumbnailUrl` → featured image (multiple sizes)
+- `uploadDate` → `_videosow_yt_published` (ISO 8601)
+- `contentUrl` / `embedUrl` → `https://www.youtube.com/watch?v={_videosow_yt_video_id}` and `https://www.youtube.com/embed/{id}`
+- `interactionStatistic` → `_videosow_yt_views` as `WatchAction` count
+- `transcript` → raw text from `_videosow_transcript` (when present)
+- `duration` → ISO 8601 (e.g. `PT5M30S`). Not stored today; we'll capture `contentDetails.duration` during import (one extra field on the existing YouTube videos API call) and save to `_videosow_yt_duration`. For already-imported posts, a one-shot backfill action can fill it lazily on first article view.
 
-Add to `src/components/importer/ImporterSettings.tsx` (after "Test playlist YouTube"):
+**Implementation:** New `videosow_single_video_jsonld()` hooked to `wp_head` priority 5, guarded by `is_singular('videosow_video')`. Output via `wp_json_encode( …, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )`. Skip emission if no `_videosow_yt_video_id`.
 
-- Title: **Scan theme structure**
-- Description: "Detects where your active theme renders its post loop so the archive page can be inserted without breaking your site's header, menu or footer. Re-run after switching themes or installing a major theme update."
-- Shows: active theme name, last scan date, confidence badge, summary of detected `loop_container` and `article_selector`.
-- Buttons: **Re-scan now** (calls `videosow_ajax_scan_theme`), **View details** (collapsible JSON of the saved map).
+---
 
-## Admin header tweak
+### 3. Per-article meta description (with SEO plugin auto-detect)
 
-In `src/pages/Index.tsx` line 73, change `gap-3` to `gap-2` so the plugin name sits a little closer to the icon. (Visual-only change.)
+**New Setup Roadmap step** ("SEO integration"), inserted in `buildShowcaseSteps` (`src/components/dashboard/TodoVariants.tsx`) between `playlist` and `firstimport`. The step:
 
-## Version + docs
+- Runs an auto-detect on load (server-side) and reports:
+  - "No SEO plugin detected — Video Sow will write the meta description directly." (done = true, informational)
+  - "Detected: Yoast SEO — descriptions will be written to `_yoast_wpseo_metadesc`." (done = true)
+  - "Detected: RankMath / AIOSEO / SEOPress / The SEO Framework / Squirrly / Slim SEO" — same pattern.
 
-- Bump `PLUGIN_VERSION` and `VIDEOSOW_VERSION` to **1.2.6**.
-- Add a `readme.txt` changelog entry covering the theme scanner, the new diagnostic tile, and the layout-safety fixes.
+**Detection** (`videosow_detect_seo_plugin()`):
+- Yoast: `defined('WPSEO_VERSION')`
+- Rank Math: `class_exists('RankMath')`
+- All in One SEO: `defined('AIOSEO_VERSION')`
+- SEOPress: `defined('SEOPRESS_VERSION')`
+- The SEO Framework: `defined('THE_SEO_FRAMEWORK_PRESENT')`
+- Squirrly SEO: `defined('SQ_PLUGIN_NAME')`
+- Slim SEO: `defined('SLIM_SEO_VER')`
 
-## Files to modify
+**Writing the description** (during import, after content is built, in `videosow_import_one_video()` ~3293):
+1. Derive `$meta_desc`: first 155 chars of plain-text content (strip transcript + shortcodes + HTML), trimmed on word boundary.
+2. Save canonical copy to `_videosow_meta_description` post meta.
+3. Mirror to the active SEO plugin's field:
+   - Yoast → `_yoast_wpseo_metadesc`
+   - Rank Math → `rank_math_description`
+   - AIOSEO → `aioseo_posts.description` via `aioseo()->meta->metaData->updatePostMeta()` if available, else postmeta `_aioseo_description` fallback
+   - SEOPress → `_seopress_titles_desc`
+   - SEO Framework → `_genesis_description`
+   - Squirrly → `_sq_post_keywords` description field (or its meta API if loaded)
+   - Slim SEO → `slim_seo` array meta
+4. **Fallback when no plugin detected:** hook `wp_head` priority 1 on `is_singular('videosow_video')` to emit `<meta name="description" content="{_videosow_meta_description}">`.
 
-- `videosow.php` — new scan AJAX, `videosow_theme_map` option, switch_theme hook, rewritten archive `init()` using `THEME_MAP`, version bump.
-- `src/components/importer/ImporterSettings.tsx` — 6th diagnostic tile.
-- `src/components/importer/ImporterWidget.tsx` — wire scan handler/state if needed.
-- `src/pages/Index.tsx` — `gap-3` → `gap-2`.
-- `src/config/pluginIdentity.ts` — version bump.
-- `readme.txt` — changelog.
+A "Re-generate descriptions" button (in Tasks page or this roadmap step) backfills already-imported posts.
 
-## Answer to "Is this doable?"
+---
 
-Yes. Server-side HTML parsing with `DOMDocument` against a prioritized selector list is a standard technique and runs in well under a second per scan. It will not be 100% perfect on every exotic page builder, but with the "low confidence → safe fallback" rule the archive will never again wipe out the site chrome — the worst case becomes "looks like the theme default", which is always safe.
+### Other touch-ups
+
+- Bump plugin version to **1.2.33** in `videosow.php`, `src/config/pluginIdentity.ts`, `readme.txt`.
+- Update `readme.txt` changelog.
+
+### Files to change
+
+- `videosow.php` — transcript renderer (§1), new VideoObject JSON-LD (§2), `videosow_detect_seo_plugin()`, meta-description writer + fallback `wp_head`, capture `contentDetails.duration` during import, AJAX handler `videosow_detect_seo` for the new roadmap step, AJAX handler `videosow_regenerate_descriptions` for backfill.
+- `src/components/dashboard/TodoVariants.tsx` — new `seo` step.
+- `src/components/pages/DashboardPage.tsx` — wire the new step (detection state via existing config/AJAX).
+- `src/hooks/useImporter.ts` — add `seoPlugin` field to config and a `detectSeoPlugin()` action.
+- `src/config/pluginIdentity.ts`, `readme.txt` — version bump + changelog.
+
+### Out of scope (ask if you want them)
+
+- BreadcrumbList JSON-LD on the archive (separate win).
+- XML video sitemap entries.
+- OpenGraph `video:*` tags on single articles.
