@@ -4229,7 +4229,264 @@ function videosow_parse_srt_captions( $body ) {
     return $segments;
 }
 
-function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
+/* ── SEO: meta description + VideoObject JSON-LD ───────────────── */
+
+/**
+ * Detect which SEO plugin is active. Returns a short slug or '' if none.
+ * Slugs: yoast | rankmath | aioseo | seopress | seoframework | squirrly | slimseo
+ */
+function videosow_detect_seo_plugin() {
+    if ( defined( 'WPSEO_VERSION' ) ) return 'yoast';
+    if ( class_exists( 'RankMath' ) || defined( 'RANK_MATH_VERSION' ) ) return 'rankmath';
+    if ( defined( 'AIOSEO_VERSION' ) || defined( 'AIOSEOP_VERSION' ) ) return 'aioseo';
+    if ( defined( 'SEOPRESS_VERSION' ) ) return 'seopress';
+    if ( defined( 'THE_SEO_FRAMEWORK_PRESENT' ) || defined( 'THE_SEO_FRAMEWORK_VERSION' ) ) return 'seoframework';
+    if ( defined( 'SQ_PLUGIN_NAME' ) || class_exists( 'SQ_Classes_Helpers_Tools' ) ) return 'squirrly';
+    if ( defined( 'SLIM_SEO_VER' ) || defined( 'SLIM_SEO_VERSION' ) ) return 'slimseo';
+    return '';
+}
+
+function videosow_seo_plugin_label( $slug ) {
+    $map = array(
+        'yoast'        => 'Yoast SEO',
+        'rankmath'     => 'Rank Math',
+        'aioseo'       => 'All in One SEO',
+        'seopress'     => 'SEOPress',
+        'seoframework' => 'The SEO Framework',
+        'squirrly'     => 'Squirrly SEO',
+        'slimseo'      => 'Slim SEO',
+    );
+    return isset( $map[ $slug ] ) ? $map[ $slug ] : '';
+}
+
+/**
+ * Build a clean meta description (max ~155 chars) from raw description text.
+ */
+function videosow_build_meta_description( $raw, $max_chars = 155 ) {
+    $raw = (string) $raw;
+    $raw = preg_replace( '~</p>|<br\s*/?>|</div>|</li>~i', "\n", $raw );
+    $raw = wp_strip_all_tags( $raw );
+    $raw = str_replace( array( "\r\n", "\r" ), "\n", $raw );
+    $raw = preg_replace( '/\s+/u', ' ', $raw );
+    $raw = trim( $raw );
+    if ( $raw === '' ) return '';
+    if ( mb_strlen( $raw ) <= $max_chars ) return $raw;
+    $cut = mb_substr( $raw, 0, $max_chars );
+    // Trim back to last word boundary.
+    $sp = mb_strrpos( $cut, ' ' );
+    if ( $sp !== false && $sp > 80 ) $cut = mb_substr( $cut, 0, $sp );
+    return rtrim( $cut, " .,:;-" ) . '…';
+}
+
+/**
+ * Write meta description for a single post: canonical postmeta + mirror to
+ * the detected SEO plugin's expected field. Safe to call repeatedly.
+ */
+function videosow_write_meta_description_for_post( $post_id, $raw_description ) {
+    $desc = videosow_build_meta_description( $raw_description );
+    if ( $desc === '' ) return;
+    update_post_meta( $post_id, '_videosow_meta_description', $desc );
+
+    $plugin = videosow_detect_seo_plugin();
+    switch ( $plugin ) {
+        case 'yoast':
+            update_post_meta( $post_id, '_yoast_wpseo_metadesc', $desc );
+            break;
+        case 'rankmath':
+            update_post_meta( $post_id, 'rank_math_description', $desc );
+            break;
+        case 'aioseo':
+            // AIOSEO uses a custom table; best-effort fallback to postmeta. If
+            // their API is loaded, prefer it.
+            if ( function_exists( 'aioseo' ) ) {
+                try {
+                    $aio = aioseo();
+                    if ( isset( $aio->meta ) && isset( $aio->meta->metaData ) ) {
+                        $aio_post = \AIOSEO\Plugin\Common\Models\Post::getPost( $post_id );
+                        if ( $aio_post ) {
+                            $aio_post->description = $desc;
+                            $aio_post->save();
+                            break;
+                        }
+                    }
+                } catch ( \Throwable $e ) { /* fall through */ }
+            }
+            update_post_meta( $post_id, '_aioseop_description', $desc );
+            break;
+        case 'seopress':
+            update_post_meta( $post_id, '_seopress_titles_desc', $desc );
+            break;
+        case 'seoframework':
+            update_post_meta( $post_id, '_genesis_description', $desc );
+            break;
+        case 'squirrly':
+            // Squirrly stores SEO data in serialized _sq_post_keywords.
+            $sq = get_post_meta( $post_id, '_sq_post_keywords', true );
+            if ( ! is_array( $sq ) ) $sq = array();
+            $sq['description'] = $desc;
+            update_post_meta( $post_id, '_sq_post_keywords', $sq );
+            break;
+        case 'slimseo':
+            $ss = get_post_meta( $post_id, 'slim_seo', true );
+            if ( ! is_array( $ss ) ) $ss = array();
+            $ss['description'] = $desc;
+            update_post_meta( $post_id, 'slim_seo', $ss );
+            break;
+    }
+}
+
+/**
+ * Fallback: emit <meta name="description"> on single videosow_video posts when
+ * NO SEO plugin is active (otherwise the plugin owns the head and we'd duplicate).
+ */
+function videosow_single_meta_description() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    if ( videosow_detect_seo_plugin() !== '' ) return;
+    $post_id = get_queried_object_id();
+    if ( ! $post_id ) return;
+    $desc = get_post_meta( $post_id, '_videosow_meta_description', true );
+    if ( ! $desc ) {
+        // Lazy backfill: derive from content on the fly.
+        $p = get_post( $post_id );
+        if ( $p ) {
+            $desc = videosow_build_meta_description( $p->post_excerpt ? $p->post_excerpt : $p->post_content );
+            if ( $desc ) update_post_meta( $post_id, '_videosow_meta_description', $desc );
+        }
+    }
+    if ( ! $desc ) return;
+    $esc = esc_attr( $desc );
+    echo "\n<meta name=\"description\" content=\"{$esc}\" />\n";
+    echo "<meta property=\"og:description\" content=\"{$esc}\" />\n";
+}
+add_action( 'wp_head', 'videosow_single_meta_description', 1 );
+
+/**
+ * Inject schema.org VideoObject JSON-LD on every single videosow_video post.
+ */
+function videosow_single_video_jsonld() {
+    if ( ! is_singular( 'videosow_video' ) ) return;
+    $post_id = get_queried_object_id();
+    if ( ! $post_id ) return;
+    $video_id = get_post_meta( $post_id, '_videosow_yt_video_id', true );
+    if ( ! $video_id ) return;
+
+    $post = get_post( $post_id );
+    if ( ! $post ) return;
+
+    $name = wp_strip_all_tags( get_the_title( $post ) );
+    $desc = get_post_meta( $post_id, '_videosow_meta_description', true );
+    if ( ! $desc ) {
+        $desc = videosow_build_meta_description( $post->post_excerpt ? $post->post_excerpt : $post->post_content );
+    }
+
+    $published_iso = get_post_meta( $post_id, '_videosow_yt_published', true );
+    if ( ! $published_iso ) {
+        $published_iso = mysql2date( 'c', $post->post_date_gmt ?: $post->post_date, false );
+    }
+
+    // Thumbnails: prefer attached featured image; fall back to YouTube hosted URL.
+    $thumb_urls = array();
+    $att_id = get_post_thumbnail_id( $post_id );
+    if ( $att_id ) {
+        foreach ( array( 'full', 'large', 'medium_large' ) as $sz ) {
+            $src = wp_get_attachment_image_src( $att_id, $sz );
+            if ( $src && ! empty( $src[0] ) ) $thumb_urls[] = $src[0];
+        }
+    }
+    if ( empty( $thumb_urls ) ) {
+        $thumb_urls[] = 'https://i.ytimg.com/vi/' . rawurlencode( $video_id ) . '/maxresdefault.jpg';
+        $thumb_urls[] = 'https://i.ytimg.com/vi/' . rawurlencode( $video_id ) . '/hqdefault.jpg';
+    }
+    $thumb_urls = array_values( array_unique( array_filter( $thumb_urls ) ) );
+
+    $data = array(
+        '@context'     => 'https://schema.org',
+        '@type'        => 'VideoObject',
+        'name'         => $name,
+        'description'  => $desc ? $desc : $name,
+        'thumbnailUrl' => $thumb_urls,
+        'uploadDate'   => $published_iso,
+        'contentUrl'   => 'https://www.youtube.com/watch?v=' . $video_id,
+        'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
+    );
+
+    $duration = get_post_meta( $post_id, '_videosow_yt_duration', true );
+    if ( $duration ) $data['duration'] = $duration;
+
+    $views = (int) get_post_meta( $post_id, '_videosow_yt_views', true );
+    if ( $views > 0 ) {
+        $data['interactionStatistic'] = array(
+            '@type'                => 'InteractionCounter',
+            'interactionType'      => array( '@type' => 'WatchAction' ),
+            'userInteractionCount' => $views,
+        );
+    }
+
+    $transcript = get_post_meta( $post_id, '_videosow_transcript', true );
+    if ( $transcript ) {
+        // Cap to keep JSON-LD reasonable in size.
+        $data['transcript'] = mb_substr( $transcript, 0, 5000 );
+    }
+
+    echo "\n<script type=\"application/ld+json\">"
+        . wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE )
+        . "</script>\n";
+}
+add_action( 'wp_head', 'videosow_single_video_jsonld', 5 );
+
+/**
+ * AJAX: report which SEO plugin (if any) is currently active.
+ */
+function videosow_ajax_detect_seo() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+    $slug = videosow_detect_seo_plugin();
+    wp_send_json_success( array(
+        'plugin' => $slug,
+        'label'  => $slug ? videosow_seo_plugin_label( $slug ) : '',
+    ) );
+}
+add_action( 'wp_ajax_videosow_detect_seo', 'videosow_ajax_detect_seo' );
+
+/**
+ * AJAX: regenerate meta descriptions for all imported posts (chunked).
+ */
+function videosow_ajax_regenerate_descriptions() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+    $offset = isset( $_POST['offset'] ) ? max( 0, intval( $_POST['offset'] ) ) : 0;
+    $batch  = 25;
+    $q = new WP_Query( array(
+        'post_type'      => 'videosow_video',
+        'post_status'    => array( 'publish', 'draft', 'pending', 'private', 'future' ),
+        'posts_per_page' => $batch,
+        'offset'         => $offset,
+        'orderby'        => 'ID',
+        'order'          => 'ASC',
+        'fields'         => 'ids',
+        'no_found_rows'  => false,
+    ) );
+    $total = (int) $q->found_posts;
+    $ids   = $q->posts;
+    $updated = 0;
+    foreach ( $ids as $pid ) {
+        $p = get_post( $pid );
+        if ( ! $p ) continue;
+        videosow_write_meta_description_for_post( $pid, $p->post_excerpt ? $p->post_excerpt : $p->post_content );
+        $updated++;
+    }
+    $next = $offset + count( $ids );
+    wp_send_json_success( array(
+        'processed'   => $next,
+        'total'       => $total,
+        'updated'     => $updated,
+        'done'        => $next >= $total,
+        'next_offset' => $next,
+    ) );
+}
+add_action( 'wp_ajax_videosow_regenerate_descriptions', 'videosow_ajax_regenerate_descriptions' );
+
+
     if ( empty( $segments ) ) return '';
     if ( $mode === 'hidden' ) return '';
 
