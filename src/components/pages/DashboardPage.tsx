@@ -55,6 +55,46 @@ const useThemeScan = () => {
   return { map, scanned, scanning, runScan };
 };
 
+const useSeoDetect = () => {
+  const [plugin, setPlugin] = useState<string>('');
+  const [label, setLabel] = useState<string>('');
+  const [detected, setDetected] = useState<boolean>(() => {
+    try { return sessionStorage.getItem('videosow_seo_detected') === '1'; } catch { return false; }
+  });
+  const [detecting, setDetecting] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'videosow_seo_detected') {
+        setDetecting(false);
+        if (e.data.success) {
+          const d = e.data.data || {};
+          setPlugin(d.plugin || '');
+          setLabel(d.label || '');
+          setDetected(true);
+          try { sessionStorage.setItem('videosow_seo_detected', '1'); } catch {}
+          if (d.label) toast.success(`Detected ${d.label} — meta descriptions will be written automatically.`);
+          else toast.success('No SEO plugin detected — Video Sow will write the meta description tag itself.');
+        } else {
+          toast.error('SEO detection failed.');
+        }
+      }
+    };
+    window.addEventListener('message', handler);
+    // Auto-run a silent first detect on mount so the step reflects current state.
+    window.postMessage({ type: 'videosow_detect_seo' }, '*');
+    try { window.parent?.postMessage({ type: 'videosow_detect_seo' }, '*'); } catch {}
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const detect = () => {
+    setDetecting(true);
+    window.postMessage({ type: 'videosow_detect_seo' }, '*');
+    try { window.parent?.postMessage({ type: 'videosow_detect_seo' }, '*'); } catch {}
+  };
+  return { plugin, label, detected, detecting, detect };
+};
+
 type Step = {
   key: string;
   icon: any;
