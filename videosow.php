@@ -343,7 +343,9 @@ class VideoSow_Plugin {
                 videosow_list_archive:                 ['videosow_list_archive',                 'videosow_archive_list'],
                 videosow_dashboard_stats:              ['videosow_dashboard_stats',              'videosow_dashboard_stats_result'],
                 videosow_scan_theme:                   ['videosow_scan_theme',                   'videosow_theme_scan_result'],
-                videosow_get_theme_map:                ['videosow_get_theme_map',                'videosow_theme_map_result']
+                videosow_get_theme_map:                ['videosow_get_theme_map',                'videosow_theme_map_result'],
+                videosow_detect_seo:                   ['videosow_detect_seo',                   'videosow_seo_detected'],
+                videosow_regenerate_descriptions:      ['videosow_regenerate_descriptions',      'videosow_seo_regenerate_result']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
