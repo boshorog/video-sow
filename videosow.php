@@ -4486,7 +4486,7 @@ function videosow_ajax_regenerate_descriptions() {
 }
 add_action( 'wp_ajax_videosow_regenerate_descriptions', 'videosow_ajax_regenerate_descriptions' );
 
-
+function videosow_render_transcript_block( $segments, $mode = 'plain' ) {
     if ( empty( $segments ) ) return '';
     if ( $mode === 'hidden' ) return '';
 
