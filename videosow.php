@@ -3382,10 +3382,17 @@ function videosow_import_one_video( $cfg, $video_id ) {
     update_post_meta( $post_id, '_videosow_yt_published', $published );
     update_post_meta( $post_id, '_videosow_yt_views', $stats_views );
     update_post_meta( $post_id, '_videosow_yt_views_updated', time() );
+    if ( ! empty( $duration_iso ) ) {
+        update_post_meta( $post_id, '_videosow_yt_duration', $duration_iso );
+    }
     // Track when WE imported the video (distinct from when YouTube published it,
     // which becomes the post_date). Use add_post_meta with unique=true so a
     // re-sync of an existing post never overwrites the original import time.
     add_post_meta( $post_id, '_videosow_imported_at', time(), true );
+
+    // SEO: derive a meta description from the cleaned content and mirror it
+    // into the active SEO plugin's field (or store for our own wp_head fallback).
+    videosow_write_meta_description_for_post( $post_id, $description );
 
     // Always store transcript status + raw text as post meta (diagnostic + reuse).
     if ( ! empty( $cfg['fetchTranscript'] ) ) {
