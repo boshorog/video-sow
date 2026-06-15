@@ -248,11 +248,18 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
           hasAi: !!cfg.aiApiKey && license.isPro,
           transcriptOn: !!cfg.fetchTranscript && license.isPro,
           isPro: license.isPro,
+          seoPlugin: seo.plugin,
+          seoPluginLabel: seo.label,
+          seoDetected: seo.detected,
         })}
         onAction={(key) => {
           const proKeys = new Set(['ai', 'transcripts']);
           if (!license.isPro && proKeys.has(key)) {
             onNavigate?.('pro');
+            return;
+          }
+          if (key === 'seo') {
+            seo.detect();
             return;
           }
           if (key === 'configure') {
