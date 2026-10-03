@@ -196,7 +196,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
         <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
         <p className="text-muted-foreground mt-1">
           Welcome to <strong>Video Sow</strong> — automatically turn a YouTube playlist into clean, SEO-ready
-          WordPress articles, complete with transcripts, tags and AI-enriched descriptions.
+          WordPress articles, complete with transcripts, tags and enriched descriptions.
         </p>
       </div>
 
@@ -275,7 +275,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             firstimport: 'import',
             autosync: 'settings',
             ai: 'tasks',
-            transcripts: 'settings',
+            transcripts: 'tasks',
           };
           const anchorFor: Record<string, string> = {
             scan: 'scan',

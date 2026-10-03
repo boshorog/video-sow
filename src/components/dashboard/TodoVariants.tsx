@@ -66,7 +66,7 @@ export const buildShowcaseSteps = (opts: {
   { key: 'autosync', icon: RefreshCw, title: 'Schedule auto-sync', short: 'Auto-sync',
     desc: 'Pick how often Video Sow checks for new videos and imports them in the background.',
     done: opts.syncEnabled, cta: opts.syncEnabled ? 'Adjust interval' : 'Enable auto-sync' },
-  { key: 'ai', icon: Wand2, title: 'Cleanup rules & AI tasks', short: 'AI tasks', pro: true,
+  { key: 'ai', icon: Wand2, title: 'Simple & Advanced Tasks', short: 'Tasks', pro: true,
     desc: 'Strip boilerplate, rewrite descriptions for SEO, and craft tags before publishing.',
     done: opts.hasAi, cta: opts.hasAi ? 'Tune prompts' : 'Open Tasks' },
   { key: 'transcripts', icon: FileText, title: 'Enable transcript fetch', short: 'Transcripts', pro: true,
