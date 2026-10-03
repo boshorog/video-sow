@@ -4,4 +4,4 @@
 - [x] Hide provider branding while retaining the API Key field.
 - [x] Add a Transcripts card with fetching, display, connection, and diagnostic controls.
 - [x] Move transcript roadmap navigation to Tasks.
-- [ ] Verify builds and the Pro/Free preview states.
+- [x] Verify builds and the Pro/Free preview states.
