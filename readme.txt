@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.32
+Stable tag: 1.2.34
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,13 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.34 =
+* Pro: added the Tasks workspace after Import, with ordered Simple Tasks and OpenRouter-powered AI Tasks.
+* AI Tasks: added beginner modes, advanced live model selection, reusable prompt templates, transcript limits, existing-tag restrictions, and AI excerpts.
+* Security: Tasks are now authorized server-side with the active Pro license before settings are accepted or processing runs.
+* Fix: AI prompt templates now save correctly when the React app is mounted directly inside WordPress admin.
+* Development: added the bottom-right Free / Pro preview switcher for testing both variants.
 
 = 1.2.33 =
 * SEO: VideoObject JSON-LD is now injected in the head of every imported article (name, description, thumbnail, uploadDate, contentUrl, embedUrl, duration, view count, transcript) — unlocks YouTube-style rich results in Google.

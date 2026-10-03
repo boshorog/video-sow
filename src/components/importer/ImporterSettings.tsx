@@ -226,11 +226,12 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
   // in local React state and disappear on plugin update / page reload.
   const persistTemplates = (list: AiTemplate[]) => {
     update("aiTemplates", list);
-    if (typeof window !== "undefined" && window.parent !== window) {
-      window.parent.postMessage(
-        { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } },
-        "*"
-      );
+    if (typeof window !== "undefined") {
+      const message = { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } };
+      window.postMessage(message, "*");
+      try {
+        if (window.parent && window.parent !== window) window.parent.postMessage(message, "*");
+      } catch {}
     }
   };
 
@@ -1889,11 +1890,12 @@ export const AiTasksSection = ({
 
   const persistTemplates = (list: AiTemplate[]) => {
     update("aiTemplates", list);
-    if (typeof window !== "undefined" && window.parent !== window) {
-      window.parent.postMessage(
-        { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } },
-        "*"
-      );
+    if (typeof window !== "undefined") {
+      const message = { type: "videosow_save_sermon_importer_config", config: { ...config, aiTemplates: list } };
+      window.postMessage(message, "*");
+      try {
+        if (window.parent && window.parent !== window) window.parent.postMessage(message, "*");
+      } catch {}
     }
   };
 
