@@ -91,9 +91,10 @@ const V2 = ({ e }: { e: Estimate }) => (
         </p>
       </div>
     </div>
-    <div className="ml-auto border-l border-border pl-3">
-      <span className="text-xl font-bold tabular-nums text-foreground">{e.total}</span>
-      <p className="text-[10px] text-muted-foreground">credits</p>
+    <div className="ml-auto shrink-0 border-l border-border pl-3 text-right">
+      <span className="whitespace-nowrap text-xl font-bold tabular-nums text-foreground">
+        {e.total} <span className="text-[10px] font-normal text-muted-foreground">credits</span>
+      </span>
     </div>
   </div>
 );
