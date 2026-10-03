@@ -10,9 +10,9 @@ import { PLUGIN_VERSION, PLUGIN_NAME, PRO_NAME } from '@/config/pluginIdentity';
 import { isDemoMode } from '@/config/demoMode';
 import DashboardPage from '@/components/pages/DashboardPage';
 import ImportPage from '@/components/pages/ImportPage';
-import TasksPage from '@/components/pages/TasksPage';
 import ImporterSettings from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
+import { BUILD_FLAGS } from '@/config/buildFlags';
 import videosowLogo from '@/assets/videosow-logo.svg';
 
 const ImporterSettingsPanel = () => {
@@ -33,6 +33,11 @@ const ImporterSettingsPanel = () => {
 // DevLicenseSelector is lazy-loaded only in dev environments
 const DevLicenseSelector = import.meta.env.DEV
   ? lazy(() => import('@/components/DevLicenseSelector').then(m => ({ default: m.DevLicenseSelector })))
+  : null;
+
+// The Free production build does not load the Pro Tasks page into its entry graph.
+const TasksPage = BUILD_FLAGS.AI_TASKS
+  ? lazy(() => import('@/components/pages/TasksPage'))
   : null;
 
 const KindPixelsLogo = ({ className }: { className?: string }) => (
@@ -69,7 +74,7 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (activeTab === 'tasks' && !license.isPro && license.checked) setActiveTab('dashboard');
+    if (activeTab === 'tasks' && (!TasksPage || (!license.isPro && license.checked))) setActiveTab('dashboard');
   }, [activeTab, license.isPro, license.checked]);
 
   return (
@@ -110,7 +115,7 @@ const Index = () => {
                 <Youtube className="w-4 h-4" />
                 Import
               </TabsTrigger>
-              {license.isPro && (
+              {TasksPage && license.isPro && (
                 <TabsTrigger value="tasks" className="flex-1 px-6 py-4 text-sm font-medium border-b-2 -mb-px flex items-center justify-center gap-2 transition-colors rounded-none data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-primary/5 data-[state=inactive]:border-transparent data-[state=inactive]:text-slate-500 hover:text-slate-700 hover:bg-slate-50 data-[state=active]:shadow-none">
                   <ListTodo className="w-4 h-4" />
                   Tasks
@@ -140,9 +145,11 @@ const Index = () => {
               <ImportPage onNavigate={navigateTab} />
             </TabsContent>
 
-            {license.isPro && (
+            {TasksPage && license.isPro && (
               <TabsContent value="tasks" className="mt-0">
-                <TasksPage />
+                <Suspense fallback={null}>
+                  <TasksPage />
+                </Suspense>
               </TabsContent>
             )}
 
