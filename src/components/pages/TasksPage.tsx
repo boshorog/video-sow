@@ -27,48 +27,24 @@ const TasksPage = () => {
             Tasks run in the order shown below.
           </p>
         </div>
-        <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
-          {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-          {imp.isSaving ? 'Saving…' : 'Save tasks'}
-        </Button>
-      </div>
-
-      <div className="overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm">
-        <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Coins className="h-4 w-4 text-primary" />
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Estimated credit usage per video</h3>
-              <p className="mt-0.5 text-xs text-muted-foreground">Updates automatically as you change the tasks below.</p>
-            </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="rounded-lg border border-border bg-secondary/40 px-3 py-1.5 text-right max-w-xs">
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Estimated credit usage per article</p>
+            <p className="text-sm font-semibold text-foreground leading-tight">
+              {estimate.total} credits
+              <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">
+                Simple {estimate.simple} · Transcript {estimate.transcript} · Advanced {estimate.advanced}
+              </span>
+            </p>
+            {imp.config.aiEnabled && !imp.config.fetchTranscript && (
+              <p className="text-[10px] text-muted-foreground leading-tight">Includes the transcript Advanced Tasks fetch for AI processing.</p>
+            )}
           </div>
-          <div className="flex items-baseline gap-1 sm:text-right">
-            <span className="text-3xl font-bold text-foreground">{estimate.total}</span>
-            <span className="text-xs text-muted-foreground">credits</span>
-          </div>
+          <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
+            {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            {imp.isSaving ? 'Saving…' : 'Save tasks'}
+          </Button>
         </div>
-        <div className="grid border-t border-border bg-secondary/30 sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-y divide-border">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
-            <span className="flex items-center gap-2 text-muted-foreground"><Wand2 className="h-3.5 w-3.5 text-emerald-600" />Simple Tasks</span>
-            <strong className="text-foreground">{estimate.simple}</strong>
-          </div>
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
-            <span className="flex items-center gap-2 text-muted-foreground"><FileText className="h-3.5 w-3.5 text-sky-600" />Transcript fetch</span>
-            <strong className="text-foreground">{estimate.transcript}</strong>
-          </div>
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
-            <span className="flex items-center gap-2 text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-violet-600" />Advanced AI</span>
-            <strong className="text-foreground">{estimate.advanced}</strong>
-          </div>
-        </div>
-        {imp.config.aiEnabled && !imp.config.fetchTranscript && (
-          <div className="flex items-center gap-2 border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
-            <ArrowRight className="h-3 w-3 text-primary" />
-            The transcript estimate is included because Advanced Tasks fetches transcript content for AI processing.
-          </div>
-        )}
       </div>
 
       <div className="rounded-lg border border-border bg-secondary/20 p-3 flex items-start gap-2 text-xs text-muted-foreground">
@@ -106,11 +82,11 @@ const TasksPage = () => {
       </Card>
 
       {/* Transcripts */}
-      <Card data-vs-anchor="transcripts" className="border-2 border-sky-300/60 shadow-md bg-gradient-to-br from-sky-50 to-transparent dark:from-sky-950/20">
-        <CardHeader className="border-b border-sky-200/60 bg-sky-100/40 dark:bg-sky-950/30 dark:border-sky-900/40">
+      <Card data-vs-anchor="transcripts" className="border-2 border-orange-300/60 shadow-md bg-gradient-to-br from-orange-50 to-transparent dark:from-orange-950/20">
+        <CardHeader className="border-b border-orange-200/60 bg-orange-100/40 dark:bg-orange-950/30 dark:border-orange-900/40">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <span className="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+            <span className="w-8 h-8 rounded-lg bg-orange-500/15 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             </span>
             Transcripts
           </CardTitle>
