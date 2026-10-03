@@ -26,24 +26,6 @@ const TasksPage = () => {
             Configure the cleanup, transcripts, and AI processing applied before each video becomes a WordPress post.
             Tasks run in the order shown below.
           </p>
-          <div className="mt-3 inline-flex items-stretch overflow-hidden rounded-lg border border-primary/25 bg-card shadow-sm">
-            <div className="px-4 py-2.5 text-left">
-              <p className="text-xs font-semibold text-foreground">Estimated credit usage per article</p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground">Recalculates as you edit tasks.</p>
-              <div className="mt-1.5 flex items-center gap-3 text-[11px]">
-                <span className="flex items-center gap-1 text-muted-foreground"><Wand2 className="h-3 w-3 text-emerald-600" />Simple <strong className="tabular-nums text-foreground">{estimate.simple}</strong></span>
-                <span className="flex items-center gap-1 text-muted-foreground"><FileText className="h-3 w-3 text-orange-600" />Transcript <strong className="tabular-nums text-foreground">{estimate.transcript}</strong></span>
-                <span className="flex items-center gap-1 text-muted-foreground"><Sparkles className="h-3 w-3 text-violet-600" />Advanced <strong className="tabular-nums text-foreground">{estimate.advanced}</strong></span>
-              </div>
-              {imp.config.aiEnabled && !imp.config.fetchTranscript && (
-                <p className="mt-1 text-[10px] text-muted-foreground">Includes the transcript Advanced Tasks fetches for AI processing.</p>
-              )}
-            </div>
-            <div className="flex flex-col items-center justify-center bg-primary/[0.06] px-4 py-3">
-              <span className="text-2xl font-bold tabular-nums leading-none text-primary">{estimate.total}</span>
-              <span className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">credits</span>
-            </div>
-          </div>
         </div>
         <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
           {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
