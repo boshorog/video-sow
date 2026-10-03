@@ -275,7 +275,7 @@ const DashboardPage = ({ onNavigate }: { onNavigate?: (tab: string) => void } = 
             firstimport: 'import',
             autosync: 'settings',
             ai: 'tasks',
-            transcripts: 'settings',
+            transcripts: 'tasks',
           };
           const anchorFor: Record<string, string> = {
             scan: 'scan',
