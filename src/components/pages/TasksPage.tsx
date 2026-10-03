@@ -5,7 +5,6 @@ import { Switch } from '@/components/ui/switch';
 import { SimpleInstructionsSection, AiTasksSection, TranscriptTasksSection } from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
 import { estimateTaskCredits } from '@/config/credits';
-import CreditEstimateShowcase from '@/components/importer/CreditEstimateShowcase';
 
 const TasksPage = () => {
   const imp = useImporter();
@@ -27,29 +26,31 @@ const TasksPage = () => {
             Configure the cleanup, transcripts, and AI processing applied before each video becomes a WordPress post.
             Tasks run in the order shown below.
           </p>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="rounded-lg border border-border bg-secondary/40 px-3 py-1.5 text-right max-w-xs">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Estimated credit usage per article</p>
-            <p className="text-sm font-semibold text-foreground leading-tight">
-              {estimate.total} credits
-              <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">
-                Simple {estimate.simple} · Transcript {estimate.transcript} · Advanced {estimate.advanced}
-              </span>
-            </p>
-            {imp.config.aiEnabled && !imp.config.fetchTranscript && (
-              <p className="text-[10px] text-muted-foreground leading-tight">Includes the transcript Advanced Tasks fetch for AI processing.</p>
-            )}
+          <div className="mt-3 inline-flex items-stretch overflow-hidden rounded-lg border border-primary/25 bg-card shadow-sm">
+            <div className="px-4 py-2.5 text-left">
+              <p className="text-xs font-semibold text-foreground">Estimated credit usage per article</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">Recalculates as you edit tasks.</p>
+              <div className="mt-1.5 flex items-center gap-3 text-[11px]">
+                <span className="flex items-center gap-1 text-muted-foreground"><Wand2 className="h-3 w-3 text-emerald-600" />Simple <strong className="tabular-nums text-foreground">{estimate.simple}</strong></span>
+                <span className="flex items-center gap-1 text-muted-foreground"><FileText className="h-3 w-3 text-orange-600" />Transcript <strong className="tabular-nums text-foreground">{estimate.transcript}</strong></span>
+                <span className="flex items-center gap-1 text-muted-foreground"><Sparkles className="h-3 w-3 text-violet-600" />Advanced <strong className="tabular-nums text-foreground">{estimate.advanced}</strong></span>
+              </div>
+              {imp.config.aiEnabled && !imp.config.fetchTranscript && (
+                <p className="mt-1 text-[10px] text-muted-foreground">Includes the transcript Advanced Tasks fetches for AI processing.</p>
+              )}
+            </div>
+            <div className="flex flex-col items-center justify-center bg-primary/[0.06] px-4 py-3">
+              <span className="text-2xl font-bold tabular-nums leading-none text-primary">{estimate.total}</span>
+              <span className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">credits</span>
+            </div>
           </div>
-          <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
-            {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            {imp.isSaving ? 'Saving…' : 'Save tasks'}
-          </Button>
         </div>
+        <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
+          {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+          {imp.isSaving ? 'Saving…' : 'Save tasks'}
+        </Button>
       </div>
 
-      {/* TEMP: estimate-section showcase — remove once a variant is chosen */}
-      <CreditEstimateShowcase estimate={estimate} />
 
       <div className="rounded-lg border border-border bg-secondary/20 p-3 flex items-start gap-2 text-xs text-muted-foreground">
         <Info className="w-4 h-4 mt-0.5 text-primary shrink-0" />

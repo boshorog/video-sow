@@ -49,7 +49,7 @@ const CreditsBadge = () => {
             <strong>{CREDIT_COSTS.simple}</strong>
           </div>
           <div className="flex items-center justify-between rounded-md bg-secondary/60 p-2">
-            <span className="flex items-center gap-2"><FileText className="h-3.5 w-3.5 text-sky-600" />Transcript fetch</span>
+            <span className="flex items-center gap-2"><FileText className="h-3.5 w-3.5 text-orange-600" />Transcript fetch</span>
             <strong>{CREDIT_COSTS.transcript}</strong>
           </div>
           <div className="flex items-center justify-between rounded-md bg-secondary/60 p-2">
