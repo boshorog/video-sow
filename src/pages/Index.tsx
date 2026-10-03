@@ -13,6 +13,7 @@ import ImportPage from '@/components/pages/ImportPage';
 import ImporterSettings from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
 import { BUILD_FLAGS } from '@/config/buildFlags';
+import CreditsBadge from '@/components/CreditsBadge';
 import videosowLogo from '@/assets/videosow-logo.svg';
 
 const ImporterSettingsPanel = () => {
@@ -83,6 +84,7 @@ const Index = () => {
         {/* Logo Header */}
         <div className="px-6 pt-6 pb-6">
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
             <img src={videosowLogo} alt={license.isPro ? PRO_NAME : PLUGIN_NAME} className="w-10 h-10" />
             <div className="flex items-baseline gap-2">
               <h1 className="text-2xl text-slate-800"><span className="font-bold">{license.isPro ? PRO_NAME : PLUGIN_NAME}</span></h1>
@@ -93,6 +95,8 @@ const Index = () => {
                 </span>
               )}
             </div>
+            </div>
+            {TasksPage && license.isPro && <CreditsBadge />}
           </div>
         </div>
 

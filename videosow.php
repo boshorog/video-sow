@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.34
+ * Version: 1.2.35
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.34' );
+define( 'VIDEOSOW_VERSION', '1.2.35' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -345,7 +345,8 @@ class VideoSow_Plugin {
                 videosow_scan_theme:                   ['videosow_scan_theme',                   'videosow_theme_scan_result'],
                 videosow_get_theme_map:                ['videosow_get_theme_map',                'videosow_theme_map_result'],
                 videosow_detect_seo:                   ['videosow_detect_seo',                   'videosow_seo_detected'],
-                videosow_regenerate_descriptions:      ['videosow_regenerate_descriptions',      'videosow_seo_regenerate_result']
+                videosow_regenerate_descriptions:      ['videosow_regenerate_descriptions',      'videosow_seo_regenerate_result'],
+                videosow_get_credits:                  ['videosow_get_credits',                  'videosow_credits_result']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
@@ -440,6 +441,75 @@ function videosow_can_use_premium_tasks() {
     if ( method_exists( $fs, 'is_paying' ) && $fs->is_paying() ) return true;
     return method_exists( $fs, 'is_trial' ) && $fs->is_trial();
 }
+
+/* ── Pro credits ─────────────────────────────────
+ * Every active Pro subscription receives a monthly credit allocation.
+ * Until the billing integration supplies the real allowance, a generous
+ * testing allocation is used. Credits are stored and spent server-side only.
+ */
+function videosow_credit_costs() {
+    return apply_filters( 'videosow_credit_costs', array(
+        'simple'     => 1,  // per simple rule, per video
+        'transcript' => 2,  // per transcript fetch
+        'advanced'   => array( 'cheap' => 5, 'balanced' => 10, 'fast' => 10, 'smart' => 25, 'custom' => 15 ),
+    ) );
+}
+
+function videosow_credit_monthly_allocation() {
+    // TODO: replace with the plan allowance once the billing integration lands.
+    return (int) apply_filters( 'videosow_credit_monthly_allocation', 5000 );
+}
+
+function videosow_advanced_credit_cost( $cfg ) {
+    $c = videosow_credit_costs();
+    $map = array(
+        'google/gemini-2.5-flash-lite' => 'cheap',
+        'google/gemini-2.5-flash'      => 'balanced',
+        'openai/gpt-5-mini'            => 'fast',
+        'google/gemini-2.5-pro'        => 'smart',
+    );
+    $model = isset( $cfg['aiModel'] ) ? (string) $cfg['aiModel'] : '';
+    $tier  = isset( $map[ $model ] ) ? $map[ $model ] : ( $model === '' ? 'balanced' : 'custom' );
+    return (int) $c['advanced'][ $tier ];
+}
+
+function videosow_get_credits() {
+    $state = get_option( 'videosow_credits', array() );
+    if ( ! is_array( $state ) ) $state = array();
+    $active = videosow_can_use_premium_tasks();
+    $period = gmdate( 'Y-m' );
+    if ( $active && ( empty( $state['period'] ) || $state['period'] !== $period ) ) {
+        $alloc = videosow_credit_monthly_allocation();
+        $state = array( 'period' => $period, 'allocation' => $alloc, 'balance' => $alloc, 'used' => 0 );
+        update_option( 'videosow_credits', $state, false );
+    }
+    $state = array_merge( array( 'period' => $period, 'allocation' => 0, 'balance' => 0, 'used' => 0 ), $state );
+    $state['active'] = $active;
+    if ( ! $active ) $state['balance'] = 0;
+    $state['renewsAt'] = gmdate( 'Y-m-d', strtotime( 'first day of next month', strtotime( $state['period'] . '-01' ) ) );
+    $state['costs'] = videosow_credit_costs();
+    return $state;
+}
+
+/** Atomically-enough deduct credits; returns false when the balance is insufficient. */
+function videosow_consume_credits( $amount ) {
+    $amount = (int) $amount;
+    if ( $amount <= 0 ) return true;
+    $state = videosow_get_credits();
+    if ( empty( $state['active'] ) || $state['balance'] < $amount ) return false;
+    $state['balance'] -= $amount;
+    $state['used']    += $amount;
+    unset( $state['active'], $state['renewsAt'], $state['costs'] );
+    update_option( 'videosow_credits', $state, false );
+    return true;
+}
+
+function videosow_ajax_get_credits() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( 'Unauthorized' );
+    wp_send_json_success( videosow_get_credits() );
+}
+add_action( 'wp_ajax_videosow_get_credits', 'videosow_ajax_get_credits' );
 
 function videosow_get_sermon_importer_defaults() {
     return array(
@@ -3245,7 +3315,9 @@ function videosow_import_one_video( $cfg, $video_id ) {
     if ( ! empty( $cfg['descriptionCleanup'] ) ) {
         $description = videosow_clean_description( $description, $cfg['descriptionCleanup'] );
     }
-    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['simpleInstructions'] ) ) {
+    $vs_costs = videosow_credit_costs();
+    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['simpleInstructions'] )
+        && videosow_consume_credits( count( (array) $cfg['simpleInstructions'] ) * (int) $vs_costs['simple'] ) ) {
         $description = videosow_apply_simple_instructions( $description, $cfg['simpleInstructions'] );
         // Hashtags removal also operates on the title.
         foreach ( (array) $cfg['simpleInstructions'] as $ins ) {
@@ -3258,7 +3330,8 @@ function videosow_import_one_video( $cfg, $video_id ) {
 
     // Fetch transcript (may also be needed by AI)
     $transcript = '';
-    if ( ! empty( $cfg['fetchTranscript'] ) || ( videosow_can_use_premium_tasks() && ! empty( $cfg['aiEnabled'] ) ) ) {
+    $vs_ai_ok = videosow_can_use_premium_tasks() && ! empty( $cfg['aiEnabled'] );
+    if ( ( ! empty( $cfg['fetchTranscript'] ) || $vs_ai_ok ) && videosow_consume_credits( (int) $vs_costs['transcript'] ) ) {
         $tr_lang = isset( $cfg['transcriptLang'] ) ? $cfg['transcriptLang'] : 'ro';
         // NOTE: each tier (local InnerTube, OAuth, Cloud) inside
         // videosow_fetch_youtube_transcript() already does its own retries
@@ -3272,7 +3345,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
     // AI-Assist (optional): may rewrite description/title/excerpt and suggest tags
     $ai_tags    = array();
     $ai_excerpt = '';
-    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['aiEnabled'] ) ) {
+    if ( $vs_ai_ok && videosow_consume_credits( videosow_advanced_credit_cost( $cfg ) ) ) {
         videosow_set_stage( 'ai_processing', $video_id );
         // Pre-compute speaker tag (from simple instructions) BEFORE asking AI,
         // so that a brand-new speaker is already included in the "existing tags"

@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { CREDIT_COSTS, advancedCost, creditLabel } from '@/config/credits';
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -1498,9 +1499,9 @@ export const TranscriptTasksSection = ({ config, onChange, onSave }: {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3" title={creditLabel(CREDIT_COSTS.transcript)}>
         <div className="pr-3">
-          <Label className="text-sm font-medium text-foreground">Add transcripts to articles</Label>
+          <Label className="text-sm font-medium text-foreground">Add transcripts to articles <span className="ml-1 text-[10px] font-normal text-sky-600">{creditLabel(CREDIT_COSTS.transcript)}</span></Label>
           <p className="mt-0.5 text-xs text-muted-foreground">Fetch each video's transcript and add indexable text to the imported article.</p>
         </div>
         <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
@@ -1653,7 +1654,7 @@ export const SimpleInstructionsSection = ({
                 (dragId === p.id ? "opacity-40 " : "") +
                 (overId === p.id && dragId && dragId !== p.id ? "border-primary ring-1 ring-primary " : "border-border ")
               }
-              title="Drag to reorder"
+              title={`Drag to reorder · ${creditLabel(CREDIT_COSTS.simple)}`}
             >
               <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab active:cursor-grabbing" />
               <Icon className="w-3.5 h-3.5 text-primary" />
@@ -1691,6 +1692,7 @@ export const SimpleInstructionsSection = ({
                   key={t}
                   type="button"
                   onClick={() => addPill(t)}
+                  title={creditLabel(CREDIT_COSTS.simple)}
                   className="w-full text-left flex items-start gap-2 p-2 rounded-md hover:bg-secondary transition-colors"
                 >
                   <Icon className="w-4 h-4 text-primary mt-0.5 shrink-0" />
@@ -2016,9 +2018,9 @@ export const AiTasksSection = ({
     <div className="p-3 rounded-lg border border-border bg-secondary/20">
       <div className="flex items-center justify-between">
         <div className="pr-3">
-          <Label className="text-sm font-medium text-foreground">Advanced tasks</Label>
+          <Label className="text-sm font-medium text-foreground" title={creditLabel(advancedCost(config.aiModel))}>Advanced tasks <span className="ml-1 text-[10px] font-normal text-violet-600">AI · {creditLabel(advancedCost(config.aiModel))}</span></Label>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Processes the title, description and optional transcript using your instructions to rewrite descriptions, suggest tags, or generate an SEO excerpt.
+            Uses AI to process the title, description and optional transcript using your instructions to rewrite descriptions, suggest tags, or generate an SEO excerpt.
           </p>
         </div>
         <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
@@ -2047,6 +2049,7 @@ export const AiTasksSection = ({
                       key={p.id}
                       type="button"
                       onClick={() => update("aiModel", p.model)}
+                      title={creditLabel(advancedCost(p.model))}
                       className={
                         "text-left p-2 rounded-md border transition-colors " +
                         (active
