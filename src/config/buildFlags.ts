@@ -97,6 +97,12 @@ export const BUILD_FLAGS = {
    * - Pro: true → Full analytics dashboard
    */
   ANALYTICS: BUILD_VARIANT === 'pro' || isDevPro,
+
+  /**
+   * Content cleanup and OpenRouter-powered AI tasks.
+   * Server-side processing is independently protected by the active Pro license.
+   */
+  AI_TASKS: BUILD_VARIANT === 'pro' || isDevPro,
 } as const;
 
 /**

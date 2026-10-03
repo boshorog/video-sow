@@ -67,7 +67,7 @@ const TasksPage = () => {
             AI Tasks
           </CardTitle>
           <CardDescription>
-            Optional AI processing per video. Pick a provider, model and prompt template. Suggested workflows:
+            Optional AI processing per video through OpenRouter. Pick an AI mode, model and prompt template. Suggested workflows:
             rewrite the description into clean paragraphs, generate SEO-friendly tags, produce a short excerpt,
             or extract chapter titles from the transcript.
           </CardDescription>

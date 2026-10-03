@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.33
+ * Version: 1.2.34
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.33' );
+define( 'VIDEOSOW_VERSION', '1.2.34' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -425,6 +425,21 @@ if ( defined( 'ABSPATH' ) ) { new VideoSow_Plugin(); }
 
 
 /* ── Sermon Importer ───────────────────────────── */
+
+/**
+ * Server-side authorization for premium importer tasks.
+ * The build marker prevents Free packages from being treated as premium, while
+ * Freemius confirms that this installation may execute premium code.
+ */
+function videosow_can_use_premium_tasks() {
+    if ( ! file_exists( dirname( __FILE__ ) . '/dist/.pro-build' ) ) return false;
+    if ( ! function_exists( 'videosow_fs' ) ) return false;
+    $fs = videosow_fs();
+    if ( ! is_object( $fs ) ) return false;
+    if ( method_exists( $fs, 'can_use_premium_code' ) ) return (bool) $fs->can_use_premium_code();
+    if ( method_exists( $fs, 'is_paying' ) && $fs->is_paying() ) return true;
+    return method_exists( $fs, 'is_trial' ) && $fs->is_trial();
+}
 
 function videosow_get_sermon_importer_defaults() {
     return array(
@@ -2104,7 +2119,7 @@ function videosow_ai_build_request( $cfg, $messages ) {
  * Result keys (all optional): description (string), tags (string[]), excerpt (string), title (string).
  */
 function videosow_ai_process_sermon( $cfg, $title, $description, $transcript, $existing_tags ) {
-    if ( empty( $cfg['aiEnabled'] ) || empty( $cfg['aiApiKey'] ) || empty( $cfg['aiInstructions'] ) ) {
+    if ( ! videosow_can_use_premium_tasks() || empty( $cfg['aiEnabled'] ) || empty( $cfg['aiApiKey'] ) || empty( $cfg['aiInstructions'] ) ) {
         return null;
     }
 
@@ -2256,6 +2271,7 @@ function videosow_ajax_save_sermon_importer_config() {
     $incoming = json_decode( stripslashes( $_POST['config'] ), true );
     if ( ! is_array( $incoming ) ) wp_send_json_error( 'Invalid config' );
     $current = videosow_get_sermon_importer_config();
+    $can_use_tasks = videosow_can_use_premium_tasks();
     $merged  = array_merge( $current, array(
         'apiKey'        => isset( $incoming['apiKey'] ) ? sanitize_text_field( $incoming['apiKey'] ) : $current['apiKey'],
         'playlistId'    => isset( $incoming['playlistId'] ) ? sanitize_text_field( $incoming['playlistId'] ) : $current['playlistId'],
@@ -2290,20 +2306,20 @@ function videosow_ajax_save_sermon_importer_config() {
         'archiveTagCloudLinesMobile'  => isset( $incoming['archiveTagCloudLinesMobile'] ) ? max( 1, intval( $incoming['archiveTagCloudLinesMobile'] ) ) : ( isset( $current['archiveTagCloudLinesMobile'] ) ? $current['archiveTagCloudLinesMobile'] : 4 ),
         'archiveTagCloudPool'         => isset( $incoming['archiveTagCloudPool'] ) ? max( 1, intval( $incoming['archiveTagCloudPool'] ) ) : $current['archiveTagCloudPool'],
         'archiveTagCloudManualTags'   => isset( $incoming['archiveTagCloudManualTags'] ) && is_array( $incoming['archiveTagCloudManualTags'] ) ? array_values( array_filter( array_map( 'sanitize_text_field', $incoming['archiveTagCloudManualTags'] ) ) ) : ( isset( $current['archiveTagCloudManualTags'] ) ? $current['archiveTagCloudManualTags'] : array() ),
-        'simpleInstructions' => isset( $incoming['simpleInstructions'] ) && is_array( $incoming['simpleInstructions'] ) ? videosow_sanitize_simple_instructions( $incoming['simpleInstructions'] ) : $current['simpleInstructions'],
+        'simpleInstructions' => $can_use_tasks && isset( $incoming['simpleInstructions'] ) && is_array( $incoming['simpleInstructions'] ) ? videosow_sanitize_simple_instructions( $incoming['simpleInstructions'] ) : $current['simpleInstructions'],
         'relaxedMode'        => isset( $incoming['relaxedMode'] ) ? (bool) $incoming['relaxedMode'] : $current['relaxedMode'],
         'relaxedDelayS'      => isset( $incoming['relaxedDelayS'] ) ? max( 0, intval( $incoming['relaxedDelayS'] ) ) : $current['relaxedDelayS'],
         'relaxedBatch'       => isset( $incoming['relaxedBatch'] ) ? max( 1, intval( $incoming['relaxedBatch'] ) ) : $current['relaxedBatch'],
         'relaxedPauseS'      => isset( $incoming['relaxedPauseS'] ) ? max( 0, intval( $incoming['relaxedPauseS'] ) ) : $current['relaxedPauseS'],
-        'aiEnabled'          => isset( $incoming['aiEnabled'] ) ? (bool) $incoming['aiEnabled'] : $current['aiEnabled'],
-        'aiProvider'         => isset( $incoming['aiProvider'] ) ? sanitize_text_field( $incoming['aiProvider'] ) : $current['aiProvider'],
-        'aiModel'            => isset( $incoming['aiModel'] ) ? sanitize_text_field( $incoming['aiModel'] ) : $current['aiModel'],
-        'aiApiKey'           => isset( $incoming['aiApiKey'] ) ? sanitize_text_field( $incoming['aiApiKey'] ) : $current['aiApiKey'],
-        'aiInstructions'     => isset( $incoming['aiInstructions'] ) ? wp_kses_post( (string) $incoming['aiInstructions'] ) : $current['aiInstructions'],
-        'aiTranscriptChars'  => isset( $incoming['aiTranscriptChars'] ) ? max( 0, intval( $incoming['aiTranscriptChars'] ) ) : $current['aiTranscriptChars'],
-        'aiTemplates'        => isset( $incoming['aiTemplates'] ) && is_array( $incoming['aiTemplates'] ) ? videosow_sanitize_ai_templates( $incoming['aiTemplates'] ) : ( isset( $current['aiTemplates'] ) ? $current['aiTemplates'] : array() ),
-        'aiRestrictTags'     => isset( $incoming['aiRestrictTags'] ) ? (bool) $incoming['aiRestrictTags'] : ( isset( $current['aiRestrictTags'] ) ? (bool) $current['aiRestrictTags'] : true ),
-        'aiUseAiExcerpt'     => isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
+        'aiEnabled'          => $can_use_tasks && isset( $incoming['aiEnabled'] ) ? (bool) $incoming['aiEnabled'] : $current['aiEnabled'],
+        'aiProvider'         => $can_use_tasks && isset( $incoming['aiProvider'] ) ? 'openrouter' : $current['aiProvider'],
+        'aiModel'            => $can_use_tasks && isset( $incoming['aiModel'] ) ? sanitize_text_field( $incoming['aiModel'] ) : $current['aiModel'],
+        'aiApiKey'           => $can_use_tasks && isset( $incoming['aiApiKey'] ) ? sanitize_text_field( $incoming['aiApiKey'] ) : $current['aiApiKey'],
+        'aiInstructions'     => $can_use_tasks && isset( $incoming['aiInstructions'] ) ? wp_kses_post( (string) $incoming['aiInstructions'] ) : $current['aiInstructions'],
+        'aiTranscriptChars'  => $can_use_tasks && isset( $incoming['aiTranscriptChars'] ) ? max( 0, intval( $incoming['aiTranscriptChars'] ) ) : $current['aiTranscriptChars'],
+        'aiTemplates'        => $can_use_tasks && isset( $incoming['aiTemplates'] ) && is_array( $incoming['aiTemplates'] ) ? videosow_sanitize_ai_templates( $incoming['aiTemplates'] ) : ( isset( $current['aiTemplates'] ) ? $current['aiTemplates'] : array() ),
+        'aiRestrictTags'     => $can_use_tasks && isset( $incoming['aiRestrictTags'] ) ? (bool) $incoming['aiRestrictTags'] : ( isset( $current['aiRestrictTags'] ) ? (bool) $current['aiRestrictTags'] : true ),
+        'aiUseAiExcerpt'     => $can_use_tasks && isset( $incoming['aiUseAiExcerpt'] ) ? (bool) $incoming['aiUseAiExcerpt'] : ( isset( $current['aiUseAiExcerpt'] ) ? (bool) $current['aiUseAiExcerpt'] : true ),
         'dashboardCards'     => isset( $incoming['dashboardCards'] ) && is_array( $incoming['dashboardCards'] ) ? array_values( array_filter( array_map( function( $c ) {
             if ( ! is_array( $c ) || empty( $c['key'] ) ) return null;
             return array(
@@ -3229,7 +3245,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
     if ( ! empty( $cfg['descriptionCleanup'] ) ) {
         $description = videosow_clean_description( $description, $cfg['descriptionCleanup'] );
     }
-    if ( ! empty( $cfg['simpleInstructions'] ) ) {
+    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['simpleInstructions'] ) ) {
         $description = videosow_apply_simple_instructions( $description, $cfg['simpleInstructions'] );
         // Hashtags removal also operates on the title.
         foreach ( (array) $cfg['simpleInstructions'] as $ins ) {
@@ -3242,7 +3258,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
 
     // Fetch transcript (may also be needed by AI)
     $transcript = '';
-    if ( ! empty( $cfg['fetchTranscript'] ) || ! empty( $cfg['aiEnabled'] ) ) {
+    if ( ! empty( $cfg['fetchTranscript'] ) || ( videosow_can_use_premium_tasks() && ! empty( $cfg['aiEnabled'] ) ) ) {
         $tr_lang = isset( $cfg['transcriptLang'] ) ? $cfg['transcriptLang'] : 'ro';
         // NOTE: each tier (local InnerTube, OAuth, Cloud) inside
         // videosow_fetch_youtube_transcript() already does its own retries
@@ -3256,7 +3272,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
     // AI-Assist (optional): may rewrite description/title/excerpt and suggest tags
     $ai_tags    = array();
     $ai_excerpt = '';
-    if ( ! empty( $cfg['aiEnabled'] ) ) {
+    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['aiEnabled'] ) ) {
         videosow_set_stage( 'ai_processing', $video_id );
         // Pre-compute speaker tag (from simple instructions) BEFORE asking AI,
         // so that a brand-new speaker is already included in the "existing tags"
