@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, ListVideo, LayoutGrid, ChevronDown, LayoutDashboard, ArrowUp, ArrowDown, Crown } from "lucide-react";
+import { Save, RefreshCw, Loader2, Youtube, ExternalLink, Copy, Check, CheckCircle2, Plug, Unplug, Settings2, Plus, X, Hash, Eraser, Scissors, Pencil, BookmarkPlus, GripVertical, Tag, Wrench, Stethoscope, KeyRound, Trash2, AlertCircle, AlertTriangle, Lightbulb, ListVideo, LayoutGrid, ChevronDown, LayoutDashboard, ArrowUp, ArrowDown, Crown } from "lucide-react";
 import { toast } from "sonner";
 import React, { useEffect, useState } from "react";
 import { SermonImporterConfig, SimpleInstruction, SimpleInstructionType, AiTemplate } from "./ImporterWidget";
@@ -1504,7 +1504,7 @@ export const TranscriptTasksSection = ({ config, onChange, onSave }: {
           <Label className="text-sm font-medium text-foreground">Add transcripts to articles <span className="ml-1 text-[10px] font-normal text-sky-600">{creditLabel(CREDIT_COSTS.transcript)}</span></Label>
           <p className="mt-0.5 text-xs text-muted-foreground">Fetch each video's transcript and add indexable text to the imported article.</p>
         </div>
-        <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
+        <Switch className="vs-plugin-switch" checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
       </div>
 
       {config.fetchTranscript && (
@@ -2013,21 +2013,33 @@ export const AiTasksSection = ({
     { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: "google/gemini-2.5-pro" },
   ];
   const activePresetId = PRESETS.find((p) => p.model === config.aiModel)?.id || "balanced";
+  const instructions = config.aiInstructions.toLowerCase();
+  const usesTags = /\btag(s|ging)?\b/.test(instructions);
+  const usesExcerpt = /\bexcerpt\b|\bseo (summary|description)\b/.test(instructions);
+  const usesTranscript = config.aiTranscriptChars > 0;
+  const fullTranscript = config.aiTranscriptChars >= 100000;
+  const lowCostMode = activePresetId === "cheap";
 
   return (
     <div className="p-3 rounded-lg border border-border bg-secondary/20">
       <div className="flex items-center justify-between">
         <div className="pr-3">
-          <Label className="text-sm font-medium text-foreground" title={creditLabel(advancedCost(config.aiModel))}>Advanced tasks <span className="ml-1 text-[10px] font-normal text-violet-600">AI · {creditLabel(advancedCost(config.aiModel))}</span></Label>
+          <Label className="text-sm font-medium text-foreground" title={creditLabel(advancedCost(config.aiModel))}>Advanced Tasks <span className="ml-1 text-[10px] font-normal text-violet-600">AI · {creditLabel(advancedCost(config.aiModel))}</span></Label>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Uses AI to process the title, description and optional transcript using your instructions to rewrite descriptions, suggest tags, or generate an SEO excerpt.
+            Optional advanced AI processing for the title, description, and transcript using your instructions.
           </p>
         </div>
-        <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
+        <Switch className="vs-plugin-switch" checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
       </div>
 
       {config.aiEnabled && (
         <div className="mt-3 space-y-3">
+          {!config.fetchTranscript && usesTranscript && (
+            <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-foreground">
+              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              <p>Transcripts are not being added to articles, but Advanced Tasks will still fetch one for AI processing.</p>
+            </div>
+          )}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label className="text-[11px] text-muted-foreground">Processing mode</Label>
@@ -2107,23 +2119,37 @@ export const AiTasksSection = ({
             A shorter transcript selection processes faster. 4000 characters cover the general theme of most videos.
           </p>
 
-          <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
+          {fullTranscript && lowCostMode && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-300/60 bg-amber-50 p-2.5 text-[11px] text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>A full transcript can be very long. The Cheapest mode may miss details or produce less consistent results; use 4000 characters or a stronger mode.</p>
+            </div>
+          )}
+
+          {config.aiTranscriptChars === 0 && /transcript|chapter|citation|reference/.test(instructions) && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-300/60 bg-amber-50 p-2.5 text-[11px] text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100">
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>Your instructions refer to transcript content, but “No transcript” is selected. Choose 4000 characters or Full for better results.</p>
+            </div>
+          )}
+
+          {usesTags && <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
             <input type="checkbox" checked={config.aiRestrictTags !== false}
               onChange={(e) => update("aiRestrictTags", e.target.checked)} className="mt-0.5" />
             <span className="text-[11px] text-foreground">
               Restrict suggestions to existing tags
               <span className="block text-muted-foreground">Only tags already created on the site can be selected, including speaker tags added by Simple Tasks.</span>
             </span>
-          </label>
+          </label>}
 
-          <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
+          {usesExcerpt && <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
             <input type="checkbox" checked={config.aiUseAiExcerpt !== false}
               onChange={(e) => update("aiUseAiExcerpt", e.target.checked)} className="mt-0.5" />
             <span className="text-[11px] text-foreground">
               Use generated excerpt
               <span className="block text-muted-foreground">If checked, the archive uses the generated excerpt. Otherwise, it uses the first part of the description (about 40 words).</span>
             </span>
-          </label>
+          </label>}
         </div>
       )}
     </div>

@@ -18,6 +18,7 @@ All colors MUST be HSL.
     --popover-foreground: 222 84% 11%;
 
     --primary: 1 56% 58%; /* Plugin color #CF5957 */
+    --plugin-primary: 1 56% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
@@ -74,6 +75,7 @@ All colors MUST be HSL.
     --popover-foreground: 210 40% 98%;
 
     --primary: 1 56% 58%; /* Plugin color #CF5957 */
+    --plugin-primary: 1 56% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
@@ -344,4 +346,10 @@ All colors MUST be HSL.
   --primary: 262 83% 58%;          /* violet-600 */
   --primary-foreground: 0 0% 100%;
   --ring: 262 83% 58%;
+}
+
+/* Keep section enable/disable controls in the plugin's brand color even when
+   their parent card scopes --primary to a feature accent. */
+.vs-plugin-switch[data-state="checked"] {
+  background-color: hsl(1 56% 58%) !important;
 }

@@ -23,3 +23,24 @@ export const advancedCost = (model?: string) =>
 
 export const creditLabel = (n: number, suffix = 'per video') =>
   `${n} credit${n === 1 ? '' : 's'} ${suffix}`;
+
+export type TaskCreditEstimateInput = {
+  simpleRuleCount: number;
+  fetchTranscript: boolean;
+  advancedEnabled: boolean;
+  advancedModel?: string;
+};
+
+/** Mirrors the per-video charging path in videosow.php. */
+export const estimateTaskCredits = ({
+  simpleRuleCount,
+  fetchTranscript,
+  advancedEnabled,
+  advancedModel,
+}: TaskCreditEstimateInput) => {
+  const simple = Math.max(0, simpleRuleCount) * CREDIT_COSTS.simple;
+  const transcript = fetchTranscript || advancedEnabled ? CREDIT_COSTS.transcript : 0;
+  const advanced = advancedEnabled ? advancedCost(advancedModel) : 0;
+
+  return { simple, transcript, advanced, total: simple + transcript + advanced };
+};
