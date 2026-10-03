@@ -557,38 +557,7 @@ const SermonImporterSettings = ({ config, onChange, onSave, isSaving, onSync, on
           <Switch checked={config.relaxedMode} onCheckedChange={(v) => update("relaxedMode", v)} />
         </div>
 
-        {isPro && (
-        <div data-vs-anchor="transcripts" className="p-3 rounded-lg border border-border bg-secondary/20">
-          <div className="flex items-center justify-between">
-            <div className="pr-3">
-              <Label className="text-sm font-medium text-foreground flex items-center gap-2">
-                Fetch transcript (SEO)
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">PRO</span>
-              </Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Adds the YouTube transcript inside a collapsible block in the post, indexable by search engines even when collapsed.</p>
-            </div>
-            <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
-          </div>
 
-          {config.fetchTranscript && (
-            <div className="mt-3 space-y-1.5">
-              <Label className="text-[11px] text-muted-foreground">Transcript language (optional)</Label>
-              <p className="text-[11px] text-muted-foreground">
-                Leave empty to use each video's <strong>default</strong> language. Set an ISO code (e.g. <code className="font-mono">en</code>, <code className="font-mono">es</code>, <code className="font-mono">fr</code>, <code className="font-mono">de</code>) only if you want to force a specific language.
-              </p>
-              <Input
-                value={config.transcriptInng}
-                onChange={(e) => update("transcriptInng", e.target.value.toLowerCase().slice(0, 5))}
-                placeholder="auto"
-                className="h-8 text-xs font-mono w-32"
-              />
-              <div className="pt-3 mt-3 border-t border-border">
-                <YouTubeConnectCard config={config} update={update} onSave={onSave} />
-              </div>
-            </div>
-          )}
-        </div>
-        )}
 
         <DashboardCardsSection
           prefs={reconcileDashboardCards(config.dashboardCards)}
@@ -1492,6 +1461,114 @@ const OAuthWizardDialog = ({
 };
 
 /* ─────────────────────────────────────────────────
+   Transcript Tasks: standalone export for Tasks page
+   ───────────────────────────────────────────────── */
+
+export const TranscriptTasksSection = ({ config, onChange, onSave }: {
+  config: SermonImporterConfig;
+  onChange: (c: SermonImporterConfig) => void;
+  onSave?: () => void;
+}) => {
+  const update = <K extends keyof SermonImporterConfig>(k: K, v: SermonImporterConfig[K]) =>
+    onChange({ ...config, [k]: v });
+  const [diagUrl, setDiagUrl] = useState("");
+  const [diagRunning, setDiagRunning] = useState(false);
+  const [diagResult, setDiagResult] = useState<DiagResult | null>(null);
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (!e.data || e.data.type !== "videosow_transcript_diagnosis") return;
+      setDiagRunning(false);
+      if (e.data.success && e.data.data) setDiagResult(e.data.data);
+      else setDiagResult({ video_id: "", strategies: [], final: { segments: 0, chars: 0, preview: "Diagnostic error." } });
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  const runDiag = () => {
+    if (!diagUrl.trim()) return;
+    setDiagRunning(true);
+    setDiagResult(null);
+    window.parent.postMessage(
+      { type: "videosow_diagnose_transcript", url: diagUrl.trim(), lang: config.transcriptInng || "ro" },
+      "*"
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+        <div className="pr-3">
+          <Label className="text-sm font-medium text-foreground">Add transcripts to articles</Label>
+          <p className="mt-0.5 text-xs text-muted-foreground">Fetch each video's transcript and add indexable text to the imported article.</p>
+        </div>
+        <Switch checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />
+      </div>
+
+      {config.fetchTranscript && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-muted-foreground">Transcript language</Label>
+              <Input value={config.transcriptInng} onChange={(e) => update("transcriptInng", e.target.value.toLowerCase().slice(0, 5))} placeholder="Auto-detect" className="h-8 text-xs font-mono" />
+              <p className="text-[11px] text-muted-foreground">Leave empty to use the video's default language, or enter an ISO code such as en, es, or fr.</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] text-muted-foreground">Display in article</Label>
+              <Select value={config.transcriptDisplay} onValueChange={(v: SermonImporterConfig["transcriptDisplay"]) => update("transcriptDisplay", v)}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="details">Collapsible</SelectItem>
+                  <SelectItem value="plain">Always visible</SelectItem>
+                  <SelectItem value="hidden">Store only, do not display</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground">Collapsible transcripts remain present in the article markup for indexing.</p>
+            </div>
+          </div>
+
+          <YouTubeConnectCard config={config} update={update} onSave={onSave} />
+
+          <div className="space-y-2 border-t border-border pt-4">
+            <div className="flex items-start gap-2">
+              <Stethoscope className="mt-0.5 h-4 w-4 text-foreground" />
+              <div>
+                <div className="text-sm font-semibold text-foreground">Test transcript fetching</div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Paste a YouTube video URL or ID to verify that its transcript can be retrieved.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input value={diagUrl} onChange={(e) => setDiagUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." className="h-8 flex-1 text-xs" />
+              <Button onClick={runDiag} disabled={diagRunning || !diagUrl.trim()} size="sm" className="h-8 gap-1.5 text-xs">
+                {diagRunning && <Loader2 className="h-3 w-3 animate-spin" />}
+                {diagRunning ? "Testing…" : "Test"}
+              </Button>
+            </div>
+            {diagResult && (
+              <div className="space-y-1.5 rounded-md border border-border bg-secondary/30 p-2.5 text-[11px]">
+                {diagResult.video_id && <div className="font-mono text-muted-foreground">Video: {diagResult.video_id}</div>}
+                {diagResult.strategies.map((strategy, index) => (
+                  <div key={`${strategy.name}-${index}`} className="flex items-start gap-2">
+                    <span className={strategy.tracks > 0 ? "text-emerald-600" : "text-destructive"}>{strategy.tracks > 0 ? "✓" : "✗"}</span>
+                    <span className="font-medium text-foreground">{strategy.name}</span>
+                    <span className="text-muted-foreground">{strategy.tracks} {strategy.tracks === 1 ? "track" : "tracks"}{strategy.langs.length > 0 ? ` — ${strategy.langs.join(", ")}` : ""}</span>
+                  </div>
+                ))}
+                <div className="border-t border-border pt-1.5 text-muted-foreground">
+                  {diagResult.final.segments > 0 ? `✓ ${diagResult.final.segments} segments, ${diagResult.final.chars} characters` : "✗ No transcript found."}
+                </div>
+                {diagResult.final.preview && <div className="italic text-muted-foreground">“{diagResult.final.preview}…”</div>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────
    Simple Instructions: pill-based description cleanup
    ───────────────────────────────────────────────── */
 
@@ -1873,7 +1950,7 @@ const AiInstructionsEditor = ({
 };
 
 /* ─────────────────────────────────────────────────
-   AI Tasks Section: standalone export for Tasks page
+   Advanced Tasks Section: standalone export for Tasks page
    ───────────────────────────────────────────────── */
 
 export const AiTasksSection = ({
@@ -1903,7 +1980,7 @@ export const AiTasksSection = ({
   const [orLoading, setOrLoading] = useState(false);
   const [advancedModel, setAdvancedModel] = useState(false);
 
-  // Force openrouter as the only provider — implementation detail hidden from end users.
+  // Keep provider routing internal to the processing layer.
   useEffect(() => {
     if (config.aiEnabled && config.aiProvider !== "openrouter") {
       onChange({ ...config, aiProvider: "openrouter" });
@@ -1926,7 +2003,7 @@ export const AiTasksSection = ({
       ? orModels
       : PROVIDER_MODELS[config.aiProvider] || [];
 
-  // Beginner presets — map to a concrete OpenRouter model.
+  // Beginner presets map to concrete processing models.
   const PRESETS: { id: string; label: string; sub: string; model: string }[] = [
     { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: "google/gemini-2.5-flash-lite" },
     { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: "google/gemini-2.5-flash" },
@@ -1939,9 +2016,9 @@ export const AiTasksSection = ({
     <div className="p-3 rounded-lg border border-border bg-secondary/20">
       <div className="flex items-center justify-between">
         <div className="pr-3">
-          <Label className="text-sm font-medium text-foreground">AI tasks</Label>
+          <Label className="text-sm font-medium text-foreground">Advanced tasks</Label>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Sends the title, description and (optionally) transcript to an AI model that follows your instructions and can rewrite the description, suggest tags or generate an SEO excerpt. One call per video for minimal cost.
+            Processes the title, description and optional transcript using your instructions to rewrite descriptions, suggest tags, or generate an SEO excerpt.
           </p>
         </div>
         <Switch checked={config.aiEnabled} onCheckedChange={(v) => update("aiEnabled", v)} />
@@ -1951,7 +2028,7 @@ export const AiTasksSection = ({
         <div className="mt-3 space-y-3">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-[11px] text-muted-foreground">AI mode</Label>
+              <Label className="text-[11px] text-muted-foreground">Processing mode</Label>
               <button
                 type="button"
                 onClick={() => setAdvancedModel((v) => !v)}
@@ -2003,14 +2080,9 @@ export const AiTasksSection = ({
               type="password"
               value={config.aiApiKey}
               onChange={(e) => update("aiApiKey", e.target.value)}
-              placeholder={config.aiProvider === "openrouter" ? "sk-or-..." : config.aiProvider === "anthropic" ? "sk-ant-..." : "sk-..."}
+              placeholder="Enter API key"
               className="h-8 text-xs font-mono"
             />
-            {config.aiProvider === "openrouter" && (
-              <p className="text-[11px] text-muted-foreground">
-                Free account + key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="underline">openrouter.ai/keys</a>. With Gemini Flash, ~$0.0002 per post.
-              </p>
-            )}
           </div>
 
           <AiInstructionsEditor
@@ -2029,15 +2101,15 @@ export const AiTasksSection = ({
               className={`p-2 text-[11px] rounded-md border transition-colors ${config.aiTranscriptChars >= 100000 ? "border-primary bg-primary/10 text-foreground" : "border-border bg-background text-muted-foreground hover:bg-secondary"}`}>Full</button>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            The less you send to the AI, the lower the cost. 4000 characters cover the general theme of most videos.
+            A shorter transcript selection processes faster. 4000 characters cover the general theme of most videos.
           </p>
 
           <label className="flex items-start gap-2 p-2 rounded-md border border-border bg-background cursor-pointer">
             <input type="checkbox" checked={config.aiRestrictTags !== false}
               onChange={(e) => update("aiRestrictTags", e.target.checked)} className="mt-0.5" />
             <span className="text-[11px] text-foreground">
-              Restrict AI to existing tags
-              <span className="block text-muted-foreground">AI can only choose from tags already created on the site (including the speaker tag added by simple tasks). It will not invent new tags.</span>
+              Restrict suggestions to existing tags
+              <span className="block text-muted-foreground">Only tags already created on the site can be selected, including speaker tags added by Simple Tasks.</span>
             </span>
           </label>
 
@@ -2045,8 +2117,8 @@ export const AiTasksSection = ({
             <input type="checkbox" checked={config.aiUseAiExcerpt !== false}
               onChange={(e) => update("aiUseAiExcerpt", e.target.checked)} className="mt-0.5" />
             <span className="text-[11px] text-foreground">
-              Use AI-generated excerpt
-              <span className="block text-muted-foreground">If checked, the excerpt shown in the archive is the AI-written one. If unchecked, the first part of the description (~40 words) is used.</span>
+              Use generated excerpt
+              <span className="block text-muted-foreground">If checked, the archive uses the generated excerpt. Otherwise, it uses the first part of the description (about 40 words).</span>
             </span>
           </label>
         </div>

@@ -30,7 +30,7 @@ const TasksPage = () => {
         <Info className="w-4 h-4 mt-0.5 text-primary shrink-0" />
         <p>
           Tasks are applied during <strong>Import</strong>. Already-imported posts are not modified retroactively
-          unless you re-run them. Use the diagnostic tools in <strong>Settings</strong> to test individual videos.
+          unless you re-run them. Use the transcript tools below to test individual videos.
         </p>
       </div>
 
@@ -44,7 +44,7 @@ const TasksPage = () => {
             Simple Tasks
           </CardTitle>
           <CardDescription>
-            Deterministic, no-AI rules applied to every video description before saving. Drag pills to reorder
+            Deterministic rules applied to every video description before saving. Drag pills to reorder
             the application sequence. Common uses: stripping signatures and social links, removing hashtags,
             collapsing whitespace, extracting a speaker name into a tag.
           </CardDescription>
