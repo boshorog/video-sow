@@ -1,13 +1,21 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wand2, Sparkles, Save, Loader2, Info, FileText } from 'lucide-react';
+import { Wand2, Sparkles, Save, Loader2, Info, FileText, Coins, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { SimpleInstructionsSection, AiTasksSection, TranscriptTasksSection } from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
+import { estimateTaskCredits } from '@/config/credits';
 
 const TasksPage = () => {
   const imp = useImporter();
   const update = <K extends keyof typeof imp.config>(k: K, v: (typeof imp.config)[K]) =>
     imp.setConfig({ ...imp.config, [k]: v });
+  const estimate = estimateTaskCredits({
+    simpleRuleCount: imp.config.simpleEnabled === false ? 0 : (imp.config.simpleInstructions || []).length,
+    fetchTranscript: imp.config.fetchTranscript,
+    advancedEnabled: imp.config.aiEnabled,
+    advancedModel: imp.config.aiModel,
+  });
 
   return (
     <div className="space-y-6">
@@ -15,15 +23,52 @@ const TasksPage = () => {
         <div>
           <h2 className="text-2xl font-bold text-slate-800">Tasks</h2>
           <p className="text-muted-foreground mt-1">
-            Define the cleanup, advanced processing, and transcript options applied before each video becomes a WordPress post.
-            Tasks run in order: <strong>simple tasks</strong> first (text rewrites and cleanup), then{' '}
-            <strong>advanced tasks</strong> (generation and enrichment).
+            Configure the cleanup, transcripts, and AI processing applied before each video becomes a WordPress post.
+            Tasks run in the order shown below.
           </p>
         </div>
         <Button onClick={imp.save} disabled={imp.isSaving} size="sm" className="gap-1.5 shrink-0">
           {imp.isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
           {imp.isSaving ? 'Saving…' : 'Save tasks'}
         </Button>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm">
+        <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+              <Coins className="h-4 w-4 text-primary" />
+            </span>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">Estimated credit usage per video</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Updates automatically as you change the tasks below.</p>
+            </div>
+          </div>
+          <div className="flex items-baseline gap-1 sm:text-right">
+            <span className="text-3xl font-bold text-foreground">{estimate.total}</span>
+            <span className="text-xs text-muted-foreground">credits</span>
+          </div>
+        </div>
+        <div className="grid border-t border-border bg-secondary/30 sm:grid-cols-3 sm:divide-x sm:divide-y-0 divide-y divide-border">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
+            <span className="flex items-center gap-2 text-muted-foreground"><Wand2 className="h-3.5 w-3.5 text-emerald-600" />Simple Tasks</span>
+            <strong className="text-foreground">{estimate.simple}</strong>
+          </div>
+          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
+            <span className="flex items-center gap-2 text-muted-foreground"><FileText className="h-3.5 w-3.5 text-sky-600" />Transcript fetch</span>
+            <strong className="text-foreground">{estimate.transcript}</strong>
+          </div>
+          <div className="flex items-center justify-between gap-3 px-4 py-3 text-xs">
+            <span className="flex items-center gap-2 text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-violet-600" />Advanced AI</span>
+            <strong className="text-foreground">{estimate.advanced}</strong>
+          </div>
+        </div>
+        {imp.config.aiEnabled && !imp.config.fetchTranscript && (
+          <div className="flex items-center gap-2 border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
+            <ArrowRight className="h-3 w-3 text-primary" />
+            The transcript estimate is included because Advanced Tasks fetches transcript content for AI processing.
+          </div>
+        )}
       </div>
 
       <div className="rounded-lg border border-border bg-secondary/20 p-3 flex items-start gap-2 text-xs text-muted-foreground">
@@ -37,46 +82,27 @@ const TasksPage = () => {
       {/* Simple tasks */}
       <Card className="vs-theme-emerald border-2 border-emerald-300/60 shadow-md bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-950/20">
         <CardHeader className="border-b border-emerald-200/60 bg-emerald-100/40 dark:bg-emerald-950/30 dark:border-emerald-900/40">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <span className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
-              <Wand2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            </span>
-            Simple Tasks
-          </CardTitle>
+          <div className="flex items-start justify-between gap-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <span className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                <Wand2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </span>
+              Simple Tasks
+            </CardTitle>
+            <Switch className="vs-plugin-switch" checked={imp.config.simpleEnabled !== false} onCheckedChange={(value) => update('simpleEnabled', value)} aria-label="Enable Simple Tasks" />
+          </div>
           <CardDescription>
             Deterministic rules applied to every video description before saving. Drag pills to reorder
             the application sequence. Common uses: stripping signatures and social links, removing hashtags,
             collapsing whitespace, extracting a speaker name into a tag.
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        {imp.config.simpleEnabled !== false && <CardContent className="pt-6">
           <SimpleInstructionsSection
             instructions={imp.config.simpleInstructions || []}
             onChange={(list) => update('simpleInstructions', list)}
           />
-        </CardContent>
-      </Card>
-
-      {/* Advanced tasks */}
-      <Card data-vs-anchor="ai" className="vs-theme-violet border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
-        <CardHeader className="border-b border-violet-200/60 bg-violet-100/40 dark:bg-violet-950/30 dark:border-violet-900/40">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <span className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-            </span>
-            Advanced Tasks
-          </CardTitle>
-          <CardDescription>
-            Optional advanced processing for each video. Choose a processing mode and reusable instructions to rewrite descriptions, generate SEO-friendly tags, produce excerpts, or extract chapter titles.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <AiTasksSection
-            config={imp.config}
-            onChange={imp.setConfig}
-            onSave={imp.save}
-          />
-        </CardContent>
+        </CardContent>}
       </Card>
 
       {/* Transcripts */}
@@ -97,13 +123,31 @@ const TasksPage = () => {
         </CardContent>
       </Card>
 
+      {/* Advanced tasks */}
+      <Card data-vs-anchor="ai" className="vs-theme-violet border-2 border-violet-300/60 shadow-md bg-gradient-to-br from-violet-50 to-transparent dark:from-violet-950/20">
+        <CardHeader className="border-b border-violet-200/60 bg-violet-100/40 dark:bg-violet-950/30 dark:border-violet-900/40">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <span className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+            </span>
+            Advanced Tasks
+          </CardTitle>
+          <CardDescription>
+            Optional advanced AI processing. Choose a processing mode and reusable instructions to rewrite descriptions, generate SEO-friendly tags, produce excerpts, or extract chapter titles.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <AiTasksSection config={imp.config} onChange={imp.setConfig} onSave={imp.save} />
+        </CardContent>
+      </Card>
+
       {/* Tips */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Tips for great results</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-slate-600 space-y-2">
-          <p>• Start with <strong>simple tasks</strong> — they are free, fast, and predictable.</p>
+          <p>• Start with <strong>Simple Tasks</strong> — they use the fewest credits and produce predictable results.</p>
           <p>• Use Advanced Tasks only for work simple rules cannot handle: summarization, tag suggestions, or restructuring.</p>
           <p>• Keep advanced instructions short and specific. Refer to fields by name: <code>title</code>, <code>description</code>, <code>tags</code>, <code>excerpt</code>.</p>
           <p>• Restrict suggestions to existing tags to avoid near-duplicates.</p>

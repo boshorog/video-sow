@@ -547,6 +547,7 @@ function videosow_get_sermon_importer_defaults() {
         'archiveTagCloudLinesMobile'  => 4,
         'archiveTagCloudPool'         => 200,
         'archiveTagCloudManualTags'   => array(),
+        'simpleEnabled' => true,
         'simpleInstructions' => array(
             array( 'id' => 'default_trail', 'type' => 'trailing_whitespace' ),
         ),
@@ -2376,6 +2377,7 @@ function videosow_ajax_save_sermon_importer_config() {
         'archiveTagCloudLinesMobile'  => isset( $incoming['archiveTagCloudLinesMobile'] ) ? max( 1, intval( $incoming['archiveTagCloudLinesMobile'] ) ) : ( isset( $current['archiveTagCloudLinesMobile'] ) ? $current['archiveTagCloudLinesMobile'] : 4 ),
         'archiveTagCloudPool'         => isset( $incoming['archiveTagCloudPool'] ) ? max( 1, intval( $incoming['archiveTagCloudPool'] ) ) : $current['archiveTagCloudPool'],
         'archiveTagCloudManualTags'   => isset( $incoming['archiveTagCloudManualTags'] ) && is_array( $incoming['archiveTagCloudManualTags'] ) ? array_values( array_filter( array_map( 'sanitize_text_field', $incoming['archiveTagCloudManualTags'] ) ) ) : ( isset( $current['archiveTagCloudManualTags'] ) ? $current['archiveTagCloudManualTags'] : array() ),
+        'simpleEnabled'      => $can_use_tasks && isset( $incoming['simpleEnabled'] ) ? (bool) $incoming['simpleEnabled'] : ( isset( $current['simpleEnabled'] ) ? (bool) $current['simpleEnabled'] : true ),
         'simpleInstructions' => $can_use_tasks && isset( $incoming['simpleInstructions'] ) && is_array( $incoming['simpleInstructions'] ) ? videosow_sanitize_simple_instructions( $incoming['simpleInstructions'] ) : $current['simpleInstructions'],
         'relaxedMode'        => isset( $incoming['relaxedMode'] ) ? (bool) $incoming['relaxedMode'] : $current['relaxedMode'],
         'relaxedDelayS'      => isset( $incoming['relaxedDelayS'] ) ? max( 0, intval( $incoming['relaxedDelayS'] ) ) : $current['relaxedDelayS'],
@@ -3316,7 +3318,7 @@ function videosow_import_one_video( $cfg, $video_id ) {
         $description = videosow_clean_description( $description, $cfg['descriptionCleanup'] );
     }
     $vs_costs = videosow_credit_costs();
-    if ( videosow_can_use_premium_tasks() && ! empty( $cfg['simpleInstructions'] )
+    if ( videosow_can_use_premium_tasks() && ( ! isset( $cfg['simpleEnabled'] ) || ! empty( $cfg['simpleEnabled'] ) ) && ! empty( $cfg['simpleInstructions'] )
         && videosow_consume_credits( count( (array) $cfg['simpleInstructions'] ) * (int) $vs_costs['simple'] ) ) {
         $description = videosow_apply_simple_instructions( $description, $cfg['simpleInstructions'] );
         // Hashtags removal also operates on the title.

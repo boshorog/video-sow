@@ -63,6 +63,7 @@ export interface SermonImporterConfig {
   archiveTagCloudLinesMobile: number;
   archiveTagCloudPool: number;
   archiveTagCloudManualTags: string[];
+  simpleEnabled: boolean;
   simpleInstructions: SimpleInstruction[];
   relaxedMode: boolean;
   relaxedDelayS: number;
@@ -128,6 +129,7 @@ export const defaultSermonImporterConfig: SermonImporterConfig = {
   archiveTagCloudLinesMobile: 4,
   archiveTagCloudPool: 200,
   archiveTagCloudManualTags: [],
+  simpleEnabled: true,
   simpleInstructions: [{ id: "default_trail", type: "trailing_whitespace" }],
   relaxedMode: true,
   relaxedDelayS: 6,
