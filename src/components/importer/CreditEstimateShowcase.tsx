@@ -87,7 +87,7 @@ const V2 = ({ e }: { e: Estimate }) => (
       <div className="text-left">
         <p className="text-[11px] font-semibold leading-tight text-foreground">Estimated credit usage per article</p>
         <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
-          <Breakdown e={e} />
+          <Breakdown estimate={e} />
         </p>
       </div>
     </div>
@@ -108,7 +108,7 @@ const V3 = ({ e }: { e: Estimate }) => (
       <p className="text-xs font-semibold text-foreground">Estimated credit usage per article</p>
       <p className="mt-0.5 text-[10px] text-muted-foreground">Recalculates as you edit tasks.</p>
       <div className="mt-1.5">
-        <Breakdown e={e} />
+        <Breakdown estimate={e} />
       </div>
     </div>
   </div>
@@ -118,7 +118,7 @@ const V4 = ({ e }: { e: Estimate }) => (
   <div className="flex max-w-xl flex-wrap items-center gap-x-3 gap-y-1.5 rounded-full border border-primary/15 bg-primary/[0.04] py-2 pl-4 pr-2">
     <Coins className="h-3.5 w-3.5 text-primary" />
     <span className="text-xs font-semibold text-foreground">Estimated credit usage per article</span>
-    <Breakdown e={e} />
+    <Breakdown estimate={e} />
     <span className="ml-auto flex items-baseline gap-1 rounded-full bg-primary/10 px-2.5 py-0.5">
       <strong className="text-sm font-bold tabular-nums text-primary">{e.total}</strong>
       <span className="text-[10px] text-muted-foreground">credits</span>
@@ -153,7 +153,7 @@ const V6 = ({ e }: { e: Estimate }) => (
       <span className="text-[10px] text-muted-foreground">credits</span>
     </div>
     <div className="mt-2.5 border-t border-border pt-2">
-      <Breakdown e={e} layout="stack" />
+      <Breakdown estimate={e} layout="stack" />
     </div>
   </div>
 );
