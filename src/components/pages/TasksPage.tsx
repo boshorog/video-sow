@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { SimpleInstructionsSection, AiTasksSection, TranscriptTasksSection } from '@/components/importer/ImporterSettings';
 import { useImporter } from '@/hooks/useImporter';
 import { estimateTaskCredits } from '@/config/credits';
+import CreditEstimateShowcase from '@/components/importer/CreditEstimateShowcase';
 
 const TasksPage = () => {
   const imp = useImporter();
@@ -46,6 +47,9 @@ const TasksPage = () => {
           </Button>
         </div>
       </div>
+
+      {/* TEMP: estimate-section showcase — remove once a variant is chosen */}
+      <CreditEstimateShowcase estimate={estimate} />
 
       <div className="rounded-lg border border-border bg-secondary/20 p-3 flex items-start gap-2 text-xs text-muted-foreground">
         <Info className="w-4 h-4 mt-0.5 text-primary shrink-0" />
