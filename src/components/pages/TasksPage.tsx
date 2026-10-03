@@ -104,19 +104,56 @@ const TasksPage = () => {
         </CardContent>
       </Card>
 
-      {/* Tips */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tips for great results</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-slate-600 space-y-2">
-          <p>• Start with <strong>Simple Tasks</strong> — they use the fewest credits and produce predictable results.</p>
-          <p>• Use Advanced Tasks only for work simple rules cannot handle: summarization, tag suggestions, or restructuring.</p>
-          <p>• Keep advanced instructions short and specific. Refer to fields by name: <code>title</code>, <code>description</code>, <code>tags</code>, <code>excerpt</code>.</p>
-          <p>• Restrict suggestions to existing tags to avoid near-duplicates.</p>
-          <p>• A 4000-character transcript window is usually enough to capture the main topic.</p>
-        </CardContent>
-      </Card>
+      {/* Estimated usage + tips */}
+      <div className="grid gap-6 lg:grid-cols-2 items-start">
+        {/* Tips */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Tips for great results</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-600 space-y-2">
+            <p>• Start with <strong>Simple Tasks</strong> — they use the fewest credits and produce predictable results.</p>
+            <p>• Use Advanced Tasks only for work simple rules cannot handle: summarization, tag suggestions, or restructuring.</p>
+            <p>• Keep advanced instructions short and specific. Refer to fields by name: <code>title</code>, <code>description</code>, <code>tags</code>, <code>excerpt</code>.</p>
+            <p>• Restrict suggestions to existing tags to avoid near-duplicates.</p>
+            <p>• A 4000-character transcript window is usually enough to capture the main topic.</p>
+          </CardContent>
+        </Card>
+
+        {/* Estimated credit usage */}
+        <Card className="border-primary/25 shadow-sm">
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Estimated credit usage</p>
+                <p className="text-sm font-semibold text-foreground">Per article</p>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold tabular-nums leading-none text-primary">{estimate.total}</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">credits</span>
+              </div>
+            </div>
+            <div className="space-y-1.5 text-xs">
+              <div className="flex items-center justify-between rounded-md bg-secondary/60 px-3 py-2">
+                <span className="flex items-center gap-2 text-muted-foreground"><Wand2 className="h-3.5 w-3.5 text-emerald-600" />Simple Tasks</span>
+                <strong className="tabular-nums text-foreground">{estimate.simple}</strong>
+              </div>
+              <div className="flex items-center justify-between rounded-md bg-secondary/60 px-3 py-2">
+                <span className="flex items-center gap-2 text-muted-foreground"><FileText className="h-3.5 w-3.5 text-orange-600" />Transcript fetch</span>
+                <strong className="tabular-nums text-foreground">{estimate.transcript}</strong>
+              </div>
+              <div className="flex items-center justify-between rounded-md bg-secondary/60 px-3 py-2">
+                <span className="flex items-center gap-2 text-muted-foreground"><Sparkles className="h-3.5 w-3.5 text-violet-600" />Advanced Tasks <span className="text-[10px] text-muted-foreground">AI</span></span>
+                <strong className="tabular-nums text-foreground">{estimate.advanced}</strong>
+              </div>
+            </div>
+            {imp.config.aiEnabled && !imp.config.fetchTranscript && (
+              <p className="text-[11px] text-muted-foreground">Includes the transcript Advanced Tasks fetches for AI processing.</p>
+            )}
+            <p className="text-[11px] text-muted-foreground">Recalculates as you edit tasks.</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
