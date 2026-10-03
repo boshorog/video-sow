@@ -351,5 +351,5 @@ All colors MUST be HSL.
 /* Keep section enable/disable controls in the plugin's brand color even when
    their parent card scopes --primary to a feature accent. */
 .vs-plugin-switch[data-state="checked"] {
-  background-color: hsl(var(--plugin-primary));
+  background-color: hsl(1 56% 58%);
 }
