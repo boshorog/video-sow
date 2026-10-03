@@ -1501,7 +1501,7 @@ export const TranscriptTasksSection = ({ config, onChange, onSave }: {
     <div className="space-y-4">
       <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3" title={creditLabel(CREDIT_COSTS.transcript)}>
         <div className="pr-3">
-          <Label className="text-sm font-medium text-foreground">Add transcripts to articles <span className="ml-1 text-[10px] font-normal text-sky-600">{creditLabel(CREDIT_COSTS.transcript)}</span></Label>
+          <Label className="text-sm font-medium text-foreground">Add transcripts to articles <span className="ml-1 text-[10px] font-normal text-orange-600">{creditLabel(CREDIT_COSTS.transcript)}</span></Label>
           <p className="mt-0.5 text-xs text-muted-foreground">Fetch each video's transcript and add indexable text to the imported article.</p>
         </div>
         <Switch className="vs-plugin-switch" checked={config.fetchTranscript} onCheckedChange={(v) => update("fetchTranscript", v)} />

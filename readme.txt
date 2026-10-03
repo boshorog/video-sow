@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.35
+Stable tag: 1.2.36
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,7 +74,8 @@ Open the Documentation tab inside the plugin — it covers every setting, the di
 
 == Changelog ==
 
-= 1.2.35 =
+= 1.2.36 =
+* Tasks: transcripts now use the orange accent everywhere, and the credit estimate is a compact per-article summary beside the save button.
 * Pro: added the Tasks workspace after Import, with ordered Simple Tasks and OpenRouter-powered AI Tasks.
 * AI Tasks: added beginner modes, advanced live model selection, reusable prompt templates, transcript limits, existing-tag restrictions, and AI excerpts.
 * Security: Tasks are now authorized server-side with the active Pro license before settings are accepted or processing runs.
