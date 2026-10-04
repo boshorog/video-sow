@@ -77,7 +77,7 @@ const AI_TEMPLATE_PRESETS: { label: string; text: string }[] = [
   },
 ];
 
-const PROVIDER_MODELS: Record<string, { value: string; label: string }[]> = {
+const PROVIDER_MODELS: Record<string, OpenRouterModel[]> = {
   openrouter: [
     { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash (ieftin, rapid)" },
     { value: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite (cel mai ieftin)" },
@@ -2023,27 +2023,22 @@ export const AiTasksSection = ({
     }
   }, [config.aiEnabled, config.aiProvider, orModels, orLoading]);
 
-  const modelOptions =
+  const discoveredModelOptions: OpenRouterModel[] =
     config.aiProvider === "openrouter" && orModels && orModels.length > 0
       ? orModels
       : PROVIDER_MODELS[config.aiProvider] || [];
 
-  const hasModel = (id: string) => modelOptions.some((model) => model.value === id);
-  const firstAvailable = (ids: string[], fallback: string) => ids.find(hasModel) || fallback;
-  const pricedModels = modelOptions.filter((model): model is OpenRouterModel => typeof model.price === "number");
-  const cheapestModel = pricedModels.find((model) => model.price > 0)?.value || modelOptions[0]?.value || "google/gemini-2.5-flash-lite";
-  const smartestModel = [...pricedModels].sort((a, b) =>
-    ((b.price || 0) + (b.outputPrice || 0)) - ((a.price || 0) + (a.outputPrice || 0))
-  )[0]?.value || firstAvailable(["openai/gpt-5", "anthropic/claude-opus-4"], "openai/gpt-5");
-
-  // Friendly modes resolve against the current monthly catalog so retired
-  // models are replaced automatically while every mode remains selectable.
+  // Friendly modes remain predictable. Their selected model is also injected
+  // into the advanced list if it is outside the curated monthly catalog.
   const PRESETS: { id: string; label: string; sub: string; model: string }[] = [
-    { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: firstAvailable(["google/gemini-2.5-flash-lite"], cheapestModel) },
-    { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: firstAvailable(["google/gemini-2.5-flash", "openai/gpt-5-mini"], modelOptions[0]?.value || "google/gemini-2.5-flash") },
-    { id: "fast",     label: "Fastest",   sub: "Quickest replies",       model: firstAvailable(["openai/gpt-5-mini", "google/gemini-2.5-flash"], modelOptions[0]?.value || "openai/gpt-5-mini") },
-    { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: smartestModel },
+    { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: "google/gemini-2.5-flash-lite" },
+    { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: "google/gemini-2.5-flash" },
+    { id: "fast",     label: "Fastest",   sub: "Quickest replies",       model: "openai/gpt-5-mini" },
+    { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: "google/gemini-2.5-pro" },
   ];
+  const modelOptions = discoveredModelOptions.some((model) => model.value === config.aiModel)
+    ? discoveredModelOptions
+    : [{ value: config.aiModel, label: config.aiModel, price: 0 }, ...discoveredModelOptions];
   const activePresetId = PRESETS.find((p) => p.model === config.aiModel)?.id || "balanced";
   const instructions = config.aiInstructions.toLowerCase();
   const usesTags = /\btag(s|ging)?\b/.test(instructions);
