@@ -123,7 +123,7 @@ const OPENROUTER_FREE_MODEL_IDS = [
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 
-type OpenRouterModel = { value: string; label: string; price: number; outputPrice?: number };
+type OpenRouterModel = { value: string; label: string; price?: number; outputPrice?: number };
 
 const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
   const wp = typeof window !== "undefined"
@@ -165,7 +165,7 @@ const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
       const outPrice = parseFloat(m.pricing?.completion || "0") * 1e6;
       return { value: m.id, label: `${name}${priceLabel}`, price: inPrice, outputPrice: outPrice };
     })
-    .sort((a: OpenRouterModel, b: OpenRouterModel) => a.price - b.price)
+    .sort((a: OpenRouterModel, b: OpenRouterModel) => (a.price || 0) - (b.price || 0))
     .slice(0, OPENROUTER_MAX_MODELS);
   return list;
 };
