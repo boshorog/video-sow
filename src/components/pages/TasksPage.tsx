@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wand2, Sparkles, Save, Loader2, Info, FileText } from 'lucide-react';
+import { Wand2, Sparkles, Save, Loader2, Info, FileText, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { SimpleInstructionsSection, AiTasksSection, TranscriptTasksSection } from '@/components/importer/ImporterSettings';
@@ -38,7 +38,7 @@ const TasksPage = () => {
         <Info className="w-4 h-4 mt-0.5 text-primary shrink-0" />
         <p>
           Tasks are applied during <strong>Import</strong>. Already-imported posts are not modified retroactively
-          unless you re-run them. Use the transcript tools below to test individual videos.
+          unless you re-run them.
         </p>
       </div>
 
@@ -107,16 +107,29 @@ const TasksPage = () => {
       {/* Estimated usage + tips */}
       <div className="grid gap-6 lg:grid-cols-2 items-start">
         {/* Tips */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Tips for great results</CardTitle>
+        <Card className="overflow-hidden border-primary/20 shadow-sm">
+          <CardHeader className="border-b border-primary/15 bg-primary/5 pb-4">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Lightbulb className="h-4 w-4" />
+              </span>
+              Tips for great results
+            </CardTitle>
+            <CardDescription>A practical order for reliable, efficient processing.</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-slate-600 space-y-2">
-            <p>• Start with <strong>Simple Tasks</strong> — they use the fewest credits and produce predictable results.</p>
-            <p>• Use Advanced Tasks only for work simple rules cannot handle: summarization, tag suggestions, or restructuring.</p>
-            <p>• Keep advanced instructions short and specific. Refer to fields by name: <code>title</code>, <code>description</code>, <code>tags</code>, <code>excerpt</code>.</p>
-            <p>• Restrict suggestions to existing tags to avoid near-duplicates.</p>
-            <p>• A 4000-character transcript window is usually enough to capture the main topic.</p>
+          <CardContent className="space-y-3 pt-5 text-sm text-muted-foreground">
+            {[
+              <span>Start with <strong className="text-foreground">Simple Tasks</strong> for predictable results at the lowest credit cost.</span>,
+              <span>Use <strong className="text-foreground">Advanced Tasks</strong> for summarization, tag suggestions, or restructuring.</span>,
+              <span>Keep AI instructions short and name the field to update: <code>title</code>, <code>description</code>, <code>tags</code>, or <code>excerpt</code>.</span>,
+              <span>Restrict suggestions to existing tags to prevent near-duplicates.</span>,
+              <span>A 4000-character transcript usually captures the main topic while keeping processing efficient.</span>,
+            ].map((tip, index) => (
+              <div key={index} className="flex items-start gap-2.5">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p className="leading-relaxed">{tip}</p>
+              </div>
+            ))}
           </CardContent>
         </Card>
 

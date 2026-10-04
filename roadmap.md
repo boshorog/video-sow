@@ -8,3 +8,5 @@
 - [x] Refine the credits popover and add a live per-video estimate to Tasks.
 - [x] Reorder Tasks to Simple, Transcripts, then Advanced.
 - [x] Use the plugin-red toggle treatment and add contextual Advanced Task guidance.
+- [x] Refresh the Advanced Tasks model catalog monthly and keep all four processing modes mapped to available models.
+- [x] Clarify advanced model selection, trim the Tasks notice, and enhance the tips card.

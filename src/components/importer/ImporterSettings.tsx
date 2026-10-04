@@ -123,9 +123,31 @@ const OPENROUTER_FREE_MODEL_IDS = [
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 
-type OpenRouterModel = { value: string; label: string; price: number };
+type OpenRouterModel = { value: string; label: string; price: number; outputPrice?: number };
 
 const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
+  const wp = typeof window !== "undefined"
+    ? ((window as any).videosowData || (window as any).kindpdfgData)
+    : null;
+  if (wp?.ajaxUrl) {
+    return new Promise((resolve) => {
+      const timeout = window.setTimeout(() => {
+        window.removeEventListener("message", handler);
+        resolve([]);
+      }, 20000);
+      const handler = (event: MessageEvent) => {
+        if (event.data?.type !== "videosow_ai_models_result") return;
+        window.clearTimeout(timeout);
+        window.removeEventListener("message", handler);
+        resolve(event.data.success && Array.isArray(event.data.data) ? event.data.data : []);
+      };
+      window.addEventListener("message", handler);
+      window.postMessage({ type: "videosow_get_ai_models" }, "*");
+    });
+  }
+
+  // The standalone preview has no WordPress bridge; use the public catalog so
+  // model selection can still be exercised while developing the plugin.
   const res = await fetch("https://openrouter.ai/api/v1/models");
   if (!res.ok) throw new Error("OpenRouter API error");
   const json = await res.json();
@@ -140,7 +162,8 @@ const fetchOpenRouterModels = async (): Promise<OpenRouterModel[]> => {
       const inPrice = parseFloat(m.pricing?.prompt || "0") * 1e6;
       const name = m.name || m.id;
       const priceLabel = id.includes(":free") ? " — FREE" : inPrice > 0 ? ` — $${inPrice.toFixed(2)}/M` : "";
-      return { value: m.id, label: `${name}${priceLabel}`, price: inPrice };
+      const outPrice = parseFloat(m.pricing?.completion || "0") * 1e6;
+      return { value: m.id, label: `${name}${priceLabel}`, price: inPrice, outputPrice: outPrice };
     })
     .sort((a: OpenRouterModel, b: OpenRouterModel) => a.price - b.price)
     .slice(0, OPENROUTER_MAX_MODELS);
@@ -2005,12 +2028,21 @@ export const AiTasksSection = ({
       ? orModels
       : PROVIDER_MODELS[config.aiProvider] || [];
 
-  // Beginner presets map to concrete processing models.
+  const hasModel = (id: string) => modelOptions.some((model) => model.value === id);
+  const firstAvailable = (ids: string[], fallback: string) => ids.find(hasModel) || fallback;
+  const pricedModels = modelOptions.filter((model): model is OpenRouterModel => typeof model.price === "number");
+  const cheapestModel = pricedModels.find((model) => model.price > 0)?.value || modelOptions[0]?.value || "google/gemini-2.5-flash-lite";
+  const smartestModel = [...pricedModels].sort((a, b) =>
+    ((b.price || 0) + (b.outputPrice || 0)) - ((a.price || 0) + (a.outputPrice || 0))
+  )[0]?.value || firstAvailable(["openai/gpt-5", "anthropic/claude-opus-4"], "openai/gpt-5");
+
+  // Friendly modes resolve against the current monthly catalog so retired
+  // models are replaced automatically while every mode remains selectable.
   const PRESETS: { id: string; label: string; sub: string; model: string }[] = [
-    { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: "google/gemini-2.5-flash-lite" },
-    { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: "google/gemini-2.5-flash" },
-    { id: "fast",     label: "Fastest",   sub: "Quickest replies",       model: "openai/gpt-5-mini" },
-    { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: "google/gemini-2.5-pro" },
+    { id: "cheap",    label: "Cheapest",  sub: "Lowest cost",            model: firstAvailable(["google/gemini-2.5-flash-lite"], cheapestModel) },
+    { id: "balanced", label: "Balanced",  sub: "Good quality + price",   model: firstAvailable(["google/gemini-2.5-flash", "openai/gpt-5-mini"], modelOptions[0]?.value || "google/gemini-2.5-flash") },
+    { id: "fast",     label: "Fastest",   sub: "Quickest replies",       model: firstAvailable(["openai/gpt-5-mini", "google/gemini-2.5-flash"], modelOptions[0]?.value || "openai/gpt-5-mini") },
+    { id: "smart",    label: "Smartest",  sub: "Best for complex tasks", model: smartestModel },
   ];
   const activePresetId = PRESETS.find((p) => p.model === config.aiModel)?.id || "balanced";
   const instructions = config.aiInstructions.toLowerCase();
@@ -2042,7 +2074,7 @@ export const AiTasksSection = ({
           )}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label className="text-[11px] text-muted-foreground">Processing mode</Label>
+              <Label className="text-[11px] text-muted-foreground">{advancedModel ? "Choose model" : "Processing mode"}</Label>
               <button
                 type="button"
                 onClick={() => setAdvancedModel((v) => !v)}
