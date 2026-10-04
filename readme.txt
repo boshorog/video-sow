@@ -4,7 +4,7 @@ Plugin URI: https://kindpixels.dev/plugins/video-sow/
 Tags: youtube, playlist, importer, articles, transcripts
 Requires at least: 5.8
 Tested up to: 6.9
-Stable tag: 1.2.36
+Stable tag: 1.2.37
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,11 @@ In Pro, Video Sow fetches the transcript for each video (when available on YouTu
 Open the Documentation tab inside the plugin — it covers every setting, the diagnostic tools, and the Pro workflow.
 
 == Changelog ==
+
+= 1.2.37 =
+* Advanced Tasks: the available model list now refreshes automatically every 30 days through a server-side cache.
+* Fix: Smartest always keeps its selected model visible when switching to the advanced model chooser.
+* Tasks: clarified the model selector, simplified the import notice, and refreshed the tips card.
 
 = 1.2.36 =
 * Tasks: transcripts now use the orange accent everywhere, and the credit estimate is a compact per-article summary beside the save button.

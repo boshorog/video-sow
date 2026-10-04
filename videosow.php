@@ -3,7 +3,7 @@
  * Plugin Name: Video Sow
  * Plugin URI: https://kindpixels.com/plugins/video-sow/
  * Description: Automatically convert YouTube playlist videos into WordPress articles, with optional transcript and AI processing.
- * Version: 1.2.36
+ * Version: 1.2.37
  * Author: KIND PIXELS
  * Author URI: https://kindpixels.com
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if ( defined( 'VIDEOSOW_PLUGIN_LOADED' ) ) { return; }
 define( 'VIDEOSOW_PLUGIN_LOADED', true );
-define( 'VIDEOSOW_VERSION', '1.2.36' );
+define( 'VIDEOSOW_VERSION', '1.2.37' );
 
 /**
  * Activation: flag a one-time redirect so the user lands on the Video Sow dashboard
@@ -346,7 +346,8 @@ class VideoSow_Plugin {
                 videosow_get_theme_map:                ['videosow_get_theme_map',                'videosow_theme_map_result'],
                 videosow_detect_seo:                   ['videosow_detect_seo',                   'videosow_seo_detected'],
                 videosow_regenerate_descriptions:      ['videosow_regenerate_descriptions',      'videosow_seo_regenerate_result'],
-                videosow_get_credits:                  ['videosow_get_credits',                  'videosow_credits_result']
+                videosow_get_credits:                  ['videosow_get_credits',                  'videosow_credits_result'],
+                videosow_get_ai_models:                ['videosow_get_ai_models',                'videosow_ai_models_result']
             };
             window.addEventListener('message', function(e){
                 var d = e.data || {}; if (!d || !d.type) return;
@@ -510,6 +511,79 @@ function videosow_ajax_get_credits() {
     wp_send_json_success( videosow_get_credits() );
 }
 add_action( 'wp_ajax_videosow_get_credits', 'videosow_ajax_get_credits' );
+
+/* ── Advanced Tasks model catalog ────────────────
+ * The public catalog is refreshed server-side and cached for 30 days. This
+ * keeps retired models out of the selector without exposing provider details
+ * or requiring a browser request to the processing service.
+ */
+function videosow_ai_model_is_supported( $id ) {
+    if ( ! is_string( $id ) || $id === '' || strpos( $id, ':free' ) !== false ) return false;
+    $patterns = array(
+        '/^google\/gemini-[0-9.]+-(flash|flash-lite|pro)(?:-[a-z0-9.-]+)?$/i',
+        '/^openai\/gpt-[0-9]+(?:\.[0-9]+)?(?:-(?:mini|nano|turbo))?$/i',
+        '/^openai\/o[0-9]+(?:-mini)?$/i',
+        '/^anthropic\/claude-(?:opus|sonnet|haiku)-[0-9]+(?:\.[0-9]+)?(?:-[a-z0-9.-]+)?$/i',
+        '/^x-ai\/grok-[0-9]+(?:-mini)?$/i',
+        '/^deepseek\/deepseek-(?:chat|r1|v3)(?:-[a-z0-9.-]+)?$/i',
+        '/^meta-llama\/llama-[0-9]+(?:\.[0-9]+)?-[0-9]+b-instruct$/i',
+        '/^mistralai\/mistral-(?:large|medium|small)(?:-latest)?$/i',
+    );
+    foreach ( $patterns as $pattern ) if ( preg_match( $pattern, $id ) ) return true;
+    return false;
+}
+
+function videosow_refresh_ai_models() {
+    $response = wp_remote_get( 'https://openrouter.ai/api/v1/models', array( 'timeout' => 20 ) );
+    if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) return false;
+    $body = json_decode( wp_remote_retrieve_body( $response ), true );
+    if ( empty( $body['data'] ) || ! is_array( $body['data'] ) ) return false;
+    $models = array();
+    foreach ( $body['data'] as $model ) {
+        $id = isset( $model['id'] ) ? sanitize_text_field( $model['id'] ) : '';
+        if ( ! videosow_ai_model_is_supported( $id ) ) continue;
+        $prompt = isset( $model['pricing']['prompt'] ) ? (float) $model['pricing']['prompt'] * 1000000 : 0;
+        $completion = isset( $model['pricing']['completion'] ) ? (float) $model['pricing']['completion'] * 1000000 : 0;
+        $name = isset( $model['name'] ) ? sanitize_text_field( $model['name'] ) : $id;
+        $price_label = $prompt > 0 ? sprintf( ' — $%.2f/M', $prompt ) : '';
+        $models[] = array(
+            'value' => $id,
+            'label' => $name . $price_label,
+            'price' => $prompt,
+            'outputPrice' => $completion,
+        );
+    }
+    usort( $models, function( $a, $b ) { return $a['price'] <=> $b['price']; } );
+    $models = array_slice( $models, 0, 40 );
+    if ( empty( $models ) ) return false;
+    update_option( 'videosow_ai_models', array( 'fetchedAt' => time(), 'models' => $models ), false );
+    return $models;
+}
+
+function videosow_get_ai_models() {
+    $catalog = get_option( 'videosow_ai_models', array() );
+    $stale = empty( $catalog['fetchedAt'] ) || ( time() - intval( $catalog['fetchedAt'] ) ) >= 30 * DAY_IN_SECONDS;
+    if ( $stale ) {
+        $fresh = videosow_refresh_ai_models();
+        if ( is_array( $fresh ) ) return $fresh;
+    }
+    return ! empty( $catalog['models'] ) && is_array( $catalog['models'] ) ? $catalog['models'] : array();
+}
+
+function videosow_ajax_get_ai_models() {
+    check_ajax_referer( 'videosow_nonce', 'nonce' );
+    if ( ! current_user_can( 'manage_options' ) || ! videosow_can_use_premium_tasks() ) wp_send_json_error( 'Unauthorized' );
+    wp_send_json_success( videosow_get_ai_models() );
+}
+add_action( 'wp_ajax_videosow_get_ai_models', 'videosow_ajax_get_ai_models' );
+
+function videosow_schedule_ai_model_refresh() {
+    if ( ! wp_next_scheduled( 'videosow_ai_model_refresh_event' ) ) {
+        wp_schedule_event( time() + DAY_IN_SECONDS, 'videosow_monthly', 'videosow_ai_model_refresh_event' );
+    }
+}
+add_action( 'init', 'videosow_schedule_ai_model_refresh' );
+add_action( 'videosow_ai_model_refresh_event', 'videosow_refresh_ai_models' );
 
 function videosow_get_sermon_importer_defaults() {
     return array(
@@ -2304,6 +2378,10 @@ function videosow_add_sermon_cron_intervals( $schedules ) {
     $schedules['videosow_sync_interval'] = array(
         'interval' => $h * HOUR_IN_SECONDS,
         'display'  => sprintf( 'Antiohia Sermon Sync (%dh)', $h ),
+    );
+    $schedules['videosow_monthly'] = array(
+        'interval' => 30 * DAY_IN_SECONDS,
+        'display'  => 'Every 30 days',
     );
     return $schedules;
 }
